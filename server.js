@@ -9,12 +9,12 @@ router module
 */
 var commonRouter = require('./route/commonRouter');
 
-app.use(serveStatic(path.join(__dirname, '/build/')));
+app.use(serveStatic(path.join(__dirname, '/build')));
 app.use('/', commonRouter);
 // app.use('/member', memberRouter);
 
 var server = app.listen(port, function() {
     console.log("★★★ Server Started ★★★");
 });
-
+ 
 module.exports = app;
