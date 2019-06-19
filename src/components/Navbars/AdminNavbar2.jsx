@@ -19,11 +19,6 @@ import {
 } from "reactstrap";
 
 class AdminNavbar extends React.Component {
-  // closes the collapse
-  noticeClick = (e, index) => {
-    console.log("noticeClick >> ", index);
-  };
-
   render() {
     return (
       <>
@@ -36,7 +31,6 @@ class AdminNavbar extends React.Component {
               {this.props.brandText}
             </Link>
             <Form className="navbar-search navbar-search-dark form-inline mr-3 d-none d-md-flex ml-lg-auto">
-            {/* 검색 */}
               <FormGroup className="mb-0">
                 <InputGroup className="input-group-alternative">
                   <InputGroupAddon addonType="prepend">
@@ -47,48 +41,7 @@ class AdminNavbar extends React.Component {
                   <Input placeholder="Search" type="text" />
                 </InputGroup>
               </FormGroup>
-              &nbsp;&nbsp;&nbsp;
-
-              {/* 친구추가 알림 */}
-              <FormGroup className="mb-0 form-control-cursor" onClick={e=>this.noticeClick(e,1)}>
-                <InputGroup className="input-group-alternative">
-                  <InputGroupAddon addonType="prepend">
-                      <InputGroupText>
-                        <i className=" ni ni-single-02"/>
-                        &nbsp;
-                      </InputGroupText>
-                    </InputGroupAddon>
-                </InputGroup>
-              </FormGroup>
-              &nbsp;&nbsp;&nbsp;
-
-              {/* 메시지 알림 */}
-              <FormGroup className="mb-0 form-control-cursor" onClick={e=>this.noticeClick(e,2)}>
-                <InputGroup className="input-group-alternative">
-                  <InputGroupAddon addonType="prepend">
-                      <InputGroupText>
-                        <i className=" ni ni-chat-round"></i>
-                        &nbsp;
-                      </InputGroupText>
-                    </InputGroupAddon>
-                </InputGroup>
-              </FormGroup>
-              &nbsp;&nbsp;&nbsp;
-
-              {/* 게시글 알림 */}
-              <FormGroup className="mb-0 form-control-cursor" onClick={e=>this.noticeClick(e,3)} href="#">
-                <InputGroup className="input-group-alternative">
-                  <InputGroupAddon addonType="prepend">
-                      <InputGroupText>
-                          <i className=" ni ni-bulb-61"></i>
-                          &nbsp;
-                      </InputGroupText>
-                    </InputGroupAddon>
-                </InputGroup>
-              </FormGroup>
-              &nbsp;&nbsp;&nbsp;
             </Form>
-
             <Nav className="align-items-center d-none d-md-flex" navbar>
               <UncontrolledDropdown nav>
                 <DropdownToggle className="pr-0" nav>

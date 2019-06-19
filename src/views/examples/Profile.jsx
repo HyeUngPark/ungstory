@@ -117,7 +117,7 @@ class Profile extends React.Component {
                     <Col xs="8">
                       <h3 className="mb-0">My account</h3>
                     </Col>
-                    <Col className="text-right" xs="4">
+                    <Col className="" xs="4">
                       <Button
                         color="primary"
                         href="#pablo"
