@@ -16,5 +16,10 @@ app.use('/', commonRouter);
 var server = app.listen(port, function() {
     console.log("★★★ Server Started ★★★");
 });
+
+app.use((req, res, next) => { // 404 처리 부분
+    console.log("/404");
+    res.status(404).redirect('/');
+  });
  
 module.exports = app;
