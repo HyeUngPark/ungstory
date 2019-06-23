@@ -66,7 +66,7 @@ class Index extends React.Component {
       <>
         <Header />
         {/* Page content */}
-        <Container className="mt--7" fluid>
+        <Container className="mt--2" fluid>
         <Row className="mt-5">
             <Col className="mb-5 mb-xl-0" xl="8">
               <Card className="shadow">
@@ -79,8 +79,27 @@ class Index extends React.Component {
                 </CardHeader>
                 <Gallery photos={photos} />
                 <br />
+              {/* 게시글 내용 */}
+              <Col lg="12">
+              <div className="card shadow">
+                    <div className="card-body">
+                        <div className="tab-content" id="myTabContent">
+                            <div className="tab-pane fade show active" id="tabs-icons-text-1" role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
+                                <p className="description">
+                                    게시글 내용~~~~~~~~~~~~~~~~<br />
+                                    게시글 내용~~~~~~~~~~~~~~~~<br />
+                                    게시글 내용~~~~~~~~~~~~~~~~<br />
+                                    게시글 내용~~~~~~~~~~~~~~~~<br />
+                                    게시글 내용~~~~~~~~~~~~~~~~<br />
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+              </Col>
+              <br />
               <Row className="align-items-center ">
-                <Col lg="3" className="text-center">
+                <Col lg="3" className="text-right">
                     {/* <i className=" ni ni-favourite-28"></i> */}
                     ♡ ♥ &nbsp;(200,000) 
                   </Col>
@@ -194,7 +213,7 @@ class Index extends React.Component {
                   </div>
                   </Col>
                   <Col lg="11">
-                    <br></br>
+                    <br />
                     <div className="col text-right avatar-padding-right-none">
                         {/* <button type="button" className="btn-sm btn-info">수정</button> &nbsp;
                         <button type="button" className="btn-sm btn-danger">삭제</button> &nbsp; */}
