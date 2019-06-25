@@ -54,6 +54,7 @@
         "nodemon": "^1.19.1",
         "nouislider": "13.1.1",
         "react": "16.8.4",
+        "react-bootstrap-modal": "^4.2.0",
         "react-chartjs-2": "2.7.4",
         "react-copy-to-clipboard": "5.0.1",
         "react-datetime": "2.16.3",
