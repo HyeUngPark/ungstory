@@ -24,10 +24,11 @@ class AdminNavbar extends React.Component {
   noticeClick = (e, index) => {
     console.log("noticeClick >> ", index);
   };
+  dropDownClose =() =>{
+
+  }
+
   render() {
-    const modalData={
-      modal:true
-    }
     return (
       <>
         <Navbar className="navbar-top navbar-dark" expand="md" id="navbar-main">
@@ -113,7 +114,7 @@ class AdminNavbar extends React.Component {
                   <DropdownItem className="noti-title" header tag="div">
                     <h6 className="text-overflow m-0">Welcome!</h6>
                   </DropdownItem>
-                    <PostWriteModal/>
+                    <PostWriteModal onClick={this.dropDownClose}/>
                   <DropdownItem to="/admin/user-profile" tag={Link}>
                       <i className="ni ni-single-02" />
                       <span>내 프로필</span>
