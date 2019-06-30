@@ -5,18 +5,21 @@ export default class PostWriteModal extends React.Component {
   constructor(props) {
     super(props);
     this.state = { modal: false,tag: []};
-    this.toggle = this.toggle.bind(this);
+    // this.toggle = this.toggle.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.modalOpen = this.props.callbackFromParent;
   }
-  toggle() {
+  toggle = (e) => {
+    // e.stopPropagation();
+    // e.preventDefault();
     this.setState({
       modal: !this.state.modal
     });
   }
 
   closeModal = (e) =>{
-    e.stopPropagation();
-
+    // e.stopPropagation();
+    // e.preventDefault();
     this.setState({
       modal: false
     });
@@ -54,6 +57,7 @@ export default class PostWriteModal extends React.Component {
     this.setState({
       tag:[]
     })
+    this.modalOpen();
     this.toggle();
   }
 
@@ -69,9 +73,10 @@ export default class PostWriteModal extends React.Component {
                       </li>)
     );
     return (
-        <div autoFocus={false}>
+        <div>
           <div onClick={this.toggle} className="dropdown-item form-control-cursor"><i className="ni ni-send" />게시글 작성</div>
-          <Modal isOpen={this.state.modal}>
+          {/* <a href="javascript:void(0)" onClick={this.toggle} className="dropdown-item form-control-cursor"><i className="ni ni-send" /><span>게시글 작성</span></a> */}
+          <Modal isOpen={this.state.modal} backdrop={false} >
           <form onSubmit={this.handleSubmit} className="card shadow">
             {/* <ModalHeader><h3>게시글 작성</h3></ModalHeader> */}
             <ModalBody>

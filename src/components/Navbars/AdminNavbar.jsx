@@ -24,8 +24,23 @@ class AdminNavbar extends React.Component {
   noticeClick = (e, index) => {
     console.log("noticeClick >> ", index);
   };
-  dropDownClose =() =>{
+  state={
+    dropdownOpen:false
+    ,isModalOpen:false
+  }
+  modalOpen =(e)=>{
+    this.setState({
+      isModalOpen:!this.state.isModalOpen
+    })
+  }
 
+  toggle = (e) =>{
+    console.log("dropdown >> ", this.state.dropdownOpen);
+    if (!this.state.isModalOpen){
+      this.setState(prevState => ({
+        dropdownOpen: !prevState.dropdownOpen
+      }));
+    }
   }
 
   render() {
@@ -94,7 +109,9 @@ class AdminNavbar extends React.Component {
             </Form>
 
             <Nav className="align-items-center d-none d-md-flex" navbar>
-              <UncontrolledDropdown nav>
+              <UncontrolledDropdown nav 
+               isOpen={this.state.dropdownOpen} toggle={this.toggle}
+              >
                 <DropdownToggle className="pr-0" nav>
                   <Media className="align-items-center">
                     <span className="avatar avatar-sm rounded-circle">
@@ -114,7 +131,9 @@ class AdminNavbar extends React.Component {
                   <DropdownItem className="noti-title" header tag="div">
                     <h6 className="text-overflow m-0">Welcome!</h6>
                   </DropdownItem>
-                    <PostWriteModal onClick={this.dropDownClose}/>
+                  <a href="javascript:void(0)" onClick={this.modalOpen}>
+                    <PostWriteModal callbackFromParent={this.modalOpen}/>
+                  </a>
                   <DropdownItem to="/admin/user-profile" tag={Link}>
                       <i className="ni ni-single-02" />
                       <span>내 프로필</span>
