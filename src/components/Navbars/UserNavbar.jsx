@@ -19,7 +19,7 @@ import {
 } from "reactstrap";
 import PostWriteModal from '../../modals/PostWriteModal';
 
-class AdminNavbar extends React.Component {
+class UserNavbar extends React.Component {
   // closes the collapse
   noticeClick = (e, index) => {
     console.log("noticeClick >> ", index);
@@ -161,4 +161,4 @@ class AdminNavbar extends React.Component {
   }
 }
 
-export default AdminNavbar;
+export default UserNavbar;

@@ -97,7 +97,7 @@ class Login extends React.Component {
                 </div>
                 <div className="text-center">
                   <Button className="my-4" color="primary" type="button">
-                    Sign in
+                    로그인
                   </Button>
                 </div>
               </Form>
@@ -110,7 +110,7 @@ class Login extends React.Component {
                 href="#pablo"
                 onClick={e => e.preventDefault()}
               >
-                <small>Forgot password?</small>
+                <small>아이디/비밀번호 찾기</small>
               </a>
             </Col>
             <Col className="text-right" xs="6">
@@ -119,7 +119,7 @@ class Login extends React.Component {
                 href="#pablo"
                 onClick={e => e.preventDefault()}
               >
-                <small>Create new account</small>
+                <small>회원가입</small>
               </a>
             </Col>
           </Row>
