@@ -28,14 +28,24 @@ class UserNavbar extends React.Component {
     dropdownOpen:false
     ,isModalOpen:false
   }
+
   modalOpen =(e)=>{
-    this.setState({
-      isModalOpen:!this.state.isModalOpen
-    })
+    console.log("Nav's modalOpen()");
+    this.setState(prevState=>({
+      isModalOpen:!prevState.isModalOpen
+    }));
+  }
+  
+  modalClose =(e)=>{
+    console.log("Nav's, modalClose()");
+    this.setState(prevState => ({
+      isModalOpen: !prevState.isModalOpen
+      ,dropdownOpen: true
+    }));
   }
 
   toggle = (e) =>{
-    console.log("dropdown >> ", this.state.dropdownOpen);
+    console.log("Nav's toggle()");
     if (!this.state.isModalOpen){
       this.setState(prevState => ({
         dropdownOpen: !prevState.dropdownOpen
@@ -132,7 +142,7 @@ class UserNavbar extends React.Component {
                     <h6 className="text-overflow m-0">Welcome!</h6>
                   </DropdownItem>
                   <a href="javascript:void(0)" onClick={this.modalOpen}>
-                    <PostWriteModal callbackFromParent={this.modalOpen}/>
+                    <PostWriteModal callbackFromParent={this.modalClose}/>
                   </a>
                   <DropdownItem to="/admin/user-profile" tag={Link}>
                       <i className="ni ni-single-02" />

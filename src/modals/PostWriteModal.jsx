@@ -7,21 +7,13 @@ export default class PostWriteModal extends React.Component {
     this.state = { modal: false,tag: []};
     // this.toggle = this.toggle.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.modalOpen = this.props.callbackFromParent;
+    this.modalClose = this.props.callbackFromParent;
   }
   toggle = (e) => {
     // e.stopPropagation();
     // e.preventDefault();
     this.setState({
       modal: !this.state.modal
-    });
-  }
-
-  closeModal = (e) =>{
-    // e.stopPropagation();
-    // e.preventDefault();
-    this.setState({
-      modal: false
     });
   }
 
@@ -57,11 +49,10 @@ export default class PostWriteModal extends React.Component {
     this.setState({
       tag:[]
     })
-    this.modalOpen();
+    // this.modalOpen();
+    this.modalClose();
     this.toggle();
   }
-
-  
 
   render() {
     const tagList = this.state.tag.map(
@@ -76,8 +67,12 @@ export default class PostWriteModal extends React.Component {
         <div>
           <div onClick={this.toggle} className="dropdown-item form-control-cursor"><i className="ni ni-send" />게시글 작성</div>
           {/* <a href="javascript:void(0)" onClick={this.toggle} className="dropdown-item form-control-cursor"><i className="ni ni-send" /><span>게시글 작성</span></a> */}
-          <Modal isOpen={this.state.modal} backdrop={false} >
-          <form onSubmit={this.handleSubmit} className="card shadow">
+          <Modal isOpen={this.state.modal} backdrop={false} onKeyUp={(e)=>{
+            if(e.key === "Escape"){
+              this.cancel();
+            }
+          }}>
+          <form className="card shadow" onSubmit={this.handleSubmit}>
             {/* <ModalHeader><h3>게시글 작성</h3></ModalHeader> */}
             <ModalBody>
               <Row>
@@ -143,7 +138,7 @@ export default class PostWriteModal extends React.Component {
                     <br/>
                 </Col>
                 <Col lg="5">
-                  <input type="submit" color="primary" className="btn btn-primary" value="게시"/>
+                  <input type="button" color="primary" className="btn btn-primary" value="게시"/>
                   <Button color="danger" onClick={this.cancel}>취소</Button>
                 </Col>
               </Row>
