@@ -22,8 +22,9 @@ router.get('/', function(req, res) {
     //         res.json({ "returnCode": "02" })
     //     }
     // });
-
 });
+
+
 
 // router.get('/googlec9bbba10a3ea94c1.html', function(req, res) {
 //     console.log("/호출!!!");

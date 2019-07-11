@@ -22,7 +22,7 @@ class Register extends React.Component {
       <>
         <Col lg="6" md="8">
           <Card className="bg-secondary shadow border-0">
-            <CardHeader className="bg-transparent pb-5">
+            <CardHeader className="bg-transparent pb-3">
               <div className="text-muted text-center mt-2 mb-4">
                 <small>Sign up with</small>
               </div>
@@ -70,16 +70,32 @@ class Register extends React.Component {
                       </InputGroupText>
                     </InputGroupAddon>
                     <Input placeholder="Name" type="text" />
+                    <Button
+                        color="primary"
+                        href="#pablo"
+                        onClick={e => e.preventDefault()}
+                        lg="4"
+                        >
+                        닉네임 중복체크
+                      </Button>
                   </InputGroup>
                 </FormGroup>
                 <FormGroup>
-                  <InputGroup className="input-group-alternative mb-3">
-                    <InputGroupAddon addonType="prepend">
+                  <InputGroup className="input-group-alternative mb-3" lg="12">
+                    <InputGroupAddon addonType="prepend" lg="2">
                       <InputGroupText>
                         <i className="ni ni-email-83" />
                       </InputGroupText>
                     </InputGroupAddon>
-                    <Input placeholder="Email" type="email" />
+                      <Input placeholder="Email" type="email"  lg="6"/>
+                      <Button
+                        color="primary"
+                        href="#pablo"
+                        onClick={e => e.preventDefault()}
+                        lg="4"
+                        >
+                        이메일 중복체크
+                      </Button>
                   </InputGroup>
                 </FormGroup>
                 <FormGroup>
@@ -91,11 +107,32 @@ class Register extends React.Component {
                     </InputGroupAddon>
                     <Input placeholder="Password" type="password" />
                   </InputGroup>
+                  <br />
+                  <InputGroup className="input-group-alternative">
+                    <InputGroupAddon addonType="prepend">
+                      <InputGroupText>
+                        <i className="ni ni-lock-circle-open" />
+                      </InputGroupText>
+                    </InputGroupAddon>
+                    <Input placeholder="Password Confirm" type="password" />
+                  </InputGroup>
                 </FormGroup>
                 <div className="text-muted font-italic">
                   <small>
-                    password strength:{" "}
-                    <span className="text-success font-weight-700">strong</span>
+                    <span className="text-warning font-weight-700">
+                      패스워드가 일치하지 않습니다.
+                    </span>
+                    <span className="text-success font-weight-700">
+                      패스워드가 일치합니다.
+                    </span>
+                  </small>
+                </div>
+                <br/>
+                <div className="text-muted">
+                  <small>
+                    패스워드 안전도:{" "}
+                    <span className="text-success font-weight-700">안전</span>
+                    <span className="text-warning font-weight-700">취약</span>
                   </small>
                 </div>
                 <Row className="my-4">
@@ -111,9 +148,9 @@ class Register extends React.Component {
                         htmlFor="customCheckRegister"
                       >
                         <span className="text-muted">
-                          I agree with the{" "}
+                          [필수]약관{" "}
                           <a href="#pablo" onClick={e => e.preventDefault()}>
-                            Privacy Policy
+                            약관 보기
                           </a>
                         </span>
                       </label>
@@ -122,7 +159,7 @@ class Register extends React.Component {
                 </Row>
                 <div className="text-center">
                   <Button className="mt-4" color="primary" type="button">
-                    Create account
+                    회원가입
                   </Button>
                 </div>
               </Form>

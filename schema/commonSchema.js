@@ -4,20 +4,19 @@
 var mongoose = require('mongoose');
 
 var schema = new mongoose.Schema({
-    workSection: { // 업무 구분 PRODUCT(상품) ORDER(주문) MEMBER(회원)
+    wkCd: { // 업무 구분 USR(회원) PST(포스팅) COM(공통)
         type: String,
         required: true
     }
-    // ,workDetailCode:{  // 업무 상세코드 PM(상품관리) OM(주문관리) MM(회원관리)
-    //     type : String 
-    //     ,required :true
-    // }
-    ,
-    firstWriteDate: { // 최초작성일
+    ,WkDtCd:{  // 업무 상세코드 UM(회원관리) PM(포스팅관리)
+        type : String 
+        ,required :false
+    }
+    ,fstWrDt: { // 최초작성일
         type: Date,
         required: true
     },
-    lastUpdateDate: { // 최근수성일
+    lstWrDt: { // 최근수성일
         type: Date,
         default: Date.now
     },

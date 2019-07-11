@@ -10,7 +10,7 @@ import {
 } from "reactstrap";
 
 import Header from "components/Headers/Header.jsx";
-import PostWriteModal from '../modals/PostWriteModal';
+import * as api from "api/api";
 
 class Index extends React.Component {
   render() {
@@ -59,7 +59,14 @@ class Index extends React.Component {
                 <Gallery photos={photos} />
                 <br />
               {/*//////////////////////////////////////////////////////////*/}
-               <PostWriteModal/>
+               <input type="button" onClick={()=>{
+                 let param ={
+                  usrName : '혜웅'
+                  
+                 };
+                
+                 api.apiSend('post','join',param);
+               }}/>
 
                {/*//////////////////////////////////////////////////////////*/}
 

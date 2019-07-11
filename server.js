@@ -8,17 +8,22 @@ var db = require('./mongo');
 router module
 */
 var commonRouter = require('./route/commonRouter');
+var userRouter = require('./route/userRouter');
+var bodyParser = require('body-parser');
+ 
+app.use(bodyParser.urlencoded({extended:true}));
+app.use(bodyParser.json());
 
 app.use(serveStatic(path.join(__dirname, '/build')));
+app.use('/user', userRouter);
 app.use('/', commonRouter);
-// app.use('/member', memberRouter);
 
 var server = app.listen(port, function() {
     console.log("★★★ Server Started ★★★");
 });
 
 app.use((req, res, next) => { // 404 처리 부분
-    console.log("/404");
+    console.log("/404\n");
     res.status(404).redirect('/');
   });
  
