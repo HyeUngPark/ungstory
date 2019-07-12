@@ -9,12 +9,14 @@ router module
 */
 var commonRouter = require('./route/commonRouter');
 var userRouter = require('./route/userRouter');
+var authRouter = require('./route/authRouter');
 var bodyParser = require('body-parser');
  
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
 
 app.use(serveStatic(path.join(__dirname, '/build')));
+app.use('/auth', authRouter);
 app.use('/user', userRouter);
 app.use('/', commonRouter);
 

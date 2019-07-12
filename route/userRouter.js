@@ -26,7 +26,6 @@
 
         // console.log(userSchema);
 
-/* 
        commonSchema.create({
             wkCd: 'USR'
             ,WkDtCd : "USR"
@@ -44,7 +43,6 @@
                 reCode: '02'
             });
         });
-        */
     });
 ///////////////////////////////////////////////////////////////////////////////
     router.get('/idCheck', function(req, res) {

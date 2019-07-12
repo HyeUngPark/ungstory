@@ -16,7 +16,68 @@ import {
   Col
 } from "reactstrap";
 
+import * as api from "api/api";
+
 class Register extends React.Component {
+  state ={
+    usrName : ''
+    ,usrId : ''
+  }
+
+  checkCallback = (result) =>{
+    let rsMsg;
+    if(result.svCd === 'e'){
+      rsMsg="이메일";
+    }else if(result.svCd === 'n'){
+      rsMsg="닉네임";
+    }
+    if(result.reCd === '01'){
+      alert('사용 가능한 '+rsMsg+' 입니다.');
+    }else if(result.reCd === '02'){
+      alert('사용할 수 없는 '+rsMsg+' 입니다.');
+    }
+  };
+
+  overCheck = (sep) => {
+    if(sep === 'e'){
+      let idVal = this.state.usrId;
+      if(idVal===''){
+        alert('이메일을 입력해 주세요.');
+      }else if(idVal.indexOf('@')<0 || idVal.indexOf('.')<0){ // 이메일 형식 체크
+        alert("이메일 형식을 지켜주세요\nex)test@test.com");
+      }else{
+        let param ={
+          usrId : idVal
+          ,svCd : 'e'
+        };
+        api.apiSend('get','idCheck',param,this.checkCallback);
+      }
+    }else if(sep==='n'){
+      if(this.state.usrName !==''){
+        let param ={
+          usrName : this.state.usrName
+          ,svCd : 'n'
+        };
+        api.apiSend('get','nameCheck',param,this.checkCallback);
+      }else{
+        alert('닉네임을 입력해주세요.');
+      }
+    }
+  }
+
+  valChange = (e,sep) =>{
+    if(sep === 'e'){
+      this.setState({
+        usrId : e.target.value
+      });
+    }else if(sep==='n'){
+      this.setState({
+        usrName : e.target.value
+      });
+    }
+  }
+
+
   render() {
     return (
       <>
@@ -61,38 +122,42 @@ class Register extends React.Component {
               <div className="text-center text-muted mb-4">
                 <small>Or sign up with credentials</small>
               </div>
-              <Form role="form">
-                <FormGroup>
                   <InputGroup className="input-group-alternative mb-3">
                     <InputGroupAddon addonType="prepend">
                       <InputGroupText>
                         <i className="ni ni-hat-3" />
                       </InputGroupText>
                     </InputGroupAddon>
-                    <Input placeholder="Name" type="text" />
+                    <Input 
+                        placeholder="Name" 
+                        type="text"
+                        value ={this.state.usrName}
+                        onChange = {e=>{this.valChange(e,'n')}}
+                    />
                     <Button
+                        href="javascript:void(0)"
                         color="primary"
-                        href="#pablo"
-                        onClick={e => e.preventDefault()}
-                        lg="4"
-                        >
+                        onClick={e=>{this.overCheck('n')}}                        
+                    >
                         닉네임 중복체크
                       </Button>
                   </InputGroup>
-                </FormGroup>
-                <FormGroup>
+                 <FormGroup>
                   <InputGroup className="input-group-alternative mb-3" lg="12">
                     <InputGroupAddon addonType="prepend" lg="2">
                       <InputGroupText>
                         <i className="ni ni-email-83" />
                       </InputGroupText>
                     </InputGroupAddon>
-                      <Input placeholder="Email" type="email"  lg="6"/>
+                      <Input 
+                        placeholder="Email" 
+                        type="email"  
+                        onChange = {e=>{this.valChange(e,'e')}}
+                      />
                       <Button
+                        href="javascript:void(0)"
                         color="primary"
-                        href="#pablo"
-                        onClick={e => e.preventDefault()}
-                        lg="4"
+                        onClick={e=>{this.overCheck('e')}}
                         >
                         이메일 중복체크
                       </Button>
@@ -162,7 +227,7 @@ class Register extends React.Component {
                     회원가입
                   </Button>
                 </div>
-              </Form>
+{/*               </Form> */}
             </CardBody>
           </Card>
         </Col>

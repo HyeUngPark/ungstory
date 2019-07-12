@@ -62,9 +62,7 @@ class Index extends React.Component {
                <input type="button" onClick={()=>{
                  let param ={
                   usrName : '혜웅'
-                  
                  };
-                
                  api.apiSend('post','join',param);
                }}/>
 

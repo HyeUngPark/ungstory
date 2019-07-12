@@ -1,25 +1,31 @@
 import axios from 'axios';
   
-export function apiSend(method, url,param) {
+export function apiSend(method, url,param,callback) {
     const sendParams={
         method : method
         ,url : url
     }
     if(method === 'get'){
-        sendParams.param = param;
+        sendParams.params = param;
     }else if(method === 'post'){
         sendParams.data = param;
     }
-    console.log(sendParams);
-
+    // var result = [];
+    var result={};
     axios(sendParams)
-      .then(function (response) {
-        console.log(response);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
-    
+      .then(response=>{
+        callback(response.data);
+        // return response.data;
+        // result.push(response.data);
+    })
+    .catch(error=>{
+        // result = error.response;
+        callback(error.response);
+        // return error.response;
+        // result.push(error.response);
+    });
+    //   console.log("★★★API RESULT★★★\n",result);
+    // return result;
 }
  
 
