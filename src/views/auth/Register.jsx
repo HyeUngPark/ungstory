@@ -18,10 +18,16 @@ import {
 
 import * as api from "api/api";
 
+var passwordValidator = require('password-validator');
+
 class Register extends React.Component {
   state ={
     usrName : ''
     ,usrId : ''
+    ,usrPw1 : ''
+    ,usrPw2 : ''
+    ,pwSameCd : 0
+    ,pwSafeCd : 0
   }
 
   checkCallback = (result) =>{
@@ -77,7 +83,68 @@ class Register extends React.Component {
     }
   }
 
+  pwChange =(e,sep) =>{
+    if(sep==='p1'){
+      this.setState({
+        usrPw1 : e.target.value
+      });
+      
+    }else if(sep==='p2'){
+      this.setState({
+        usrPw2 : e.target.value
+      });
+    }
+  }
 
+  pwCheck = () =>{
+    let pw1 = this.state.usrPw1;
+    let pw2 = this.state.usrPw2;
+    if(pw1 === '' || pw2 ===''){
+      this.setState({
+        pwSameCd : 0
+        ,pwSafeCd : 0
+      });
+    }else if(pw1 == pw2){
+      this.setState({
+        pwSameCd : 1
+      });
+    }else if(pw1 != pw2){
+      this.setState({
+        pwSameCd : 2
+        });
+    }
+  }
+
+  pwValidCheck=()=>{
+    let pwValid = new passwordValidator();
+    // Add properties to it
+    pwValid
+    .is().min(8)                                    // Minimum length 8
+    .is().max(15)                                  // Maximum length 100
+    // .has().uppercase()                              // Must have uppercase letters
+    .has().lowercase()                              // Must have lowercase letters
+    .has().digits()                                 // Must have digits
+    .has().not().spaces()                           // Should not have spaces
+    .is().not().oneOf(['Passw0rd', 'Password123']); // Blacklist these values
+    
+    if(pwValid.validate(this.state.usrPw1)){
+      this.setState({
+        pwSafeCd : 1
+      })
+    }else{
+      this.setState({
+        pwSafeCd : 2
+      })
+    }
+  }
+
+  componentDidUpdate = (prevProps, prevState)=>{
+    if(prevState.usrPw1 != this.state.usrPw1 || 
+       prevState.usrPw2 != this.state.usrPw2 ){
+      this.pwCheck();
+      this.pwValidCheck();
+    }
+  }
   render() {
     return (
       <>
@@ -170,34 +237,62 @@ class Register extends React.Component {
                         <i className="ni ni-lock-circle-open" />
                       </InputGroupText>
                     </InputGroupAddon>
-                    <Input placeholder="Password" type="password" />
+                    <Input 
+                      placeholder="Password" 
+                      type="password" 
+                      value ={this.state.usrPw1}
+                      onChange = {e=>{this.pwChange(e,'p1')}}
+                      />
                   </InputGroup>
-                  <br />
+                  <br/>
+                  <div className="text-muted">
+                  <small>
+                    <div 
+                      className="text-warning font-weight-700"
+                      style={{ display: (this.state.pwSameCd === 2 ? 'block' : 'none') }}
+                      >
+                      패스워드가 일치하지 않습니다.
+                    </div>
+                    <div 
+                      className="text-success font-weight-700"
+                      style={{ display: (this.state.pwSameCd === 1 ? 'block' : 'none') }}
+                    >
+                      패스워드가 일치합니다.
+                    </div>
+                  </small>
+                  {
+                    (this.state.pwSameCd === 1 || this.state.pwSameCd === 2) ? <br/> : ''
+                  }
+                </div>
                   <InputGroup className="input-group-alternative">
                     <InputGroupAddon addonType="prepend">
                       <InputGroupText>
                         <i className="ni ni-lock-circle-open" />
                       </InputGroupText>
                     </InputGroupAddon>
-                    <Input placeholder="Password Confirm" type="password" />
+                    <Input 
+                      placeholder="Password Confirm" 
+                      type="password" 
+                      value ={this.state.usrPw2}
+                      onChange = {e=>{this.pwChange(e,'p2')}}
+                    />
                   </InputGroup>
                 </FormGroup>
-                <div className="text-muted font-italic">
-                  <small>
-                    <span className="text-warning font-weight-700">
-                      패스워드가 일치하지 않습니다.
-                    </span>
-                    <span className="text-success font-weight-700">
-                      패스워드가 일치합니다.
-                    </span>
-                  </small>
-                </div>
-                <br/>
                 <div className="text-muted">
                   <small>
-                    패스워드 안전도:{" "}
-                    <span className="text-success font-weight-700">안전</span>
-                    <span className="text-warning font-weight-700">취약</span>
+                    <div 
+                      className="text-success font-weight-700"
+                      style={{display:(this.state.pwSafeCd === 1 ? 'block' : 'none')}}
+                    >
+                      사용 가능한 비밀번호 입니다.
+                    </div>
+                    <div
+                      className="text-warning font-weight-700"
+                      style={{display:(this.state.pwSafeCd === 2 ? 'block' : 'none')}}
+                    >
+                      사용할 수 없는 비밀번호 입니다.
+                      문자, 숫자 포함 8~15자리 비밀번호를 사용해주세요
+                    </div>
                   </small>
                 </div>
                 <Row className="my-4">
