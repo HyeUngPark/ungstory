@@ -7,13 +7,14 @@ var schema = require('../schema/commonSchema');
 var userSchema = require('../schema/userSchema');
 var random = require('../myUtils/randomUtils');
 var mail = require('../myUtils/mailUtils');
+var encrypt = require('../myUtils/encryptUtils');
 
 router.post('/join', function(req, res) {
     var params = req.body;
     console.log('/join() \n',params);
     userSchema.usrId = params.usrId;
     // 암호화 필요
-    userSchema.usrPwd = params.usrPwd; 
+    userSchema.usrPwd = encrypt.getEncrypt(params.usrPwd); 
     userSchema.usrName = params.usrName;
     userSchema.usrSep = "01";
     userSchema.usrPt = "";
@@ -148,29 +149,40 @@ router.get('/nameCheck', function(req, res) {
 });
 
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-
 router.post('/login', function(req, res) {
-    console.log("/login");
     var params = req.query;
-
+    console.log(encrypt.getEncrypt(params.usrPwd));
     schema.find({
-        workSection: 'USR',
-        "subSchema.mem_id": params.loginId,
-        "subSchema.mem_pw": params.password
+        wkCd: 'USR',
+        WkDtCd :'USR',
+        "subSchema.usrId": params.usrId,
+        "subSchema.usrPwd": encrypt.getEncrypt(params.usrPwd)
     }, function(err, result) {
         if (err) {
             console.log('error \n', err);
             return res.status(500).send("select error >> " + err)
         }
+        console.log("★★★ login ★★★\n",result);
         if (result.length > 0) {
-            res.json({ "returnCode": '01', name: result[0].subSchema.mem_name });
+            if(result[0].subSchema.usrCert === '00'){
+                // 미인증 아이디
+                console.log('★★★ 인증되지 않은 아이디 ★★★');
+                res.json({ "reCd": "03" });
+            }else{
+                console.log('★★★ 로그인 성공 ★★★');
+                // 성공
+                res.json({ "reCd": '01'});
+                // 로그인 세션처리
+                
+            }
         } else {
-            res.json({ "returnCode": "02" })
+            res.json({ "reCd": "02" })
         }
     });
 });
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
 
 router.post('/idSearch',function(req,res){
     var params = req.query;

@@ -16,6 +16,7 @@ import {
 } from "reactstrap";
 
 import * as api from "api/api";
+import { withRouter } from 'react-router-dom';
 
 var passwordValidator = require('password-validator');
 
@@ -174,7 +175,12 @@ class Register extends React.Component {
   }
 
   joinCallback = (result) =>{
-    console.log(result);
+    if(result.reCd==="01"){
+      alert('회원가입 성공');
+      this.props.history.push('/');
+    }else{
+      alert('회원가입 실패');
+    }
   }
 
   join = () => {
