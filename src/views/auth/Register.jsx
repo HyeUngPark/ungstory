@@ -7,7 +7,6 @@ import {
   CardHeader,
   CardBody,
   FormGroup,
-  Form,
   Input,
   InputGroupAddon,
   InputGroupText,
@@ -28,6 +27,9 @@ class Register extends React.Component {
     ,usrPw2 : ''
     ,pwSameCd : 0
     ,pwSafeCd : 0
+    ,usrNameCk : 0
+    ,usrIdCk : 0
+    ,usrArg01 : false
   }
 
   checkCallback = (result) =>{
@@ -39,8 +41,26 @@ class Register extends React.Component {
     }
     if(result.reCd === '01'){
       alert('사용 가능한 '+rsMsg+' 입니다.');
+      if(result.svCd==='e'){
+        this.setState({
+          usrIdCk : 1
+        });
+      }else if(result.svCd==='n'){
+        this.setState({
+          usrNameCk : 1
+        });
+      }
     }else if(result.reCd === '02'){
       alert('사용할 수 없는 '+rsMsg+' 입니다.');
+      if(result.svCd==='e'){
+        this.setState({
+          usrIdCk : 0
+        });
+      }else if(result.svCd==='n'){
+        this.setState({
+          usrNameCk : 0
+        });
+      }
     }
   };
 
@@ -75,12 +95,19 @@ class Register extends React.Component {
     if(sep === 'e'){
       this.setState({
         usrId : e.target.value
+        ,usrIdCk : 0
       });
     }else if(sep==='n'){
       this.setState({
         usrName : e.target.value
+        ,usrNameCk : 0
+      });
+    }else if(sep==='a'){
+      this.setState({
+        usrArg01 : !this.state.usrArg01
       });
     }
+
   }
 
   pwChange =(e,sep) =>{
@@ -111,7 +138,7 @@ class Register extends React.Component {
     }else if(pw1 != pw2){
       this.setState({
         pwSameCd : 2
-        });
+      });
     }
   }
 
@@ -145,6 +172,43 @@ class Register extends React.Component {
       this.pwValidCheck();
     }
   }
+
+  joinCallback = (result) =>{
+    console.log(result);
+  }
+
+  join = () => {
+    // validation check
+    // 닉네임
+    if(this.state.usrNameCk === 0 || this.state.usrName ===''){
+      alert('닉네임을 확인해주세요');
+      return;
+    }
+    // 아이디
+    if(this.state.usrIdCk === 0 || this.state.usrId === ''){
+      alert('아이디를 확인해주세요');
+      return;
+    }
+    // 비밀번호
+    if(this.state.pwSameCd !== 1 || this.state.pwSafeCd !== 1){
+      alert('비밀번호를 확인해주세요');
+      return;
+    }
+    // 약관체크
+    if(!this.state.usrArg01){
+      alert('약관에 동의해주셔야 가입이 가능합니다.');
+      return;
+    }
+    // 회원가입 API
+    let param={
+       usrId : this.state.usrId
+      ,usrName : this.state.usrName
+      ,usrPwd : this.state.usrPw1
+    };
+    api.apiSend('post','join',param,this.joinCallback);
+
+  }
+
   render() {
     return (
       <>
@@ -229,6 +293,12 @@ class Register extends React.Component {
                         이메일 중복체크
                       </Button>
                   </InputGroup>
+                  <div 
+                    className="text-warning font-weight-700"
+                    >
+                    입력하신 이메일로 인증 후 가입이 진행됩니다.<br/>
+                    반드시 사용하시는 이메일을 입력해주세요.
+                  </div>
                 </FormGroup>
                 <FormGroup>
                   <InputGroup className="input-group-alternative">
@@ -302,7 +372,9 @@ class Register extends React.Component {
                         className="custom-control-input"
                         id="customCheckRegister"
                         type="checkbox"
-                      />
+                        value={this.state.usrArg01}
+                        onClick ={e=>this.valChange(e,'a')}
+                        />
                       <label
                         className="custom-control-label"
                         htmlFor="customCheckRegister"
@@ -318,7 +390,12 @@ class Register extends React.Component {
                   </Col>
                 </Row>
                 <div className="text-center">
-                  <Button className="mt-4" color="primary" type="button">
+                  <Button 
+                    className="mt-4" 
+                    color="primary" 
+                    type="button"
+                    onClick={this.join}
+                  >
                     회원가입
                   </Button>
                 </div>

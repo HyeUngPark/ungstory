@@ -6,8 +6,6 @@ env.config();
 var email = process.env.email;
 var mailPw = process.env.mailPw;
 
-
-
 var nodemailer = require('nodemailer');
 
 var mailSender = {
@@ -27,7 +25,8 @@ var mailSender = {
             from: email,
             to: param.toEmail,
             subject: param.subject,
-            text: param.text
+            html: param.text,
+            // text: param.text
         };
             
         transporter.sendMail(mailOptions, function(error, info){

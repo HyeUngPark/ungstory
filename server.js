@@ -11,9 +11,11 @@ var commonRouter = require('./route/commonRouter');
 var userRouter = require('./route/userRouter');
 var authRouter = require('./route/authRouter');
 var bodyParser = require('body-parser');
- 
+// var flash = require('req-flash');
+
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
+// app.use(flash());
 
 app.use(serveStatic(path.join(__dirname, '/build')));
 app.use('/auth', authRouter);

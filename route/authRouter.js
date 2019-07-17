@@ -8,12 +8,6 @@ var userSchema = require('../schema/userSchema');
 var random = require('../myUtils/randomUtils');
 var mail = require('../myUtils/mailUtils');
 
-router.get('nameCheck', function(req,res){
-    let params = req.body;
-    console.log('/join() \n',params);
-    
-});
-
 router.post('/join', function(req, res) {
     var params = req.body;
     console.log('/join() \n',params);
@@ -24,17 +18,27 @@ router.post('/join', function(req, res) {
     userSchema.usrSep = "01";
     userSchema.usrPt = "";
     userSchema.usrFrds = [];
-
-    // console.log(userSchema);
+    userSchema.usrCert = '00'
 
     schema.create({
         wkCd: 'USR'
         ,WkDtCd : "USR"
-        ,fstWrDt: new Date() // 최초작성일
-        ,lstWrDt: new Date() // 최초작성일
+        ,fstWrDt: new Date() // 최초 작성일
+        ,lstWrDt: new Date() // 최종 작성일
         ,subSchema: userSchema
     }).then((result)=>{
         console.log("★★join success★★\n",result);
+        // 인증메일 발송
+        let mailParam={
+            toEmail: userSchema.usrId,
+            subject: '[웅스토리] 회원가입 인증 메일',
+            text: "<html><body>"
+                +"<h3>웅스토리 가입 인증 메일입니다.<br></h3>"
+                +"<a href='http://localhost:5000/auth/joinResponse?usrId="+userSchema.usrId+"'><button>인증완료</button></a>"
+                +"</body></html>"
+        };
+        mail.sendGmail(mailParam);
+
         res.json({
             reCd: '01'
         });
@@ -45,6 +49,55 @@ router.post('/join', function(req, res) {
         });
     });
 });
+
+router.get('/joinResponse',function(req, res){
+    var params = req.query;
+    schema.find({
+        wkCd: 'USR'
+        ,WkDtCd : "USR"
+        ,"subSchema.usrId": params.usrId
+    }, function(err, result) {
+        if (err) {
+            console.log('error \n', err);
+            return res.status(500).send("select error >> " + err)
+        }if (result.length > 0) {
+            console.log("★★★ result ★★★ \n",result[0]);
+            
+            schema.updateOne({
+                "_id" : result[0]._id
+            }
+            , { $set: {'subSchema.usrCert': '01' } }
+            , function(err, result) {
+                if (err) {
+                    console.log('error \n', err);
+                    return res.status(500).send("select error >> " + err)
+                }
+                if (result.n) {
+                    console.log("★★★ 회원가입 인증 result ★★★ \n",result.n);
+                    res.send('<script type="text/javascript">'
+                             +'alert("회원가입 인증 완료");'
+                             +'self.close();'
+                             +'</script>');
+                } else {
+                    console.log("★★★ 회원가입 인증 fail ★★★ \n",result.n);
+                    res.send('<script type="text/javascript">'
+                            +'alert("회원가입 인증 실패");'
+                            +'self.close();'
+                            +'</script>');
+                        }
+                    });
+            } else {
+            res.send('<script type="text/javascript">'
+                    +'alert("회원가입 인증 실패");'
+                    +'self.close();'
+                    +'</script>');
+        }
+    });
+
+    
+
+});
+
 router.get('/idCheck', function(req, res) {
     var params = req.query;
     schema.find({
