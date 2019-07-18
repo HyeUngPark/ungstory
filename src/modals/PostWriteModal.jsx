@@ -1,5 +1,5 @@
 import React from 'react';
-import { Button, Modal, ModalHeader, ModalBody, ModalFooter, Row, Col} from 'reactstrap';
+import { Button, Modal, ModalBody, Row, Col} from 'reactstrap';
 
 export default class PostWriteModal extends React.Component {
   constructor(props) {

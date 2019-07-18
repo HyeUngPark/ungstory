@@ -16,7 +16,6 @@ import {
 } from "reactstrap";
 
 import * as api from "api/api";
-import { withRouter } from 'react-router-dom';
 
 var passwordValidator = require('password-validator');
 
@@ -80,7 +79,7 @@ class Register extends React.Component {
         api.apiSend('get','idCheck',param,this.checkCallback);
       }
     }else if(sep==='n'){
-      if(this.state.usrName !==''){
+      if(this.state.usrName !=''){
         let param ={
           usrName : this.state.usrName
           ,svCd : 'n'
@@ -132,7 +131,7 @@ class Register extends React.Component {
         pwSameCd : 0
         ,pwSafeCd : 0
       });
-    }else if(pw1 == pw2){
+    }else if(pw1 === pw2){
       this.setState({
         pwSameCd : 1
       });
@@ -196,7 +195,7 @@ class Register extends React.Component {
       return;
     }
     // 비밀번호
-    if(this.state.pwSameCd !== 1 || this.state.pwSafeCd !== 1){
+    if(this.state.pwSameCd != 1 || this.state.pwSafeCd !== 1){
       alert('비밀번호를 확인해주세요');
       return;
     }

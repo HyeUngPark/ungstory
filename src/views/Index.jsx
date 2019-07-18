@@ -58,16 +58,6 @@ class Index extends React.Component {
                 </CardHeader>
                 <Gallery photos={photos} />
                 <br />
-              {/*//////////////////////////////////////////////////////////*/}
-               <input type="button" onClick={()=>{
-                 let param ={
-                  usrName : '혜웅'
-                 };
-                 api.apiSend('post','join',param);
-               }}/>
-
-               {/*//////////////////////////////////////////////////////////*/}
-
               {/* 게시글 내용 */}
               <Col lg="12">
               <div className="card shadow">

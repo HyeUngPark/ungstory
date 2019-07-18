@@ -16,7 +16,64 @@ import {
   Col
 } from "reactstrap";
 
+import * as api from "api/api";
+
 class Login extends React.Component {
+  state ={
+    usrId : ''
+    ,usrPw : ''
+    ,remberCd : false
+  };
+  valChange = (e,sep) =>{
+    if(sep == 'e'){
+      this.setState({
+        usrId : e.target.value
+      });
+    }else if(sep=='p'){
+      this.setState({
+        usrPw : e.target.value
+      });
+    }else if(sep=='r'){
+      this.setState({
+        remberCd : !this.state.remberCd
+      });
+    }
+  }
+
+  loginCallback = (result) =>{
+    if(result.reCd=="01"){
+      console.log('login 성공');
+      this.props.history.push('/');
+    }else if(result.reCd =='02'){
+      alert('아이디 또는 비밀번호를 확인해주세요');
+    }else if(result.reCd =='03'){
+      alert('아직 이메일 인증이 완료되지 않았습니다.\n이메일 인증 후 로그인해주세요');
+    }
+  }
+
+  login = () => {
+    // validation check
+    let idVal = this.state.usrId;
+    if(idVal==''){
+      alert('이메일을 입력해 주세요.');
+      return;
+    }else if(idVal.indexOf('@')<0 || idVal.indexOf('.')<0){ // 이메일 형식 체크
+      alert("이메일 형식을 지켜주세요\nex)test@test.com");
+      return;
+    }
+    // 비밀번호
+    if(this.state.usrPw == ''){
+      alert('비밀번호를 확인해주세요');
+      return;
+    }
+    // 로그인 API
+    let param={
+       usrId : this.state.usrId
+      ,usrPwd : this.state.usrPw
+    };
+    api.apiSend('post','login',param,this.loginCallback);
+  }
+
   render() {
     return (
       <>
@@ -69,7 +126,11 @@ class Login extends React.Component {
                         <i className="ni ni-email-83" />
                       </InputGroupText>
                     </InputGroupAddon>
-                    <Input placeholder="Email" type="email" />
+                    <Input placeholder="Email" 
+                           type="email" 
+                           value={this.state.usrId}
+                           onChange={e=>{this.valChange(e,'e')}}
+                    />
                   </InputGroup>
                 </FormGroup>
                 <FormGroup>
@@ -79,7 +140,12 @@ class Login extends React.Component {
                         <i className="ni ni-lock-circle-open" />
                       </InputGroupText>
                     </InputGroupAddon>
-                    <Input placeholder="Password" type="password" />
+                    <Input 
+                      placeholder="Password" 
+                      type="password" 
+                      value={this.state.usrPw}
+                      onChange={e=>{this.valChange(e,'p')}}
+                    />
                   </InputGroup>
                 </FormGroup>
                 <div className="custom-control custom-control-alternative custom-checkbox">
@@ -87,6 +153,8 @@ class Login extends React.Component {
                     className="custom-control-input"
                     id=" customCheckLogin"
                     type="checkbox"
+                    value={this.state.remberCd}
+                    onClick ={e=>this.valChange(e,'r')}
                   />
                   <label
                     className="custom-control-label"
@@ -96,7 +164,12 @@ class Login extends React.Component {
                   </label>
                 </div>
                 <div className="text-center">
-                  <Button className="my-4" color="primary" type="button">
+                  <Button 
+                    className="my-4" 
+                    color="primary" 
+                    type="button"
+                    onClick={this.login}
+                  >
                     로그인
                   </Button>
                 </div>
