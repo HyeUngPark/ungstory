@@ -35,7 +35,8 @@ router.post('/join', function(req, res) {
             subject: '[웅스토리] 회원가입 인증 메일',
             text: "<html><body>"
                 +"<h3>웅스토리 가입 인증 메일입니다.<br></h3>"
-                +"<a href='http://localhost:5000/auth/joinResponse?usrId="+userSchema.usrId+"'><button>인증완료</button></a>"
+                // +"<a href='http://localhost:5000/auth/joinResponse?usrId="+userSchema.usrId+"'><button>인증완료</button></a>"
+                +"<a href='https://ungstory.herokuapp.com/auth/joinResponse?usrId="+userSchema.usrId+"'><button>인증완료</button></a>"
                 +"</body></html>"
         };
         mail.sendGmail(mailParam);
