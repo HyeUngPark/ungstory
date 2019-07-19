@@ -151,8 +151,7 @@ router.get('/nameCheck', function(req, res) {
 
 ///////////////////////////////////////////////////////////////////////////////
 router.post('/login', function(req, res) {
-    var params = req.query;
-    console.log(encrypt.getEncrypt(params.usrPwd));
+    var params = req.body;
     schema.find({
         wkCd: 'USR',
         WkDtCd :'USR',
@@ -174,6 +173,7 @@ router.post('/login', function(req, res) {
                 // 성공
                 res.json({ "reCd": '01'});
                 // 로그인 세션처리
+
                 
             }
         } else {
