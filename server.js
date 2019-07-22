@@ -10,12 +10,25 @@ router module
 var commonRouter = require('./route/commonRouter');
 var userRouter = require('./route/userRouter');
 var authRouter = require('./route/authRouter');
-var bodyParser = require('body-parser');
-// var flash = require('req-flash');
 
+var bodyParser = require('body-parser');
+var session = require('express-session');
+// var cookieParser =require('cookie-parser');
+
+// app.use(express.cookieParser());
 app.use(bodyParser.urlencoded({extended:true}));
 app.use(bodyParser.json());
-// app.use(flash());
+// app.use(cookieParser());
+
+app.use(session({
+  key: 'sid', 
+  secret: 'secret',
+  resave: false,
+  saveUninitialized: true,
+  cookie: {
+    maxAge: 24000 * 60 * 60 // 쿠키 유효기간 24시간
+  }
+}));
 
 app.use(serveStatic(path.join(__dirname, '/build')));
 app.use('/auth', authRouter);
@@ -25,6 +38,7 @@ app.use('/', commonRouter);
 var server = app.listen(port, function() {
     console.log("★★★ Server Started ★★★");
 });
+
 
 app.use((req, res, next) => { // 404 처리 부분
     console.log("/404\n");

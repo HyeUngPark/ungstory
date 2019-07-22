@@ -3,11 +3,14 @@
 */
 var express = require('express');
 var router = express.Router();
+
 var schema = require('../schema/commonSchema');
 var userSchema = require('../schema/userSchema');
 var random = require('../myUtils/randomUtils');
 var mail = require('../myUtils/mailUtils');
 var encrypt = require('../myUtils/encryptUtils');
+
+// router.use(express.cookieParser());
 
 router.post('/join', function(req, res) {
     var params = req.body;
@@ -149,7 +152,6 @@ router.get('/nameCheck', function(req, res) {
     });
 });
 
-///////////////////////////////////////////////////////////////////////////////
 router.post('/login', function(req, res) {
     var params = req.body;
     schema.find({
@@ -169,12 +171,16 @@ router.post('/login', function(req, res) {
                 console.log('★★★ 인증되지 않은 아이디 ★★★');
                 res.json({ "reCd": "03" });
             }else{
-                console.log('★★★ 로그인 성공 ★★★');
                 // 성공
-                res.json({ "reCd": '01'});
+                // res.json({ "reCd": '01'});
                 // 로그인 세션처리
-
-                
+                let session = req.session;
+                session.usrId = result[0].subSchema.usrId;
+                console.log('★★★ 로그인 성공 ★★★\n',session);
+                res.json({
+                    session : session,
+                    "reCd": '01'
+                });       
             }
         } else {
             res.json({ "reCd": "02" })

@@ -25,15 +25,15 @@ class Login extends React.Component {
     ,remberCd : false
   };
   valChange = (e,sep) =>{
-    if(sep == 'e'){
+    if(sep === 'e'){
       this.setState({
         usrId : e.target.value
       });
-    }else if(sep=='p'){
+    }else if(sep==='p'){
       this.setState({
         usrPw : e.target.value
       });
-    }else if(sep=='r'){
+    }else if(sep==='r'){
       this.setState({
         remberCd : !this.state.remberCd
       });
@@ -41,12 +41,12 @@ class Login extends React.Component {
   }
 
   loginCallback = (result) =>{
-    if(result.reCd=="01"){
-      console.log('login 성공');
+    if(result.reCd==="01"){
+      console.log('login 성공 \n',this.props);
       this.props.history.push('/');
-    }else if(result.reCd =='02'){
+    }else if(result.reCd ==='02'){
       alert('아이디 또는 비밀번호를 확인해주세요');
-    }else if(result.reCd =='03'){
+    }else if(result.reCd ==='03'){
       alert('아직 이메일 인증이 완료되지 않았습니다.\n이메일 인증 후 로그인해주세요');
     }
   }
@@ -54,7 +54,7 @@ class Login extends React.Component {
   login = () => {
     // validation check
     let idVal = this.state.usrId;
-    if(idVal==''){
+    if(idVal===''){
       alert('이메일을 입력해 주세요.');
       return;
     }else if(idVal.indexOf('@')<0 || idVal.indexOf('.')<0){ // 이메일 형식 체크
@@ -62,10 +62,14 @@ class Login extends React.Component {
       return;
     }
     // 비밀번호
-    if(this.state.usrPw == ''){
+    if(this.state.usrPw === ''){
       alert('비밀번호를 확인해주세요');
       return;
     }
+    // 자동 로그인 여부 저장
+    console.log('로그인 자동 여부 > ',this.state.remberCd);
+    localStorage.setItem('loginRememberCd',this.state.remberCd);
+
     // 로그인 API
     let param={
        usrId : this.state.usrId

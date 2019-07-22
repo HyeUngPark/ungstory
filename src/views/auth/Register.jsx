@@ -79,7 +79,7 @@ class Register extends React.Component {
         api.apiSend('get','idCheck',param,this.checkCallback);
       }
     }else if(sep==='n'){
-      if(this.state.usrName !=''){
+      if(this.state.usrName !==''){
         let param ={
           usrName : this.state.usrName
           ,svCd : 'n'
@@ -135,7 +135,7 @@ class Register extends React.Component {
       this.setState({
         pwSameCd : 1
       });
-    }else if(pw1 != pw2){
+    }else if(pw1 !== pw2){
       this.setState({
         pwSameCd : 2
       });
@@ -166,8 +166,8 @@ class Register extends React.Component {
   }
 
   componentDidUpdate = (prevProps, prevState)=>{
-    if(prevState.usrPw1 != this.state.usrPw1 || 
-       prevState.usrPw2 != this.state.usrPw2 ){
+    if(prevState.usrPw1 !== this.state.usrPw1 || 
+       prevState.usrPw2 !== this.state.usrPw2 ){
       this.pwCheck();
       this.pwValidCheck();
     }
@@ -195,7 +195,7 @@ class Register extends React.Component {
       return;
     }
     // 비밀번호
-    if(this.state.pwSameCd != 1 || this.state.pwSafeCd !== 1){
+    if(this.state.pwSameCd !== 1 || this.state.pwSafeCd !== 1){
       alert('비밀번호를 확인해주세요');
       return;
     }
@@ -271,7 +271,6 @@ class Register extends React.Component {
                         onChange = {e=>{this.valChange(e,'n')}}
                     />
                     <Button
-                        href="javascript:void(0)"
                         color="primary"
                         onClick={e=>{this.overCheck('n')}}                        
                     >
@@ -291,7 +290,6 @@ class Register extends React.Component {
                         onChange = {e=>{this.valChange(e,'e')}}
                       />
                       <Button
-                        href="javascript:void(0)"
                         color="primary"
                         onClick={e=>{this.overCheck('e')}}
                         >
