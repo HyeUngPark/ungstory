@@ -3,6 +3,8 @@ import React from "react";
 // reactstrap components
 import {Container } from "reactstrap";
 
+import authContainer from 'containers/authContainer';
+
 class Header extends React.Component {
   render() {
     return (
@@ -13,6 +15,7 @@ class Header extends React.Component {
 
             </div>
           </Container>
+          <authContainer />
         </div>
       </>
     );

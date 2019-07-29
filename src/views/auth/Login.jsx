@@ -16,7 +16,8 @@ import {
   Col
 } from "reactstrap";
 
-import * as api from "api/api";
+// import * as api from "api/api";
+import * as authActions from 'modules/auth';
 
 class Login extends React.Component {
   state ={
@@ -39,7 +40,7 @@ class Login extends React.Component {
       });
     }
   }
-
+/*
   loginCallback = (result) =>{
     if(result.reCd==="01"){
       console.log('login 성공 \n',this.props);
@@ -50,7 +51,7 @@ class Login extends React.Component {
       alert('아직 이메일 인증이 완료되지 않았습니다.\n이메일 인증 후 로그인해주세요');
     }
   }
-
+*/
   login = () => {
     // validation check
     let idVal = this.state.usrId;
@@ -75,7 +76,8 @@ class Login extends React.Component {
        usrId : this.state.usrId
       ,usrPwd : this.state.usrPw
     };
-    api.apiSend('post','login',param,this.loginCallback);
+    // api.apiSend('post','login',param,this.loginCallback);
+    authActions.authLogin(param);
   }
 
   render() {
@@ -207,3 +209,4 @@ class Login extends React.Component {
 }
 
 export default Login;
+
