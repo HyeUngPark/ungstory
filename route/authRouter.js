@@ -187,6 +187,14 @@ router.post('/login', function(req, res) {
         }
     });
 });
+
+router.post('/loginCk',function(req, res){
+    var params = req.body;
+    console.log(session.usrId);
+    res.json({
+        reCd : '01'
+    })
+})
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 

@@ -13,4 +13,18 @@
         res.redirect('./index.html');
     });
 
+    router.post('/loginCk',function(req, res){
+        console.log("★★★login Session Check★★★");
+        var params = req.body;
+        let session = req.session;
+        if(session.usrId === params.usrId){
+            res.json({
+                reCd : '01'
+            })
+        }else{
+            res.json({
+                reCd : '02'
+            })
+        }   
+    })
 module.exports = router;
