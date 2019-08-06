@@ -91,9 +91,22 @@ class UserNavbar extends React.Component {
     }
   }
 
+  logoutCallback = (result) =>{
+    if(result.reCd==='01'){
+      console.log("로그아웃 성공");
+      // local storage 파기
+      localStorage.removeItem('usrInfo');
+
+      this.props.history.push('/');
+    }else{
+      console.log('로그아웃 실패');
+    }
+  }
+
   logout = () =>{
-    // local storage 파기
-    
+    // logoutapi 호출
+    let param={};
+    api.apiSend('post','/auth/logout',param,this.logoutCallback);
   }
 
   render() {
@@ -234,7 +247,7 @@ class UserNavbar extends React.Component {
                       <span>설정</span>
                     </DropdownItem>
                     <DropdownItem divider />
-                    <DropdownItem href="#pablo" onClick={e => e.preventDefault()}>
+                    <DropdownItem href="#pablo" onClick={this.logout}>
                       <i className="ni ni-user-run" />
                       <span>Logout</span>
                     </DropdownItem>

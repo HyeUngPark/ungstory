@@ -40,6 +40,13 @@ class Login extends React.Component {
     }
   }
 
+  enterKeyEvent =(e)=>{
+    if(e.key==="Enter"){
+      console.log('Enter Key');
+      this.login();
+    }
+  }
+
   loginCallback = (result) =>{
     if(result.usrToken && result.reCd==="01"){
       console.log('login 성공 \n');
@@ -129,7 +136,9 @@ class Login extends React.Component {
               <div className="text-center text-muted mb-4">
                 <small>Or sign in with credentials</small>
               </div>
-              <Form role="form">
+              <Form role="form"
+                    onKeyPress={e=>this.enterKeyEvent(e)}
+              >
                 <FormGroup className="mb-3">
                   <InputGroup className="input-group-alternative">
                     <InputGroupAddon addonType="prepend">

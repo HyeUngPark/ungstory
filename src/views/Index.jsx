@@ -10,7 +10,6 @@ import {
 } from "reactstrap";
 
 import Header from "components/Headers/Header.jsx";
-import * as api from "api/api";
 
 class Index extends React.Component {
   render() {

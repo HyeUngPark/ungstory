@@ -208,6 +208,23 @@ router.post('/loginCk',function(req, res){
         reCd : '01'
     })
 })
+
+router.post('/logout',function(req,res){
+    let session = req.session;
+    console.log("★★★logout★★★\n",session.usrToken);
+    if(session.usrToken){
+        req.session.destroy();
+        res.clearCookie('sid');
+        res.json({
+            reCd : '01'
+        })
+    }else{
+        res.json({
+            reCd : '02'
+        })
+    }
+});
+
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 

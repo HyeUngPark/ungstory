@@ -17,9 +17,9 @@
         console.log("★★★login Session Check★★★");
         var params = req.body;
         let session = req.session;
-        console.log('params token ', params.usrToken);
-        console.log('session token ', session.usrToken);
-        if(session.usrToken === params.usrToken){
+        // console.log('params token ', params.usrToken);
+        // console.log('session token ', session.usrToken);
+        if(session.usrToken && session.usrToken === params.usrToken){
             res.json({
                 reCd : '01'
             })
