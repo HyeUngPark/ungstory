@@ -9,6 +9,10 @@ var userSchema = require('../schema/userSchema');
 var random = require('../myUtils/randomUtils');
 var mail = require('../myUtils/mailUtils');
 var encrypt = require('../myUtils/encryptUtils');
+let jwt = require("jsonwebtoken");
+
+var env = require('dotenv');
+env.config();
 
 // router.use(express.cookieParser());
 
@@ -154,6 +158,7 @@ router.get('/nameCheck', function(req, res) {
 
 router.post('/login', function(req, res) {
     var params = req.body;
+
     schema.find({
         wkCd: 'USR',
         WkDtCd :'USR',
@@ -173,13 +178,21 @@ router.post('/login', function(req, res) {
             }else{
                 // 성공
                 // res.json({ "reCd": '01'});
+                let token = jwt.sign({
+                    usrId : result[0].subSchema.usrId
+                }
+                ,process.env.tokenKey ,    // 비밀 키
+                {
+                    expiresIn: '5m'    // 유효 시간은 5분
+                });
+                
                 // 로그인 세션처리
                 let session = req.session;
-                session.usrId = result[0].subSchema.usrId;
+                session.usrToken = token;
                 console.log('★★★ 로그인 성공 ★★★\n',session);
                 res.json({
-                    session : session,
-                    "reCd": '01'
+                    "reCd" : '01',
+                    "usrToken" : token
                 });       
             }
         } else {

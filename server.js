@@ -31,18 +31,24 @@ app.use(session({
 }));
 
 app.use(serveStatic(path.join(__dirname, '/build')));
+
+
+
+app.use('/', commonRouter);
 app.use('/auth', authRouter);
 app.use('/user', userRouter);
-app.use('/', commonRouter);
 
 var server = app.listen(port, function() {
-    console.log("★★★ Server Started ★★★");
+  console.log("★★★ Server Started ★★★");
 });
 
+app.use(function(req,res,next){
+  throw new Error(req.url + ' not Found');
+});
 
-app.use((req, res, next) => { // 404 처리 부분
-    console.log("/404\n");
-    res.status(404).redirect('/');
-  });
+app.use((err, req, res, next) => { // 404 처리 부분
+  console.log("★★★ 404 error ★★★\n",err);
+  res.status(404).redirect('/');
+});
  
 module.exports = app;

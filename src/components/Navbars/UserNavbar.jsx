@@ -15,7 +15,8 @@ import {
   Navbar,
   Nav,
   Container,
-  Media
+  Media,
+  NavLink,
 } from "reactstrap";
 
 import PostWriteModal from '../../modals/PostWriteModal';
@@ -30,7 +31,9 @@ class UserNavbar extends React.Component {
   }
   
   componentDidMount(){
-    this.sessionCheck();
+    if(localStorage.getItem('usrInfo')){
+      this.sessionCheck();
+    }
   }
 
   loginCkCallback= (result) =>{
@@ -50,7 +53,7 @@ class UserNavbar extends React.Component {
   sessionCheck =()=>{
     // 세션 체크
     var param={
-      usrId : 'phu8460@naver.com'
+      usrToken : JSON.parse(localStorage.getItem('usrInfo')).usrToken
     }
     api.apiSend('post','loginCk',param,this.loginCkCallback);
   }
@@ -88,6 +91,11 @@ class UserNavbar extends React.Component {
     }
   }
 
+  logout = () =>{
+    // local storage 파기
+    
+  }
+
   render() {
     return (
       <>
@@ -114,7 +122,7 @@ class UserNavbar extends React.Component {
               &nbsp;&nbsp;&nbsp;
 
               <div
-                style={{ display: (this.state.loginYn ? '' : 'none') }}
+                style={{ display: (this.state.loginYn ? 'inherit' : 'none') }}
               >
               {/* 친구추가 알림 */}
               <FormGroup className="mb-0 form-control-cursor" onClick={e=>this.noticeClick(e,1)}>
@@ -155,10 +163,37 @@ class UserNavbar extends React.Component {
               </FormGroup>
               &nbsp;&nbsp;&nbsp;
               </div>
+              {/* 비 회원 */}
+              <div
+                style={{ display: (!this.state.loginYn ? 'inherit' : 'none') }}
+              >
+              <FormGroup className="mb-0 form-control-cursor">
+                <InputGroup className="input-group-alternative">
+                  <InputGroupAddon addonType="prepend">
+                      
+                        <Link
+                        className="input-group-text"
+                              to="/auth/login"
+                              tag={Link}
+                            >
+                            <i className="ni ni-key-25" />
+                            <span
+                              className="nav-link-inner--text"
+                            >
+                              &nbsp;Login&nbsp;
+                            </span>
+                        </Link> 
+                      
+                    </InputGroupAddon>
+                </InputGroup>
+              </FormGroup>
+            </div>
+
+
             </Form>
           {/* 회원/비회원 분기 */}
           <div
-             style={{ display: (this.state.loginYn ? '' : 'none') }}
+             style={{ display: (this.state.loginYn ? 'inherit' : 'none') }}
           >
               <Nav className="align-items-center d-none d-md-flex" navbar>
                 <UncontrolledDropdown nav 
@@ -207,6 +242,7 @@ class UserNavbar extends React.Component {
                 </UncontrolledDropdown>
               </Nav>
             </div>
+        
           </Container>
         </Navbar>
       </>

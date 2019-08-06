@@ -9,15 +9,17 @@
     var mail = require('../myUtils/mailUtils');
 
     router.get('/index',function(req,res){
-        console.log('/index');
-        res.redirect('./index.html');
+        console.log('/user/index');
+        res.redirect('../index.html');
     });
 
     router.post('/loginCk',function(req, res){
         console.log("★★★login Session Check★★★");
         var params = req.body;
         let session = req.session;
-        if(session.usrId === params.usrId){
+        console.log('params token ', params.usrToken);
+        console.log('session token ', session.usrToken);
+        if(session.usrToken === params.usrToken){
             res.json({
                 reCd : '01'
             })

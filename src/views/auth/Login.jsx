@@ -41,8 +41,11 @@ class Login extends React.Component {
   }
 
   loginCallback = (result) =>{
-    if(result.reCd==="01"){
-      console.log('login 성공 \n',this.props);
+    if(result.usrToken && result.reCd==="01"){
+      console.log('login 성공 \n');
+      let usrInfo = JSON.parse(localStorage.getItem('usrInfo'));
+      usrInfo.usrToken = result.usrToken;
+      localStorage.setItem('usrInfo',JSON.stringify(usrInfo));
       this.props.history.push('/');
     }else if(result.reCd ==='02'){
       alert('아이디 또는 비밀번호를 확인해주세요');
@@ -68,7 +71,10 @@ class Login extends React.Component {
     }
     // 자동 로그인 여부 저장
     console.log('로그인 자동 여부 > ',this.state.remberCd);
-    localStorage.setItem('loginRememberCd',this.state.remberCd);
+    let usrInfo = {
+      autoLoginCd : this.state.remberCd
+    }
+    localStorage.setItem('usrInfo',JSON.stringify(usrInfo));
 
     // 로그인 API
     let param={
