@@ -6,6 +6,7 @@ var router = express.Router();
 
 var schema = require('../schema/commonSchema');
 var userSchema = require('../schema/userSchema');
+var loginSchema = require('../schema/loginSchema');
 var random = require('../myUtils/randomUtils');
 var mail = require('../myUtils/mailUtils');
 var encrypt = require('../myUtils/encryptUtils');
@@ -185,15 +186,46 @@ router.post('/login', function(req, res) {
                 {
                     expiresIn: '5m'    // 유효 시간은 5분
                 });
-                
+
                 // 로그인 세션처리
                 let session = req.session;
                 session.usrToken = token;
                 console.log('★★★ 로그인 성공 ★★★\n',session);
-                res.json({
-                    "reCd" : '01',
-                    "usrToken" : token
-                });       
+
+                // 접속 IP
+                var ipAddress;
+                var forwardedIpsStr = req.header('x-forwarded-for');
+                if(forwardedIpsStr){
+                    var forwardedIps = forwardedIpsStr.split(',');
+                    ipAddress = forwardedIps[0];
+                }else{
+                    ipAddress = req.connection.remoteAddress;
+                }
+
+                loginSchema.loginToken = token;
+                loginSchema.usrId = result[0].subSchema.usrId;
+                loginSchema.connIp = ipAddress;
+                loginSchema.loginDate = new Date();
+
+                // 로그인 내역 추가
+                schema.create({
+                    wkCd: 'USR'
+                    ,WkDtCd : "LOGIN"
+                    ,fstWrDt: new Date() // 최초 작성일
+                    ,lstWrDt: new Date() // 최종 작성일
+                    ,subSchema: loginSchema
+                }).then((loginResult)=>{
+                    console.log("★★로그인 내역 등록 성공★★\n",loginResult);
+                    res.json({
+                        "reCd" : '01',
+                        "usrToken" : token
+                    });       
+                }).catch((err)=>{
+                    console.log("★★join fail★★\n",err);
+                    res.json({
+                        reCd: '02'
+                    });
+                });
             }
         } else {
             res.json({ "reCd": "02" })
@@ -213,15 +245,50 @@ router.post('/logout',function(req,res){
     let session = req.session;
     console.log("★★★logout★★★\n",session.usrToken);
     if(session.usrToken){
-        req.session.destroy();
-        res.clearCookie('sid');
-        res.json({
-            reCd : '01'
-        })
-    }else{
-        res.json({
-            reCd : '02'
-        })
+        schema.find({
+            wkCd: 'USR',
+            WkDtCd : 'LOGIN',
+            "subSchema.loginToken": session.usrToken
+        }, function(err, result) {
+            if (err) {
+                console.log('error \n', err);
+                return res.status(500).send("select error >> " + err)
+            }
+            if (result.length > 0) {
+                console.log("★★★ login history search result ★★★ \n",result[0]);
+    
+                var _id = result[0]._id;
+
+                schema.updateOne({
+                    "_id" : _id
+                }
+                , { $set: {
+                    lstWrDt : new Date()
+                    ,'subSchema.logoutDate': new Date() 
+                }}
+                , function(err, result) {
+                    if (err) {
+                        console.log('error \n', err);
+                        return res.status(500).send("select error >> " + err)
+                    }
+                    if (result.n) {
+                        console.log("★★★ result ★★★ \n",result.n);
+                        // 세션파기
+                        req.session.destroy();
+                        res.clearCookie('sid');
+                        res.json({
+                            reCd : '01'
+                        })
+                    } else {
+                        console.log("★★★ fail ★★★ \n",result.n);
+                    }
+                });
+            } else {
+                res.json({
+                    reCd : '02'
+                })
+            }
+        });
     }
 });
 
