@@ -14,16 +14,17 @@
     });
 
     router.post('/loginCk',function(req, res){
-        console.log("★★★login Session Check★★★");
         var params = req.body;
         let session = req.session;
         // console.log('params token ', params.usrToken);
         // console.log('session token ', session.usrToken);
         if(session.usrToken && session.usrToken === params.usrToken){
+            console.log("★★★login Session Check LOGIN★★★");
             res.json({
                 reCd : '01'
             })
         }else{
+            console.log("★★★login Session Check NOT LOGIN★★★");
             res.json({
                 reCd : '02'
             })

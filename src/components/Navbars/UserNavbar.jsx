@@ -25,6 +25,8 @@ import * as api from "api/api";
 class UserNavbar extends React.Component {
   state ={
     loginYn : false
+    ,dropdownOpen:false
+    ,isModalOpen:false
   };
   constructor(props){
     super(props);
@@ -62,10 +64,6 @@ class UserNavbar extends React.Component {
   noticeClick = (e, index) => {
     console.log("noticeClick >> ", index);
   };
-  state={
-    dropdownOpen:false
-    ,isModalOpen:false
-  }
 
   modalOpen =(e)=>{
     console.log("Nav's modalOpen()");
@@ -176,10 +174,10 @@ class UserNavbar extends React.Component {
               </FormGroup>
               &nbsp;&nbsp;&nbsp;
               </div>
-              {/* 비 회원 */}
-              <div
-                style={{ display: (!this.state.loginYn ? 'inherit' : 'none') }}
-              >
+            {/* 비 회원 */}
+            <div
+              style={{ display: (!this.state.loginYn ? 'inherit' : 'none') }}
+            >
               <FormGroup className="mb-0 form-control-cursor">
                 <InputGroup className="input-group-alternative">
                   <InputGroupAddon addonType="prepend">
@@ -201,10 +199,8 @@ class UserNavbar extends React.Component {
                 </InputGroup>
               </FormGroup>
             </div>
-
-
             </Form>
-          {/* 회원/비회원 분기 */}
+          {/* 회원 */}
           <div
              style={{ display: (this.state.loginYn ? 'inherit' : 'none') }}
           >
