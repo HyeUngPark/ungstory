@@ -10,6 +10,7 @@ var loginSchema = require('../schema/loginSchema');
 var random = require('../myUtils/randomUtils');
 var mail = require('../myUtils/mailUtils');
 var encrypt = require('../myUtils/encryptUtils');
+var date = require('../myUtils/dateUtils');
 let jwt = require("jsonwebtoken");
 
 var env = require('dotenv');
@@ -32,8 +33,8 @@ router.post('/join', function(req, res) {
     schema.create({
         wkCd: 'USR'
         ,WkDtCd : "USR"
-        ,fstWrDt: new Date() // 최초 작성일
-        ,lstWrDt: new Date() // 최종 작성일
+        ,fstWrDt: date.getDate() // 최초 작성일
+        ,lstWrDt: date.getDate() // 최종 작성일
         ,subSchema: userSchema
     }).then((result)=>{
         console.log("★★join success★★\n",result);
@@ -205,14 +206,14 @@ router.post('/login', function(req, res) {
                 loginSchema.loginToken = token;
                 loginSchema.usrId = result[0].subSchema.usrId;
                 loginSchema.connIp = ipAddress;
-                loginSchema.loginDate = new Date();
+                loginSchema.loginDate = date.getDate();
 
                 // 로그인 내역 추가
                 schema.create({
                     wkCd: 'USR'
                     ,WkDtCd : "LOGIN"
-                    ,fstWrDt: new Date() // 최초 작성일
-                    ,lstWrDt: new Date() // 최종 작성일
+                    ,fstWrDt: date.getDate() // 최초 작성일
+                    ,lstWrDt: date.getDate() // 최종 작성일
                     ,subSchema: loginSchema
                 }).then((loginResult)=>{
                     console.log("★★로그인 내역 등록 성공★★\n",loginResult);
@@ -263,8 +264,8 @@ router.post('/logout',function(req,res){
                     "_id" : _id
                 }
                 , { $set: {
-                    lstWrDt : new Date()
-                    ,'subSchema.logoutDate': new Date() 
+                    lstWrDt : date.getDate()
+                    ,'subSchema.logoutDate': date.getDate()
                 }}
                 , function(err, result) {
                     if (err) {
