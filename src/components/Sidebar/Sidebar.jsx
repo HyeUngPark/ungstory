@@ -6,11 +6,6 @@ import { PropTypes } from "prop-types";
 
 // reactstrap components
 import {
-  Button,
-  Card,
-  CardHeader,
-  CardBody,
-  CardTitle,
   Collapse,
   DropdownMenu,
   DropdownItem,
@@ -28,23 +23,33 @@ import {
   NavItem,
   NavLink,
   Nav,
-  Progress,
-  Table,
   Container,
   Row,
-  Col
+  Col,
+  Button
 } from "reactstrap";
 
-var ps;
+import PostWriteModal from '../../modals/PostWriteModal';
+import * as api from "api/api";
 
 class Sidebar extends React.Component {
   state = {
     collapseOpen: false
+    ,isModalOpen : false
+    ,dropdownOpen : false
+    ,loginYn : false
   };
   constructor(props) {
     super(props);
     this.activeRoute.bind(this);
   }
+
+  componentDidMount(){
+    if(localStorage.getItem('usrInfo')){
+      this.sessionCheck();
+    }
+  }
+
   // verifies if routeName is the one active (in browser input)
   activeRoute(routeName) {
     return this.props.location.pathname.indexOf(routeName) > -1 ? "active" : "";
@@ -79,6 +84,72 @@ class Sidebar extends React.Component {
       );
     });
   };
+  
+  modalOpen =(e)=>{
+    console.log("Nav's modalOpen()");
+    this.setState(prevState=>({
+      isModalOpen:!prevState.isModalOpen
+    }));
+  }
+  
+  modalClose =(e)=>{
+    console.log("Nav's, modalClose()");
+    this.setState(prevState => ({
+      isModalOpen: !prevState.isModalOpen
+      ,dropdownOpen: true
+    }));
+  }
+
+  loginCkCallback= (result) =>{
+    if(result.reCd==="01"){
+      console.log('login 상태 \n');
+      this.setState({
+        loginYn : true
+      });
+    }else if(result.reCd ==='02'){
+      console.log('비 login 상태 \n');
+      this.setState({
+        loginYn : false
+      });
+    }
+  }
+
+  sessionCheck =()=>{
+    // 세션 체크
+    console.log('sidebar session check');
+    var param={
+      usrToken : JSON.parse(localStorage.getItem('usrInfo')).usrToken
+    }
+    api.apiSend('post','loginCk',param,this.loginCkCallback);
+  }
+
+  toggle = (e) =>{
+    console.log("Nav's toggle()");
+    if (!this.state.isModalOpen){
+      this.setState(prevState => ({
+        dropdownOpen: !prevState.dropdownOpen
+      }));
+    }
+  }
+
+  logoutCallback = (result) =>{
+    if(result.reCd==='01'){
+      console.log("로그아웃 성공");
+      // local storage 파기
+      localStorage.removeItem('usrInfo');
+
+      this.props.history.push('/');
+    }else{
+      console.log('로그아웃 실패');
+    }
+  }
+
+  logout = () =>{
+    // logoutapi 호출
+    let param={};
+    api.apiSend('post','/auth/logout',param,this.logoutCallback);
+  }
+
   render() {
     const { bgColor, routes, logo } = this.props;
     let navbarBrandProps;
@@ -120,6 +191,93 @@ class Sidebar extends React.Component {
           ) : null}
           {/* User */}
           <Nav className="align-items-center d-md-none">
+ 
+          <Form
+          
+           >
+          {/* 비 회원 */}
+          <div
+            style={{ display: (!this.state.loginYn ? 'inherit' : 'none') }}
+          >
+              <FormGroup className="mb-0 form-control-cursor">
+                <InputGroup className="input-group-alternative">
+                  <InputGroupAddon addonType="prepend">
+                      <Link
+                        // className="input-group-text"
+                              to="/auth/login"
+                              tag={Link}
+                            >
+                            <Button
+                              color="primary" 
+                              type="button"
+                            >
+                              <i className="ni ni-key-25" />
+                              <span
+                                className="nav-link-inner--text"
+                              >
+                                Login
+                              </span>  
+                            </Button>
+                        </Link> 
+                    </InputGroupAddon>
+                </InputGroup>
+              </FormGroup>
+            </div>
+            </Form>
+
+          {/* 회원 */}
+          <div
+             style={{ display: (this.state.loginYn ? 'inherit' : 'none') }}
+          >
+              {/* <Nav className="align-items-center d-none d-md-flex" navbar> */}
+                <UncontrolledDropdown nav 
+                isOpen={this.state.dropdownOpen} toggle={this.toggle}
+                >
+                  <DropdownToggle className="pr-0" nav>
+                    <Media className="align-items-center">
+                      <span className="avatar avatar-sm rounded-circle">
+                        <img
+                          alt="..."
+                          src={require("assets/img/theme/team-4-800x800.jpg")}
+                        />
+                      </span>
+                      <Media className="ml-2 d-none d-lg-block">
+                        <span className="mb-0 text-sm font-weight-bold">
+                          박혜웅
+                        </span>
+                      </Media>
+                    </Media>
+                  </DropdownToggle>
+                  <DropdownMenu className="dropdown-menu-arrow" right>
+                    <DropdownItem className="noti-title" header tag="div">
+                      <h6 className="text-overflow m-0">Welcome!</h6>
+                    </DropdownItem>
+                    <a href="javascript:void(0)" onClick={this.modalOpen}>
+                      <PostWriteModal callbackFromParent={this.modalClose}/>
+                    </a>
+                    <DropdownItem to="/admin/user-profile" tag={Link}>
+                        <i className="ni ni-single-02" />
+                        <span>내 프로필</span>
+                    </DropdownItem>
+                    <DropdownItem to="/admin/user-profile" tag={Link}>
+                      <i className="ni ni-support-16" />
+                      <span>Support</span>
+                    </DropdownItem>
+                    <DropdownItem to="/admin/user-profile" tag={Link}>
+                      <i className="ni ni-settings-gear-65" />
+                      <span>설정</span>
+                    </DropdownItem>
+                    <DropdownItem divider />
+                    <DropdownItem href="#" onClick={this.logout}>
+                      <i className="ni ni-user-run" />
+                      <span>Logout</span>
+                    </DropdownItem>
+                  </DropdownMenu>
+                </UncontrolledDropdown>
+              {/* </Nav> */}
+            </div>
+          {/* 
+          
             <UncontrolledDropdown nav>
               <DropdownToggle nav className="nav-link-icon">
                 <i className="ni ni-bell-55" />
@@ -135,17 +293,26 @@ class Sidebar extends React.Component {
                 <DropdownItem>Something else here</DropdownItem>
               </DropdownMenu>
             </UncontrolledDropdown>
+          
+          */}
             <UncontrolledDropdown nav>
-              <DropdownToggle nav>
+{/*
+            <DropdownToggle nav>
                 <Media className="align-items-center">
                   <span className="avatar avatar-sm rounded-circle">
+                    <h1>여기!!</h1>
                     <img
                       alt="..."
                       src={require("assets/img/theme/team-1-800x800.jpg")}
                     />
                   </span>
                 </Media>
-              </DropdownToggle>
+              </DropdownToggle> 
+            */}
+
+              {/* 
+                Sidebar menu
+              */}
               <DropdownMenu className="dropdown-menu-arrow" right>
                 <DropdownItem className="noti-title" header tag="div">
                   <h6 className="text-overflow m-0">Welcome!</h6>
@@ -173,8 +340,8 @@ class Sidebar extends React.Component {
                 </DropdownItem>
               </DropdownMenu>
             </UncontrolledDropdown>
-          </Nav>
-          {/* Collapse */}
+          </Nav> 
+           {/* Collapse */}
           <Collapse navbar isOpen={this.state.collapseOpen}>
             {/* Collapse header */}
             <div className="navbar-collapse-header d-md-none">
