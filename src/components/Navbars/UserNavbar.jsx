@@ -25,6 +25,7 @@ import * as api from "api/api";
 class UserNavbar extends React.Component {
   state ={
     loginYn : false
+    ,usrName : ''
     ,dropdownOpen:false
     ,isModalOpen:false
   };
@@ -44,6 +45,13 @@ class UserNavbar extends React.Component {
         this.setState({
           loginYn : true
         });
+
+        let usrInfo = JSON.parse(localStorage.getItem('usrInfo'));
+        if(usrInfo){
+          this.setState({
+            usrName : usrInfo.usrName
+          });
+        }
       }else if(result.reCd ==='02'){
         console.log('비 login 상태 \n',this.state.loginYn);
         this.setState({
@@ -218,7 +226,7 @@ class UserNavbar extends React.Component {
                       </span>
                       <Media className="ml-2 d-none d-lg-block">
                         <span className="mb-0 text-sm font-weight-bold">
-                          박혜웅
+                          {this.state.usrName} 님
                         </span>
                       </Media>
                     </Media>

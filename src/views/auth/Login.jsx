@@ -52,6 +52,7 @@ class Login extends React.Component {
       console.log('login 성공 \n');
       let usrInfo = JSON.parse(localStorage.getItem('usrInfo'));
       usrInfo.usrToken = result.usrToken;
+      usrInfo.usrName = result.usrInfo.usrName;
       localStorage.setItem('usrInfo',JSON.stringify(usrInfo));
       this.props.history.push('/');
     }else if(result.reCd ==='02'){

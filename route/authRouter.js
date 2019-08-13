@@ -219,7 +219,10 @@ router.post('/login', function(req, res) {
                     console.log("★★로그인 내역 등록 성공★★\n",loginResult);
                     res.json({
                         "reCd" : '01',
-                        "usrToken" : token
+                        "usrToken" : token,
+                        "usrInfo" :{
+                            "usrName" : result[0].subSchema.usrName
+                        }
                     });       
                 }).catch((err)=>{
                     console.log("★★join fail★★\n",err);
@@ -237,9 +240,16 @@ router.post('/login', function(req, res) {
 router.post('/loginCk',function(req, res){
     var params = req.body;
     console.log(session.usrId);
-    res.json({
-        reCd : '01'
-    })
+
+    if(session.usrToken && session.usrToken === params.usrToken){
+        res.json({
+            reCd : '01'
+        })
+    }else{
+        res.json({
+            reCd : '02'
+        })
+    }
 })
 
 router.post('/logout',function(req,res){
