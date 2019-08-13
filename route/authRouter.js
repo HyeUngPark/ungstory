@@ -283,7 +283,7 @@ router.post('/logout',function(req,res){
                         return res.status(500).send("select error >> " + err)
                     }
                     if (result.n) {
-                        console.log("★★★ result ★★★ \n",result.n);
+                        console.log("★★★ 로그아웃 성공 result ★★★ \n",result.n);
                         // 세션파기
                         req.session.destroy();
                         res.clearCookie('sid');
