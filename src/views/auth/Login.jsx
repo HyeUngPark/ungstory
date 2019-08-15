@@ -16,6 +16,7 @@ import {
   Col
 } from "reactstrap";
 
+import PwFindModal from '../../modals/auth/PwFindModal';
 import * as api from "api/api";
 class Login extends React.Component {
   state ={
@@ -23,6 +24,7 @@ class Login extends React.Component {
     ,usrPw : ''
     ,remberCd : false
     ,loginYn : false
+    ,isModalOpen : false
   };
   valChange = (e,sep) =>{
     if(sep === 'e'){
@@ -91,6 +93,20 @@ class Login extends React.Component {
     };
     api.apiSend('post','login',param,this.loginCallback);
     // authActions.login(param);
+  }
+
+  modalOpen =(e)=>{
+    console.log("PwFind modalOpen()");
+    this.setState(prevState=>({
+      isModalOpen:!prevState.isModalOpen
+    }));
+  }
+  
+  modalClose =(e)=>{
+    console.log("PwFind modalClose()");
+    this.setState(prevState => ({
+        isModalOpen: !prevState.isModalOpen
+    }));
   }
 
   render() {
@@ -199,13 +215,14 @@ class Login extends React.Component {
           </Card>
           <Row className="mt-3">
             <Col xs="6">
-              <a
+            <PwFindModal callbackFromParent={this.modalClose}/>
+              {/* <a
                 className="text-light"
                 href="#pablo"
                 onClick={e => e.preventDefault()}
               >
-                <small>아이디/비밀번호 찾기</small>
-              </a>
+                <small>비밀번호 찾기</small>
+              </a> */}
             </Col>
             <Col className="text-right" xs="6">
               <a

@@ -20,7 +20,7 @@ import {
   Button
 } from "reactstrap";
 
-import PostWriteModal from '../../modals/PostWriteModal';
+import PostWriteModal from '../../modals/user/PostWriteModal';
 import * as api from "api/api";
 
 class LoginProfile extends React.Component {

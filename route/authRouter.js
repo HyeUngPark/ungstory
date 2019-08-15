@@ -303,40 +303,14 @@ router.post('/logout',function(req,res){
     }
 });
 
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-
-
-router.post('/idSearch',function(req,res){
-    var params = req.query;
-    console.log('/idSearch() \n',params);
-    schema.find({
-        workSection: 'USR',
-        "subSchema.mem_phone": params.phoneNumber,
-        "subSchema.mem_name": params.name
-    }, function(err, result) {
-        if (err) {
-            console.log('error \n', err);
-            return res.status(500).send("select error >> " + err)
-        }
-        if (result.length > 0) {
-            console.log("★★★ result ★★★ \n",result[0]);
-            res.json({ "returnCode": '01', "loginId": result[0].subSchema.mem_id });
-        } else {
-            res.json({ "returnCode": "02" })
-        }
-    });
-});
-
-router.post('/pwSearch',function(req,res){
-    var params = req.query;
-    var phoneNubmer = params.phoneNumber;
-    var loginId = params.loginId;
+router.post('/pwFind',function(req,res){
+    var params = req.body;
+    var usrId = params.usrId;
     var _id;
     schema.find({
-        workSection: 'USR',
-        "subSchema.mem_id": loginId,
-        "subSchema.mem_phone": phoneNubmer
+        wkCd: 'USR',
+        WkDtCd : 'USR',
+        "subSchema.usrId": usrId
     }, function(err, result) {
         if (err) {
             console.log('error \n', err);
@@ -345,20 +319,22 @@ router.post('/pwSearch',function(req,res){
         console.log(result);
         if (result.length > 0) {
             _id = result[0]._id;
-            var newPw = random.getRandom();
+            var newPw = random.getRandomPw();
             console.log('pwSearch || ',newPw);
             
-            let emailParam = {
-                toEmail : loginId
-                ,subject  : 'MyRentCar 비밀번호 초기화'
-                ,text : '초기화 된 비밀번호는 '+newPw+' 입니다. 로그인 후 변경하시기 바랍니다.'
+            let mailParam={
+                toEmail : usrId
+                ,subject  : '웅스토리 비밀번호 초기화'
+                ,text: "<html><body>"
+                    +'초기화 된 비밀번호는 '+newPw+' 입니다. 로그인 후 변경하시기 바랍니다.'
+                    +"</body></html>"
             };
-            mail.sendGmail(emailParam);
+            mail.sendGmail(mailParam);
             // 비밀번호 업데이트
             schema.updateOne({
                 "_id" : _id
             }
-            , { $set: {'subSchema.mem_pw': newPw } }
+            , { $set: {'subSchema.usrPwd': encrypt.getEncrypt(newPw) } }
             , function(err, result) {
                 if (err) {
                     console.log('error \n', err);
@@ -366,48 +342,17 @@ router.post('/pwSearch',function(req,res){
                 }
                 if (result.n) {
                     console.log("★★★ result ★★★ \n",result.n);
-                    // res.json({ "returnCode": '01', "loginId": result[0].subSchema.mem_id });
+                    res.json({ "reCd": '01'});
                 } else {
                     console.log("★★★ fail ★★★ \n",result.n);
-                    // res.json({ "returnCode": "02" })
+                    res.json({ "reCd": "02" })
                 }
             });
-
-            res.json({ "returnCode": '01' });
         } else {
-            res.json({ "returnCode": "02" })
+            res.json({ "reCd": "03" });
         }
     });
 });
 
-/*
-router.get('/pwChange',function(req,res){
-    // let parms = req.query;
-    // let loginId = parms.id;
-    // let phoneNumber = parms.phoneNumbmer;
-    var newPw = random.getRandom();
-    console.log('/pwChange');
-
-    schema.updateOne({
-        workSection: 'USR'
-        ,"subSchema.mem_id": "*"
-        ,"subSchema.mem_phone": '*'
-    }
-    , { $set: {'subSchema.mem_pw': newPw } }
-    , function(err, result) {
-        if (err) {
-            console.log('error \n', err);
-            return res.status(500).send("select error >> " + err)
-        }
-        if (result.n) {
-            console.log("★★★ result ★★★ \n",result.n);
-            // res.json({ "returnCode": '01', "loginId": result[0].subSchema.mem_id });
-        } else {
-            console.log("★★★ fail ★★★ \n",result.n);
-            // res.json({ "returnCode": "02" })
-        }
-    });
-});
-*/
 
 module.exports = router;
