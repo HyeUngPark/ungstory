@@ -74,6 +74,13 @@ class LoginProfile extends React.Component {
           this.setState({
             loginYn : false
           });
+        }else if(result.reCd === '03'){
+            let usrInfo = JSON.parse(localStorage.getItem('usrInfo'));
+            usrInfo.usrToken = result.usrToken;
+            localStorage.setItem('usrInfo',JSON.stringify(usrInfo));
+            this.sessionCheck();
+        }else if(result.reCd === '04'){
+            this.logout();
         }
       }
   
@@ -81,6 +88,8 @@ class LoginProfile extends React.Component {
       // 세션 체크
       var param={
         usrToken : JSON.parse(localStorage.getItem('usrInfo')).usrToken
+        ,usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
+        ,autoLoginCd : JSON.parse(localStorage.getItem('usrInfo')).autoLoginCd
       }
       api.apiSend('post','loginCk',param,this.loginCkCallback);
     }
@@ -100,7 +109,9 @@ class LoginProfile extends React.Component {
     
     logout = () =>{
         // logoutapi 호출
-        let param={};
+        let param={
+            usrToken : JSON.parse(localStorage.getItem('usrInfo')).usrToken
+        };
         api.apiSend('post','/auth/logout',param,this.logoutCallback);
     }
 

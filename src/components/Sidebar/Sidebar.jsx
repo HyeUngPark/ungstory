@@ -42,8 +42,30 @@ class Sidebar extends React.Component {
   constructor(props) {
     super(props);
     this.activeRoute.bind(this);
+    // this.onUnload = this.onUnload.bind(this); // if you need to bind callback to this
+  }
+/*
+  onUnload(event) { // the method that will be used for both add and remove event
+    event.preventDefault();  
+    event.returnValue = "test";
+    console.log('self.top : ',window.screenTop);
+    console.log('(document.readyState : ', document.readyState);
+      if(localStorage.getItem('usrInfo')){
+        this.logout();
+      }
+  }
+  
+  componentDidMount() {
+    //  window.addEventListener("onunload", this.onUnload)
+     window.addEventListener("beforeunload", this.onUnload);
   }
 
+  componentWillUnmount() {
+    // window.removeEventListener("onunload", this.onUnload)
+    window.removeEventListener("beforeunload", this.onUnload);
+  }
+
+*/
   // verifies if routeName is the one active (in browser input)
   activeRoute(routeName) {
     return this.props.location.pathname.indexOf(routeName) > -1 ? "active" : "";
@@ -60,6 +82,7 @@ class Sidebar extends React.Component {
       collapseOpen: false
     });
   };
+
   // creates the links that appear in the left menu / Sidebar
   createLinks = routes => {
     return routes.map((prop, key) => {
