@@ -7,6 +7,10 @@
     var userSchema = require('../schema/userSchema');
     var random = require('../myUtils/randomUtils');
     var mail = require('../myUtils/mailUtils');
+    var jwt = require('jsonwebtoken');
+
+    var env = require('dotenv');
+    env.config();
 
     router.get('/index',function(req,res){
         console.log('/user/index');
@@ -14,6 +18,19 @@
     });
 
     router.post('/loginCk',function(req, res){
+        let params = req.body;
+        if(jwt.verify(params.usrToken,process.env.tokenKey)){
+            console.log('★★★ LOGIN CHECK SUCCESS ★★★');
+            res.json({
+                reCd : '01'
+            })
+        }else{
+            console.log('★★★ LOGIN CHECK FAIL ★★★');
+            res.json({
+                reCd : '02'
+            })
+        }
+        /*
         var params = req.body;
         let session = req.session;
         // console.log('params token ', params.usrToken);
@@ -29,5 +46,6 @@
                 reCd : '02'
             })
         }   
+*/
     })
 module.exports = router;

@@ -185,13 +185,13 @@ router.post('/login', function(req, res) {
                 }
                 ,process.env.tokenKey ,    // 비밀 키
                 {
-                    expiresIn: '5m'    // 유효 시간은 5분
+                    // expiresIn: '5m'    // 유효 시간은 5분
                 });
 
                 // 로그인 세션처리
-                let session = req.session;
-                session.usrToken = token;
-                console.log('★★★ 로그인 성공 ★★★\n',session);
+                // let session = req.session;
+                // session.usrToken = token;
+                // console.log('★★★ 로그인 성공 ★★★\n',session);
 
                 // 접속 IP
                 var ipAddress;
@@ -239,13 +239,14 @@ router.post('/login', function(req, res) {
 
 router.post('/loginCk',function(req, res){
     var params = req.body;
-    console.log(session.usrId);
-
-    if(session.usrToken && session.usrToken === params.usrToken){
+    // if(session.usrToken && session.usrToken === params.usrToken){
+    if(jwt.verify(params.usrToken,process.env.tokenKey)){
+        console.log('★★★ LOGIN CHECK SUCCESS ★★★');
         res.json({
             reCd : '01'
         })
     }else{
+        console.log('★★★ LOGIN CHECK FAIL ★★★');
         res.json({
             reCd : '02'
         })
