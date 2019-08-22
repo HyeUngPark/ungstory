@@ -1,10 +1,16 @@
 import React from 'react';
 import { Button, Modal, ModalBody, Row, Col} from 'reactstrap';
 
+import * as api from "api/api";
+
 export default class PostWriteModal extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { modal: false,tag: []};
+    this.state = { 
+      modal: false
+      , tag: []
+      , postImgs : []
+    };
     // this.toggle = this.toggle.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
     this.modalClose = this.props.callbackFromParent;
@@ -48,10 +54,35 @@ export default class PostWriteModal extends React.Component {
   cancel=()=>{
     this.setState({
       tag:[]
+      ,postImgs :[]
     })
     // this.modalOpen();
     this.modalClose();
     this.toggle();
+  }
+
+  imgChangeCallback = (result)=>{
+    if(result.reCd === '01' && result.tempImg){
+      console.log('이미지 인코드 성공\n',result.tempImg);
+      this.setState({
+        postImgs : result.tempImg
+      });
+    }
+  }
+
+  imgChange =(e)=>{
+    if(e.target.files.length<5){
+      // 이미지 서버 전송 후 리턴
+    let param={
+      tempImg : e.target.files
+    };
+    console.log(e.target.files);
+    api.apiSend('post','tempImgs',param,this.imgChangeCallback);
+
+    }else{
+      alert("이미지는 5개까지만 업로드 가능합니다.");
+    }
+
   }
 
   render() {
@@ -60,6 +91,17 @@ export default class PostWriteModal extends React.Component {
                         <a href="javascript:void(0)" className="form-control-cursor">
                           #{tag}
                           <span className="form-tag-del-btn" value={index} onClick={this.removeTag}>X</span>
+                        </a>
+                      </li>)
+    );
+// const Example = ({ data }) => <img src={`data:image/jpeg;base64,${data}`} />
+
+    const imgList = this.state.postImgs.map(
+      (img,index) => (<li className="form-tag form-tag-li" key={index}>
+                        <a href="javascript:void(0)" className="form-control-cursor">
+                          {/* <img src={img} /> */}
+                          <img src={img + ':image/jpeg;base64,${'+img+'}'}/>
+                          <span className="form-tag-del-btn" value={index} onClick={this.removeimg}>X</span>
                         </a>
                       </li>)
     );
@@ -91,10 +133,31 @@ export default class PostWriteModal extends React.Component {
               <br/>
               <Row lg="12">
                 <Col lg="3">
+                  <form
+                    encType="multipart/form-data"
+                  >
                   <i className=" ni ni-image align-items-center">
-                    <label htmlFor="PostImg">&nbsp;이미지 </label>
+                    <label 
+                      className ="form-control-cursor"
+                      htmlFor="PostImg"
+                    >
+                      &nbsp;이미지 
+                    </label>
                   </i>
-                  <input multiple="multiple"  type="file" name="filename[]" id="PostImg" className="form-display-none"/>
+                  <input type="file" 
+                         className="form-display-none"
+                         name="filename[]" 
+                         id="PostImg" 
+                         multiple
+                        //  value ={this.state.postImgs}
+                         onChange = {e=>{this.imgChange(e)}}
+                    />
+                  </form>
+                  <Col lg="12">
+                    <ul id="img-list" className="form-tag-ul">
+                        {imgList}
+                    </ul>
+                  </Col>
                 </Col>
                 <Col lg="3 text-right">
                   <span>
