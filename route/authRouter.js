@@ -185,7 +185,7 @@ router.post('/login', function(req, res) {
                 }
                 ,process.env.tokenKey ,    // 비밀 키
                 {
-                    expiresIn: '1m'    // 유효 시간은 5분
+                    expiresIn: '1h'    // 유효 시간은 5분
                 });
 
                 // 로그인 세션처리

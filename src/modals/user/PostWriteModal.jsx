@@ -71,14 +71,20 @@ export default class PostWriteModal extends React.Component {
   }
 
   imgChange =(e)=>{
-    if(e.target.files.length<5){
-      // 이미지 서버 전송 후 리턴
-    let param={
-      tempImg : e.target.files
-    };
-    console.log(e.target.files);
-    api.apiSend('post','tempImgs',param,this.imgChangeCallback);
-
+    if(e.target.files.length<6){
+      for(var i=0; i<e.target.files.length; i++){
+        var file = e.target.files[i];
+        var reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onloadend = function (file) {
+          console.log('읽은 파일 2',file.target.result);
+          var tempList = this.state.postImgs;
+            tempList.push(file.target.result);
+            this.setState({
+              postImgs : tempList
+            });
+          }.bind(this);
+      }
     }else{
       alert("이미지는 5개까지만 업로드 가능합니다.");
     }
@@ -95,16 +101,22 @@ export default class PostWriteModal extends React.Component {
                       </li>)
     );
 // const Example = ({ data }) => <img src={`data:image/jpeg;base64,${data}`} />
-
     const imgList = this.state.postImgs.map(
       (img,index) => (<li className="form-tag form-tag-li" key={index}>
                         <a href="javascript:void(0)" className="form-control-cursor">
-                          {/* <img src={img} /> */}
-                          <img src={img + ':image/jpeg;base64,${'+img+'}'}/>
+                          <img src={img} 
+                              style={{
+                                width: "100px",
+                                height: "100px",
+                              }}
+                            />
+                          {/* <img src={img + ':image/jpeg;base64,${'+img+'}'}/> */}
+
                           <span className="form-tag-del-btn" value={index} onClick={this.removeimg}>X</span>
                         </a>
                       </li>)
     );
+
     return (
         <div>
           <div onClick={this.toggle} className="dropdown-item form-control-cursor"><i className="ni ni-send" />게시글 작성</div>
@@ -150,7 +162,7 @@ export default class PostWriteModal extends React.Component {
                          id="PostImg" 
                          multiple
                         //  value ={this.state.postImgs}
-                         onChange = {e=>{this.imgChange(e)}}
+                         onChange = {this.imgChange}
                     />
                   </form>
                   <Col lg="12">

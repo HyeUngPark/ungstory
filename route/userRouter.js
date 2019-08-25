@@ -7,6 +7,7 @@
     var jwt = require('jsonwebtoken');
     var env = require('dotenv');
     var date = require('../myUtils/dateUtils');
+    var FileReader = require('filereader');
 
     env.config();
 
@@ -101,39 +102,6 @@
             })
         }   
 */
-    })
-
-    router.post('/tempImgs',function(req, res){
-        var params = req.body;
-        console.log(params.tempImg);
-        var tt = params.tempImg;
-        console.log(Object.values(tt));
-
-        var tempImgs = Object.values(params.tempImg);
-        // var tempImgs = [];
-        // tempImgs = params.tempImg;
-        var encodeImgs = [];
-
-        console.log('파일 \n',tempImgs);
-        var test = new Buffer(tempImgs[0].toString(), 'base64').toString('ascii');
-        console.log(test);
-
-        if(tempImgs){
-            // 바이너리 파일로 변환
-            for(var i=0; i<tempImgs.length; i++){
-                encodeImgs.push(new Buffer(tempImgs[i].toString(), 'base64').toString('ascii'));
-            }
-            console.log('변환 후 ',encodeImgs);
-            res.json({
-                reCd : '01'
-                ,tempImg : encodeImgs
-            });
-        }else{
-            res.json({
-                reCd : '02'
-            });
-        }
-
     });
 
 module.exports = router;
