@@ -61,15 +61,6 @@ export default class PostWriteModal extends React.Component {
     this.toggle();
   }
 
-  imgChangeCallback = (result)=>{
-    if(result.reCd === '01' && result.tempImg){
-      console.log('이미지 인코드 성공\n',result.tempImg);
-      this.setState({
-        postImgs : result.tempImg
-      });
-    }
-  }
-
   imgChange =(e)=>{
     if(e.target.files.length<6){
       for(var i=0; i<e.target.files.length; i++){
@@ -77,18 +68,43 @@ export default class PostWriteModal extends React.Component {
         var reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onloadend = function (file) {
-          console.log('읽은 파일 2',file.target.result);
           var tempList = this.state.postImgs;
             tempList.push(file.target.result);
             this.setState({
               postImgs : tempList
             });
+            e.preventDefault();
           }.bind(this);
-      }
+        }
     }else{
       alert("이미지는 5개까지만 업로드 가능합니다.");
+      return;
     }
+  }
 
+  removeImg = (idx,e) =>{
+    console.log("removeImg >> \n",e.target,'\n',idx);
+
+    if(e.target){
+      // const idx =  e.target.attributes.value.value * 1;
+      const list = this.state.postImgs;
+      if (idx > -1) list.splice(idx, 1)
+      this.setState({
+        postImgs : list
+      });
+    }
+  }
+
+  imgView =(idx,e)=>{
+    console.log("imgView >> \n",e.target,'\n',idx);
+    
+    if(e.target){
+      // const idx =  e.target.attributes.value.value * 1;
+      const list = this.state.postImgs;
+      if (idx > -1){
+        window.open('about:blank',list[idx]);
+      }
+    }
   }
 
   render() {
@@ -103,17 +119,28 @@ export default class PostWriteModal extends React.Component {
 // const Example = ({ data }) => <img src={`data:image/jpeg;base64,${data}`} />
     const imgList = this.state.postImgs.map(
       (img,index) => (<li className="form-tag form-tag-li" key={index}>
-                        <a href="javascript:void(0)" className="form-control-cursor">
+                        <a href="javascript:void(0)" 
+                           className="form-control-cursor"
+                           style={{
+                            //  position: "absolute"
+                           }}
+                           onClick={e=>{this.imgView(index,e)}}
+                        >
                           <img src={img} 
                               style={{
                                 width: "100px",
                                 height: "100px",
                               }}
+                              value={index} 
                             />
                           {/* <img src={img + ':image/jpeg;base64,${'+img+'}'}/> */}
-
-                          <span className="form-tag-del-btn" value={index} onClick={this.removeimg}>X</span>
                         </a>
+                        <span className="form-tag-del-btn form-control-cursor" 
+                              value={index} 
+                              onClick={e=>{this.removeImg(index,e)}}
+                        >
+                          X
+                        </span>
                       </li>)
     );
 
@@ -126,7 +153,10 @@ export default class PostWriteModal extends React.Component {
               this.cancel();
             }
           }}>
-          <form className="card shadow" onSubmit={this.handleSubmit}>
+          <form className="card shadow" 
+                onSubmit={this.handleSubmit}
+                encType="multipart/form-data"
+          >
             {/* <ModalHeader><h3>게시글 작성</h3></ModalHeader> */}
             <ModalBody>
               <Row>
@@ -145,9 +175,10 @@ export default class PostWriteModal extends React.Component {
               <br/>
               <Row lg="12">
                 <Col lg="3">
-                  <form
+                  {/* <form
                     encType="multipart/form-data"
-                  >
+                    onSubmit={this.handleSubmit}
+                  > */}
                   <i className=" ni ni-image align-items-center">
                     <label 
                       className ="form-control-cursor"
@@ -162,23 +193,30 @@ export default class PostWriteModal extends React.Component {
                          id="PostImg" 
                          multiple
                         //  value ={this.state.postImgs}
+                         onClick={e=>{this.setState({
+                           postImgs : []
+                         })}}
                          onChange = {this.imgChange}
                     />
-                  </form>
-                  <Col lg="12">
-                    <ul id="img-list" className="form-tag-ul">
-                        {imgList}
-                    </ul>
-                  </Col>
+                  {/* </form> */}
                 </Col>
-                <Col lg="3 text-right">
+              </Row>
+                <Row lg="12">
+                  <Col lg="12">
+                      <ul id="img-list" className="form-tag-ul">
+                          {imgList}
+                      </ul>
+                  </Col>
+                </Row>
+                <Row lg="12">
+                <Col lg="4 text-right">
                   <span>
                     <i className=" ni ni-tag align-items-center" >
                       <label htmlFor="PostImg">&nbsp;해시태그 </label>
                     </i>
                   </span>
                 </Col>
-                <Col lg="6" style={{paddingLeft:"0"}}>
+                <Col lg="8" style={{paddingLeft:"0"}}>
                   <span>
                     <input className="form-control " 
                            id="PostHashTag" 
@@ -187,12 +225,14 @@ export default class PostWriteModal extends React.Component {
                            onKeyPress={this.addTag}/>
                   </span>
                 </Col>
-              </Row>
-                <Col lg="12">
-                    <ul id="tag-list" className="form-tag-ul">
-                        {tagList}
-                    </ul>
-                </Col>
+                </Row>
+                <Row lg="12">
+                  <Col lg="12">
+                      <ul id="tag-list" className="form-tag-ul">
+                          {tagList}
+                      </ul>
+                  </Col>
+                </Row>
               <br/>
               <Row>
                 <Col lg="7">

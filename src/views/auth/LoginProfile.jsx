@@ -33,7 +33,6 @@ class LoginProfile extends React.Component {
     }
 
     toggle = (e) =>{
-        console.log("Nav's toggle()");
         if (!this.state.isModalOpen){
           this.setState(prevState => ({
             dropdownOpen: !prevState.dropdownOpen
@@ -41,15 +40,15 @@ class LoginProfile extends React.Component {
         }
     }
 
-    modalOpen =(e)=>{
-        console.log("Nav's modalOpen()");
-        this.setState(prevState=>({
-          isModalOpen:!prevState.isModalOpen
-        }));
+    modalOpen =(cd)=>{
+        if(!this.state.isModalOpen && cd ==='m'){
+            this.setState(prevState=>({
+              isModalOpen:!prevState.isModalOpen
+            }));
+        }
       }
       
     modalClose =(e)=>{
-    console.log("Nav's, modalClose()");
     this.setState(prevState => ({
         isModalOpen: !prevState.isModalOpen
         ,dropdownOpen: true
@@ -157,7 +156,7 @@ class LoginProfile extends React.Component {
                         <DropdownItem className="noti-title" header tag="div">
                             <h6 className="text-overflow m-0">Welcome!</h6>
                         </DropdownItem>
-                        <a href="javascript:void(0)" onClick={this.modalOpen}>
+                        <a href="javascript:void(0)" onClick={e=>{this.modalOpen('m')}}>
                             <PostWriteModal callbackFromParent={this.modalClose}/>
                         </a>
                         <DropdownItem to="/admin/user-profile" tag={Link}>
@@ -213,7 +212,7 @@ class LoginProfile extends React.Component {
                     <DropdownItem className="noti-title" header tag="div">
                         <h6 className="text-overflow m-0">Welcome!</h6>
                     </DropdownItem>
-                    <a href="javascript:void(0)" onClick={this.modalOpen}>
+                    <a href="javascript:void(0)" onClick={e=>{this.modalOpen('m')}}>
                         <PostWriteModal callbackFromParent={this.modalClose}/>
                     </a>
                     <DropdownItem to="/admin/user-profile" tag={Link}>
