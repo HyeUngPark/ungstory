@@ -35,6 +35,7 @@
                     // token 재생성
                     let newToken = jwt.sign({
                         usrName : params.usrName
+                        ,mkDate : new Date()
                     },process.env.tokenKey ,    // 비밀 키
                     {expiresIn: '1h' });
                     
