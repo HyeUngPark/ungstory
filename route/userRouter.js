@@ -7,7 +7,6 @@
     var jwt = require('jsonwebtoken');
     var env = require('dotenv');
     var date = require('../myUtils/dateUtils');
-    var FileReader = require('filereader');
 
     env.config();
 
