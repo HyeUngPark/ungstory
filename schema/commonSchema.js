@@ -8,7 +8,7 @@ var schema = new mongoose.Schema({
         type: String,
         required: true
     }
-    ,WkDtCd:{  // 업무 상세코드 UM(회원관리) PM(포스팅관리)
+    ,wkDtCd:{  // 업무 상세코드 UM(회원관리) PM(포스팅관리)
         type : String 
         ,required :false
     }
