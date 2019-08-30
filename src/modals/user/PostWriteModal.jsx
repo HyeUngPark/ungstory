@@ -10,6 +10,8 @@ export default class PostWriteModal extends React.Component {
       modal: false
       , tag: []
       , postImgs : []
+      , PostContent : ''
+      , pstPubYn : '01'
     };
     // this.toggle = this.toggle.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
@@ -105,7 +107,64 @@ export default class PostWriteModal extends React.Component {
         window.open('about:blank',list[idx]);
       }
     }
+  };
+
+  valChange = (cd, e) =>{
+    console.log('cd >> ',cd, ' value >> ', e.target.value);
+    if(cd === 'p'){ // 공개여부
+      switch(e.target.value){
+        case 1:
+          this.setState({
+            pstPubYn : '01'
+          });
+          break;
+        case 2:
+          this.setState({
+            pstPubYn : '02'
+          });
+          break;
+        case 3:
+          this.setState({
+            pstPubYn : '03'
+          });
+          break;
+      }
+    }else if(cd === 'c'){ // 게시글 내용
+      this.setState({
+        PostContent : e.target.value
+      });
+    }
   }
+
+  valCheck=() => {
+    // if()
+  };
+
+  postCallback = (result) =>{
+    if(result.reCd === '01'){
+      alert('게시글 작성 성공');
+    }else{
+      alert('게시글 작성 실패');
+    }
+    this.cancel();
+  };
+
+  post = () =>{
+    // valcheck
+    if(this.state.postImgs.length==0 && this.state.PostContent === ''){
+      alert('이미지 또는 게시글 내용 중 하나는 필수입니다.');
+      return;
+    }
+    // postImg
+    var param={
+      usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
+      ,pstPts : this.state.postImgs
+      ,pstCt : this.state.PostContent
+      ,pstHt : this.state.tag
+      ,pstPubYn : this.state.pstPubYn
+    }
+    api.apiSend('post','post',param,this.postCallback);
+  };
 
   render() {
     const tagList = this.state.tag.map(
@@ -116,31 +175,40 @@ export default class PostWriteModal extends React.Component {
                         </a>
                       </li>)
     );
-// const Example = ({ data }) => <img src={`data:image/jpeg;base64,${data}`} />
     const imgList = this.state.postImgs.map(
       (img,index) => (<li className="form-tag form-tag-li" key={index}>
-                        <a href="javascript:void(0)" 
-                           className="form-control-cursor"
-                           style={{
-                            //  position: "absolute"
-                           }}
-                           onClick={e=>{this.imgView(index,e)}}
-                        >
-                          <img src={img} 
-                              style={{
-                                width: "100px",
-                                height: "100px",
-                              }}
-                              value={index} 
-                            />
-                          {/* <img src={img + ':image/jpeg;base64,${'+img+'}'}/> */}
-                        </a>
-                        <span className="form-tag-del-btn form-control-cursor" 
-                              value={index} 
-                              onClick={e=>{this.removeImg(index,e)}}
-                        >
-                          X
-                        </span>
+                      <div
+                        style={{
+                          position: "relative"
+                        }}
+                      >
+                          <a href="javascript:void(0)" 
+                            className="form-control-cursor"
+                            style={{
+                            }}
+                            onClick={e=>{this.imgView(index,e)}}
+                          >
+                            <img src={img} 
+                                style={{
+                                  width: "100px",
+                                  height: "100px",
+                                }}
+                                value={index} 
+                              />
+                          </a>
+                          <span className="form-tag-del-btn form-control-cursor" 
+                                value={index} 
+                                onClick={e=>{this.removeImg(index,e)}}
+                                style ={{
+                                  position:'absolute',
+                                  right:'0px',
+                                  top:'0px',
+                                  fontSize : '0.75rem'
+                                }}
+                          >
+                            X
+                          </span>
+                        </div>
                       </li>)
     );
 
@@ -169,7 +237,16 @@ export default class PostWriteModal extends React.Component {
                 </span>
                 </Col>
                 <Col lg="10">
-                  <textarea className="form-control " id="PostContent" rows="3" autoFocus={true} placeholder="내용 입력하세요"></textarea>
+                  <textarea className="form-control" 
+                            id="PostContent" 
+                            rows="3" 
+                            autoFocus={true} 
+                            placeholder="내용 입력하세요"
+                            onChange={e=>{this.valChange('c',e)}}
+                            value={this.state.PostContent}
+                  >
+                    
+                  </textarea>
                 </Col>
               </Row>
               <br/>
@@ -202,21 +279,25 @@ export default class PostWriteModal extends React.Component {
                 </Col>
               </Row>
                 <Row lg="12">
-                  <Col lg="12">
+                  <Col>
                       <ul id="img-list" className="form-tag-ul">
                           {imgList}
                       </ul>
                   </Col>
                 </Row>
                 <Row lg="12">
-                <Col lg="4 text-right">
-                  <span>
-                    <i className=" ni ni-tag align-items-center" >
+                <Col lg="3" 
+                // className="text-right"
+                >
+                  <span style={{
+                    paddingRight : '0px'
+                  }}>
+                    <i className=" ni ni-tag align-items-center">
                       <label htmlFor="PostImg">&nbsp;해시태그 </label>
                     </i>
                   </span>
                 </Col>
-                <Col lg="8" style={{paddingLeft:"0"}}>
+                <Col lg="9" style={{paddingLeft:"0"}}>
                   <span>
                     <input className="form-control " 
                            id="PostHashTag" 
@@ -227,7 +308,7 @@ export default class PostWriteModal extends React.Component {
                 </Col>
                 </Row>
                 <Row lg="12">
-                  <Col lg="12">
+                  <Col lg="8">
                       <ul id="tag-list" className="form-tag-ul">
                           {tagList}
                       </ul>
@@ -239,21 +320,29 @@ export default class PostWriteModal extends React.Component {
                   <i className="ni ni-lock-circle-open" style={{width:"45%"}}>&nbsp;공개 여부</i>&nbsp;
                 {/* </Col>
                 <Col lg="3"> */}
-                    <select className="form-control" style={{width:"50%",display:"inline"}}> 
-                      <option>
+                    <select className="form-control" 
+                            onChange={e=>{this.valChange('p',e)}}
+                            style={{width:"50%",display:"inline"}}
+                    > 
+                      <option value='1'>
                         전체
                       </option>  
-                      <option>
+                      <option value='2'>
                         친구에게만
                       </option>  
-                      <option>
+                      <option value='3'>
                         비공개
                       </option>  
                     </select>
                     <br/>
                 </Col>
                 <Col lg="5">
-                  <input type="button" color="primary" className="btn btn-primary" value="게시"/>
+                  <input type="button" 
+                         color="primary" 
+                         className="btn btn-primary" 
+                         value="게시"
+                         onClick={this.post}       
+                  />
                   <Button color="danger" onClick={this.cancel}>취소</Button>
                 </Col>
               </Row>

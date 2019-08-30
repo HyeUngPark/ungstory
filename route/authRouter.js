@@ -32,7 +32,7 @@ router.post('/join', function(req, res) {
 
     schema.create({
         wkCd: 'USR'
-        ,WkDtCd : "USR"
+        ,wkDtCd : "USR"
         ,fstWrDt: date.getDate() // 최초 작성일
         ,lstWrDt: date.getDate() // 최종 작성일
         ,subSchema: userSchema
@@ -65,7 +65,7 @@ router.get('/joinResponse',function(req, res){
     var params = req.query;
     schema.find({
         wkCd: 'USR'
-        ,WkDtCd : "USR"
+        ,wkDtCd : "USR"
         ,"subSchema.usrId": params.usrId
     }, function(err, result) {
         if (err) {
@@ -163,7 +163,7 @@ router.post('/login', function(req, res) {
 
     schema.find({
         wkCd: 'USR',
-        WkDtCd :'USR',
+        wkDtCd :'USR',
         "subSchema.usrId": params.usrId,
         "subSchema.usrPwd": encrypt.getEncrypt(params.usrPwd)
     }, function(err, result) {
@@ -211,7 +211,7 @@ router.post('/login', function(req, res) {
                 // 로그인 내역 추가
                 schema.create({
                     wkCd: 'USR'
-                    ,WkDtCd : "LOGIN"
+                    ,wkDtCd : "LOGIN"
                     ,fstWrDt: date.getDate() // 최초 작성일
                     ,lstWrDt: date.getDate() // 최종 작성일
                     ,subSchema: loginSchema
@@ -263,7 +263,7 @@ router.post('/loginCk',function(req, res){
                     // 로그인 이력 업데이트
                     schema.find({
                         wkCd: 'USR',
-                        WkDtCd : 'LOGIN',
+                        wkDtCd : 'LOGIN',
                         "subSchema.loginToken": params.usrToken
                     }, function(err, result) {
                         if (err) {
@@ -331,7 +331,7 @@ router.post('/logout',function(req,res){
     if(params.usrToken){
         schema.find({
             wkCd: 'USR',
-            WkDtCd : 'LOGIN',
+            wkDtCd : 'LOGIN',
             "subSchema.loginToken": params.usrToken
         }, function(err, result) {
             if (err) {
@@ -384,7 +384,7 @@ router.post('/pwFind',function(req,res){
     var _id;
     schema.find({
         wkCd: 'USR',
-        WkDtCd : 'USR',
+        wkDtCd : 'USR',
         "subSchema.usrId": usrId
     }, function(err, result) {
         if (err) {

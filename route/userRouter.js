@@ -4,6 +4,7 @@
     var express = require('express');
     var router = express.Router();
     var schema = require('../schema/commonSchema');
+    var postSchema = require('../schema/postSchema');
     var jwt = require('jsonwebtoken');
     var env = require('dotenv');
     var date = require('../myUtils/dateUtils');
@@ -42,7 +43,7 @@
                     // 로그인 이력 업데이트
                     schema.find({
                         wkCd: 'USR',
-                        WkDtCd : 'LOGIN',
+                        wkDtCd : 'LOGIN',
                         "subSchema.loginToken": params.usrToken
                     }, function(err, result) {
                         if (err) {
@@ -85,23 +86,76 @@
                 reCd : '02'
             });
         }
-        /*
-        var params = req.body;
-        let session = req.session;
-        // console.log('params token ', params.usrToken);
-        // console.log('session token ', session.usrToken);
-        if(session.usrToken && session.usrToken === params.usrToken){
-            console.log("★★★login Session Check LOGIN★★★");
-            res.json({
-                reCd : '01'
-            })
-        }else{
-            console.log("★★★login Session Check NOT LOGIN★★★");
-            res.json({
-                reCd : '02'
-            })
-        }   
-*/
+    });
+
+    router.post('/post',function(req, res){
+        let params = req.body;
+        
+        // 사용자 이름으로 id 검색 후 입력
+        schema.find({
+            wkCd: 'USR',
+            wkDtCd : 'USR',
+            "subSchema.usrName": params.usrName
+        }, function(err, result) {
+            if (err) {
+                console.log('error \n', err);
+                return res.status(500).send("select error >> " + err)
+            }
+            if (result.length > 0) {
+                console.log("★★★ login history search result ★★★ \n",result[0]);
+                let usrId = result[0].subSchema.usrId;
+                postSchema.usrName = params.usrName;
+                postSchema.usrId = usrId;
+                postSchema.pstPts = params.pstPts;
+                postSchema.pstCt  = params.pstCt;
+                postSchema.pstHt = params.pstHt;
+                postSchema.pstCmt = [];
+                postSchema.pstPubYn = params.pstPubYn;
+                schema.create({
+                    wkCd: 'PST'
+                    ,wkDtCd : "PST"
+                    ,fstWrDt: date.getDate() // 최초 작성일
+                    ,lstWrDt: date.getDate() // 최종 작성일
+                    ,subSchema: postSchema
+                }).then((result)=>{
+                    console.log("★★post success★★\n",result);
+                    res.json({
+                        reCd: '01'
+                    });
+                }).catch((err)=>{
+                    console.log("★★post fail★★\n",err);
+                    res.json({
+                        reCd: '02'
+                    });
+                }); // post close
+            }
+        }); // find close
+    });
+
+    router.post('/postList',function(req, res){
+
+        schema.find({
+            wkCd : 'PST',
+            wkDtCd : 'PST',
+            "subSchema.usrId" : 'phu8460@naver.com'
+        }
+        , function(err, result) {
+            if (err) {
+                console.log('error \n', err);
+                return res.status(500).send("select error >> " + err)
+            }
+            if (result.length > 0) {
+                res.json({
+                    reCd : '01'
+                    ,pstList : result
+                });
+            }else{
+                res.json({
+                    reCd : '02'
+                });
+            }
+        });
+
     });
 
 module.exports = router;

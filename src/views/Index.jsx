@@ -9,9 +9,47 @@ import {
   Col
 } from "reactstrap";
 
+import * as api from "api/api";
 import Header from "components/Headers/Header.jsx";
 
 class Index extends React.Component {
+  state = {
+    postList : []
+    ,pstStSuCd : false
+  };
+
+  getPostListCallback= (result) =>{
+    if(result.reCd==="01"){
+      console.log('게시글 조회 성공');
+      this.setState({
+        pstStSuCd : true
+        ,postList : result.pstList
+      });
+      
+    }else if(result.reCd ==='02'){
+      console.log('게시글 조회 실패');
+      this.setState({
+        pstStSuCd : true
+      });
+      
+    }
+  }
+
+  getPostList =()=>{
+  // 세션 체크
+  var param={
+    usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
+  }
+  api.apiSend('post','postList',param,this.getPostListCallback);
+}
+
+componentDidMount(){
+    if(!this.state.pstStSuCd){
+        this.getPostList();
+    }
+}
+
+
   render() {
      const photos = [
        {
