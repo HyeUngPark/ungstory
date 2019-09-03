@@ -20,7 +20,7 @@ class Index extends React.Component {
 
   getPostListCallback= (result) =>{
     if(result.reCd==="01"){
-      console.log('게시글 조회 성공');
+      console.log('게시글 조회 성공 \n',result.pstList);
       this.setState({
         pstStSuCd : true
         ,postList : result.pstList
@@ -51,14 +51,10 @@ componentDidMount(){
 
 
   render() {
-     const photos = [
-       {
-         src: require('assets/img/theme/team-1-800x800.jpg'),
-         width: 1,
-         height: 1
-        }
-        ,{
-         src: require('assets/img/theme/team-2-800x800.jpg'),
+    /* 
+    const photos = [
+      { 
+        src: require('assets/img/theme/team-2-800x800.jpg'),
          width: 1,
          height: 1
        }
@@ -78,22 +74,32 @@ componentDidMount(){
          height: 1
         }
      ];
+     */
     return (
       <>
         <Header />
         {/* Page content */}
         <Container className="mt--2" fluid>
-        <Row className="mt-5">
+        {
+          this.state.postList.map((post, index)=>{
+            return(
+              ////////////////////////////////////////////////////////////////////////////////////////////////
+              ////////////////////////////////////////////////////////////////////////////////////////////////
+              ////////////////////////////////////////////////////////////////////////////////////////////////
+              <Row className="mt-5">
             <Col className="mb-5 mb-xl-0" xl="8">
               <Card className="shadow">
                 <CardHeader className="border-0">
-                  <Row className="align-items-center">
-                    <div className="col">
-                        작성자 이름
-                    </div>
+                  <Row className="align-items-center" lg="12">
+                    <Col lg="6">
+                        {post.usrName}
+                    </Col>
+                    <Col lg="6" className="text-right">
+                        {post.wrDt}
+                    </Col>
                   </Row>
                 </CardHeader>
-                <Gallery photos={photos} />
+                <Gallery photos={post.pstPts} />
                 <br />
               {/* 게시글 내용 */}
               <Col lg="12">
@@ -102,11 +108,7 @@ componentDidMount(){
                         <div className="tab-content" id="myTabContent">
                             <div className="tab-pane fade show active" id="tabs-icons-text-1" role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
                                 <p className="description">
-                                    게시글 내용~~~~~~~~~~~~~~~~<br />
-                                    게시글 내용~~~~~~~~~~~~~~~~<br />
-                                    게시글 내용~~~~~~~~~~~~~~~~<br />
-                                    게시글 내용~~~~~~~~~~~~~~~~<br />
-                                    게시글 내용~~~~~~~~~~~~~~~~<br />
+                                    {post.pstCt}
                                 </p>
                             </div>
                         </div>
@@ -125,18 +127,15 @@ componentDidMount(){
                         <div className="tab-content" id="myTabContent">
                             <div className="tab-pane fade show active" id="tabs-icons-text-1" role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
                                 <p className="description">
-                                  <a href="#">
-                                    #해시태그1
-                                  </a> 
-                                  <a href="#">
-                                    #해시태그2
-                                  </a> 
-                                  <a href="#">
-                                    #해시태그3
-                                  </a> 
-                                  <a href="#">
-                                    #해시태그4
-                                  </a> 
+                                  {
+                                    post.pstHt.map((tag, index)=>{
+                                      return(
+                                      <a href="#">
+                                        #{tag}&nbsp;
+                                      </a> 
+                                      )
+                                   })
+                                  }
                                 </p>
                             </div>
                         </div>
@@ -145,6 +144,9 @@ componentDidMount(){
                   </Col>
                 </Row>
                 <br/>
+              {/*////////////////////////////////
+              ////////////// 댓글 //////////////  
+              ////////////////////////////////*/}
                 <Row className="align-items-center avatar-padding">
                   <Col lg="1" className="">
                     <span className="avatar avatar-sm rounded-circle">
@@ -201,45 +203,15 @@ componentDidMount(){
                     </div>
                   </Col>
                 </Row>
-                <Row className="align-items-center avatar-padding">
-                  <Col lg="1">
-                    <span className="avatar avatar-sm rounded-circle">
-                      <img
-                        alt="..."
-                        src={require("assets/img/theme/team-1-800x800.jpg")}
-                      />
-                    </span>
-                  </Col>
-                  <Col lg="5">
-                      <a href="#">홍길동</a> &nbsp;
-                      2019/06/19 16:20
-                  </Col>
-                  <Col lg="11">
-                  <div className="card shadow">
-                    <div className="card-body">
-                        <div className="tab-content" id="myTabContent">
-                            <div className="tab-pane fade show active" id="tabs-icons-text-1" role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
-                                <p className="description">
-                                  댓글 내용 댓글 내용 댓글 내용 댓글 내용 댓글 내용 댓글 내용 댓글 내용 댓글 내용 
-                                  댓글 내용 댓글 내용 댓글 내용 댓글 내용 댓글 내용 댓글 내용 댓글 내용 댓글 내용 
-                                </p>
-                            </div>
-                        </div> 
-                      </div>
-                  </div>
-                  </Col>
-                  <Col lg="11">
-                    <br />
-                    <div className="col text-right avatar-padding-right-none">
-                        {/* <button type="button" className="btn-sm btn-info">수정</button> &nbsp;
-                        <button type="button" className="btn-sm btn-danger">삭제</button> &nbsp; */}
-                        <button type="button" className="btn-sm btn-info">답글</button>
-                    </div>
-                  </Col>
-                </Row>
               </Card>
             </Col>
           </Row>
+              ////////////////////////////////////////////////////////////////////////////////////////////////
+              ////////////////////////////////////////////////////////////////////////////////////////////////
+              ////////////////////////////////////////////////////////////////////////////////////////////////
+            );
+          })
+        }
         </Container>
       </>
     );

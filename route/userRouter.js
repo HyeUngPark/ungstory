@@ -145,9 +145,37 @@
                 return res.status(500).send("select error >> " + err)
             }
             if (result.length > 0) {
+                let postList = [];                
+
+                for(var i=0; i<result.length; i++){
+                    let tempPhoto = [];
+                    if(result[i].subSchema.pstPts 
+                        && result[i].subSchema.pstPts.length >0 ){
+                            for(var j=0; j<result[i].subSchema.pstPts.length; j++){
+                                let tp = {
+                                    // 'src': "require('"+result[i].subSchema.pstPts[j]+"')",
+                                    'src': result[i].subSchema.pstPts[j],
+                                    'width': 1,
+                                    'height': 1 
+                                }
+                                tempPhoto.push(tp);
+                            }
+                    }
+
+                    let post ={
+                        usrName : result[i].subSchema.usrName
+                        ,wrDt : date.getWriteDate(result[i].lstWrDt)
+                        ,pstPts : tempPhoto
+                        ,pstCt : result[i].subSchema.pstCt
+                        ,pstHt : result[i].subSchema.pstHt
+                        ,pstCmt : result[i].subSchema.pstCmt
+                    };
+                    postList.push(post);
+                }
+                
                 res.json({
                     reCd : '01'
-                    ,pstList : result
+                    ,pstList : postList
                 });
             }else{
                 res.json({
