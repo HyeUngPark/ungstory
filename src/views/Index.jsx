@@ -37,8 +37,12 @@ class Index extends React.Component {
 
   getPostList =()=>{
   // 세션 체크
-  var param={
-    usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
+  let param ={};
+  if(localStorage.getItem('usrInfo') &&
+    JSON.parse(localStorage.getItem('usrInfo')).usrName){
+    param.usrName = JSON.parse(localStorage.getItem('usrInfo')).usrName;
+  }else{
+    param.usrName = '';
   }
   api.apiSend('post','postList',param,this.getPostListCallback);
 }
