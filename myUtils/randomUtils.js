@@ -1,6 +1,9 @@
 /* 
     난수 생성 모듈
 */
+var moment = require('moment');
+require('moment-timezone');
+moment.tz.setDefault("Asia/Seoul");
 
 var random = {
     getRandomPw : function(){
@@ -18,6 +21,16 @@ var random = {
             }
         }
         return randomstring;
+    },
+    getPk : function(pkLength){
+        var cmtPk = '';
+        var chars = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXTZabcdefghiklmnopqrstuvwxyz";
+        var now = moment().format('YYYYMMDDHHmmss');
+        for (var i=0; i<pkLength; i++) {
+            let rnum = Math.floor(Math.random() * chars.length);
+            cmtPk += chars.substring(rnum,rnum+1);
+        }
+        return now+cmtPk;
     }
 }
 

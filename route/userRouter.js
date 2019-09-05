@@ -5,9 +5,11 @@
     var router = express.Router();
     var schema = require('../schema/commonSchema');
     var postSchema = require('../schema/postSchema');
+    var postCmtSchema = require('../schema/postCmtSchema');
     var jwt = require('jsonwebtoken');
     var env = require('dotenv');
     var date = require('../myUtils/dateUtils');
+    var random = require('../myUtils/randomUtils');
 
     env.config();
 
@@ -184,6 +186,11 @@
             }
         });
 
+    });
+
+    router.post('/postCmtWt',function(req, res){
+        // var newPw = random.getPk(4);
+        
     });
 
 module.exports = router;
