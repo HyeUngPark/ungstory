@@ -106,6 +106,7 @@
             if (result.length > 0) {
                 console.log("★★★ login history search result ★★★ \n",result[0]);
                 let usrId = result[0].subSchema.usrId;
+                postSchema.pstPk = random.getPk(4);
                 postSchema.usrName = params.usrName;
                 postSchema.usrId = usrId;
                 postSchema.pstPts = params.pstPts;
@@ -165,7 +166,8 @@
                     }
 
                     let post ={
-                        usrName : result[i].subSchema.usrName
+                        pstPk : result[i].subSchema.pstPk
+                        ,usrName : result[i].subSchema.usrName
                         ,wrDt : date.getWriteDate(result[i].lstWrDt)
                         ,pstPts : tempPhoto
                         ,pstCt : result[i].subSchema.pstCt
@@ -189,6 +191,52 @@
     });
 
     router.post('/postCmtWt',function(req, res){
+        let params = req.body;
+        
+        schema.find({
+            wkCd : 'PST',
+            wkDtCd : 'PST',
+            "subSchema.pstPk" : params.pstPk
+        },function(err, result){
+            if (err) {
+                console.log('error \n', err);
+                return res.status(500).send("select error >> " + err)
+            }
+            if (result.length > 0) {
+                var _id = result[0]._id;
+                let commentList = result[0].subSchema.pstCmt;
+                
+                postCmtSchema.pstCmtPk = random.getPk(4);
+                postCmtSchema.usrName = params.usrName;
+                postCmtSchema.pstCmtCt = params.pstCmtCt;
+                postCmtSchema.pstCmtSep = '01';
+                postCmtSchema.pstWtDate = date.getDate();
+                commentList.push(postCmtSchema);
+                schema.updateOne({
+                    "_id" : _id
+                }
+                , { $set: {
+                    'subSchema.pstCmt': commentList
+                }}
+                , function(err, result) {
+                    if (err) {
+                        console.log('error \n', err);
+                        return res.status(500).send("select error >> " + err)
+                    }
+                    if (result.n) {
+                        console.log("★★★ 댓글 등록 성공 result ★★★ \n",result.n);
+                        res.json({
+                            reCd : '01'
+                        });
+                    } else {
+                        console.log("★★★ 댓글 등록 실패 ★★★ \n",result.n);
+                        res.json({
+                            reCd : '02'
+                        });
+                    }
+                }); // update close
+            }
+        });
         // var newPw = random.getPk(4);
         
     });

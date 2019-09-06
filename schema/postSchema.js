@@ -1,5 +1,6 @@
 var schema = ({
-    usrName  : ''
+    pstPk : ''
+   ,usrName  : ''
    ,usrId    : ''
    ,pstPts   : []
    ,pstCt    : ''
