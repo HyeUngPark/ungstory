@@ -17,6 +17,7 @@ class Index extends React.Component {
     postList : []
     ,pstStSuCd : false
     ,writeComment : ''
+    ,updateComment : ''
   };
 
   getPostListCallback= (result) =>{
@@ -72,19 +73,60 @@ class Index extends React.Component {
     this.getPostList();
   }
   commentChnage = (e) =>{
-    console.log(e.target.value);
     this.setState({
       writeComment : e.target.value
     });
   }
 
+  commentUtChnage =(e)=>{
+    this.setState({
+      updateComment : e.target.value
+    });
+  }
+
+  commentUpdateCallback = (result) =>{
+    if(result.reCd==='01'){
+      alert('댓글 수정 성공!');
+    }else{
+      alert('댓글 수정 실패');
+    }
+    this.setState({
+      updateComment : ''
+    });
+    this.getPostList();
+  }
+  commentUpdate = (cd, postIdx, commentIdx) =>{
+    let postList = this.state.postList;
+    console.log('commentUpdate () ',cd , "\n",postList);
+    if(postList){
+      if(cd === 'v'){
+        postList[postIdx].pstCmt[commentIdx].pstCmtUd = true;
+        this.setState({
+          postList : postList
+        });
+      }else if(cd === 'c'){
+        postList[postIdx].pstCmt[commentIdx].pstCmtUd = false;
+        this.setState({
+          postList : postList
+          ,updateComment : ''
+        });
+      }else if(cd === 'e'){
+        console.log('댓글 수정 버튼 클릭 ]n',this.state.updateComment 
+                    , '\n',postList[postIdx].pstCmt[commentIdx].pstCmtPk);
+        let param = {
+          pstCmtCt : this.state.updateComment
+          ,pstCmtPk : postList[postIdx].pstCmt[commentIdx].pstCmtPk
+        };
+        api.apiSend('post','postCmtUd',param,this.commentUpdateCallback);
+      }
+    }
+  }
 
   componentDidMount(){
       if(!this.state.pstStSuCd){
           this.getPostList();
       }
   }
-
 
   render() {
     return (
@@ -93,7 +135,7 @@ class Index extends React.Component {
         {/* Page content */}
         <Container className="mt--2" fluid>
         {
-          this.state.postList.map((post, index)=>{
+          this.state.postList.map((post, postIdx)=>{
             return(
               ////////////////////////////////////////////////////////////////////////////////////////////////
               ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -213,7 +255,7 @@ class Index extends React.Component {
                     {/* 댓글 내용 */}
                       {
                       (post.pstCmt && post.pstCmt.length >0 ) ?
-                      post.pstCmt.map((comment, index)=>{
+                      post.pstCmt.map((comment, commentIdx)=>{
                         return(
                       <div>
                       <Row className = "align-items-center avatar-padding">
@@ -238,24 +280,59 @@ class Index extends React.Component {
                                 <div className="tab-content" id="myTabContent">
                                     <div className="tab-pane fade show active" id="tabs-icons-text-1" role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
                                         <p className="description">
-                                          {comment.pstCmtCt}
+                                          {
+                                            (!comment.pstCmtUd) ?  comment.pstCmtCt  : 
+                                              <textarea 
+                                                className="form-control " 
+                                                rows="3" 
+                                                placeholder="수정할 댓글을 입력하세요" 
+                                                onChange = {e=>{this.commentUtChnage(e)}}
+                                                value = {this.state.updateComment}
+                                              />
+                                          }
                                         </p>
                                     </div>
                                 </div>
                               </div>
                           </div>
                         </Col>
+                        {(comment.pstCmtUd) ? 
+                          <Col lg="11">
+                            <br />
+                            <div className="col text-right avatar-padding-right-none">
+                                <button type="button" 
+                                        className="btn-sm btn-info form-control-cursor"
+                                        onClick = {e=>{this.commentUpdate('e', postIdx, commentIdx)}}
+                                >
+                                  수정하기
+                                </button>&nbsp;
+                                <button type="button" 
+                                        className="btn-sm btn-danger form-control-cursor"
+                                        onClick = {e=>{this.commentUpdate('c',postIdx, commentIdx)}}
+                                >
+                                  취소
+                                </button> &nbsp;
+                            </div>
+                          </Col>
+                          : ''}
                       </Row> 
-                      <Col lg="11">
-                      <br></br>
-                      <div className="col text-right avatar-padding-right-none form-control-cursor">
-                          {/* 내 댓글일 경우에만 수정/삭제 */}
-                          <button type="button" className="btn-sm btn-info">수정</button> &nbsp;
-                          <button type="button" className="btn-sm btn-danger">삭제</button> &nbsp;
+                      {(!comment.pstCmtUd) ? 
+                        <Col lg="11">
+                        <br></br>
+                        <div className="col text-right avatar-padding-right-none form-control-cursor">
+                            {/* 내 댓글일 경우에만 수정/삭제 */}
+                            <button type="button" 
+                                    className="btn-sm btn-info form-control-cursor"
+                                    onClick ={e=>{this.commentUpdate('v',postIdx, commentIdx)}}
+                            >
+                              수정
+                            </button>&nbsp;
+                            <button type="button" className="btn-sm btn-danger">삭제</button> &nbsp;
 
-                          <button type="button" className="btn-sm btn-info">답글</button>
-                      </div>
-                      </Col>
+                            <button type="button" className="btn-sm btn-info">답글</button>
+                        </div>
+                        </Col>  
+                        : ''}
                       </div> 
                       )}) : ''
                       }

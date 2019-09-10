@@ -237,8 +237,39 @@
                 }); // update close
             }
         });
-        // var newPw = random.getPk(4);
-        
+    });
+
+    router.post('/postCmtUd',function(req, res){
+        let params = req.body;
+        console.log('댓글 업데이트 \n', params);
+        schema.update({
+            wkCd : 'PST',
+            wkDtCd : 'PST',
+            "subSchema.pstCmt.pstCmtPk" : params.pstCmtPk
+            }
+            ,{$set:{
+                "subSchema.pstCmt.$.pstCmtCt" : params.pstCmtCt // 댓글내용
+                ,"subSchema.pstCmt.$.pstWtDate" : date.getDate() // 댓글 작성일자 
+            }}
+            , function(err, result) {
+                console.log("댓글 업데이트 result \n",result);
+                if (err) {
+                    console.log('error \n', err);
+                    return res.status(500).send("댓글 업데이트 실패 >> " + err)
+                }
+                
+                if (result.n) {
+                    console.log('★★★ 댓글 업데이트 성공 ★★★');
+                    res.json({
+                        reCd : '01'
+                    });
+                } else {
+                    console.log("★★★ 댓글 업데이트 실패 ★★★ \n",result.n);
+                    res.json({
+                        reCd : '02'
+                    });
+                }
+            });
     });
 
 module.exports = router;
