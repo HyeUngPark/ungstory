@@ -211,6 +211,7 @@
                 postCmtSchema.pstCmtCt = params.pstCmtCt;
                 postCmtSchema.pstCmtSep = '01';
                 postCmtSchema.pstWtDate = date.getDate();
+                postCmtSchema.pstLtDate = date.getDate();
                 commentList.push(postCmtSchema);
                 schema.updateOne({
                     "_id" : _id
@@ -249,7 +250,7 @@
             }
             ,{$set:{
                 "subSchema.pstCmt.$.pstCmtCt" : params.pstCmtCt // 댓글내용
-                ,"subSchema.pstCmt.$.pstWtDate" : date.getDate() // 댓글 작성일자 
+                ,"subSchema.pstCmt.$.pstCmtLtDate" : date.getDate() // 댓글 작성일자 
             }}
             , function(err, result) {
                 console.log("댓글 업데이트 result \n",result);

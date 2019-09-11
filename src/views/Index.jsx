@@ -269,7 +269,7 @@ class Index extends React.Component {
                         </Col>
                         <Col lg="5">
                             <a href="#">{comment.usrName}</a> &nbsp;
-                            {comment.pstWtDate}
+                            {comment.pstCmtWtDate}
                         </Col>
                         <Col lg="11">
                           {(comment.pstCmtSep == '02' ) ? 

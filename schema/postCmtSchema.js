@@ -3,7 +3,8 @@ var schema = ({
    ,usrName   : ''
    ,pstCmtCt  : ''
    ,pstCmtSep : ''
-   ,pstWtDate : ''
+   ,pstCmtWtDate : ''
+   ,pstCmtLtDate : ''
 });
 
 module.exports = schema;
