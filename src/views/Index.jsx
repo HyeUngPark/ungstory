@@ -12,6 +12,9 @@ import {
 import * as api from "api/api";
 import Header from "components/Headers/Header.jsx";
 
+import { confirmAlert } from 'react-confirm-alert'; // Import
+import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
+
 class Index extends React.Component {
   state = {
     postList : []
@@ -121,7 +124,39 @@ class Index extends React.Component {
       }
     }
   }
+  commentDeleteCallback = (result) => {
+    if(result.reCd==='01'){
+      alert('댓글 삭제 성공!');
+    }else{
+      alert('댓글 삭제 실패');
+    }
+    this.getPostList();
+  }
 
+  commentDelete = (postIdx, commentIdx)=>{
+    let postList = this.state.postList;
+
+    let param = {
+      pstCmtPk : postList[postIdx].pstCmt[commentIdx].pstCmtPk
+    };
+    api.apiSend('post','postCmtDel',param,this.commentDeleteCallback);
+  }
+  commentDeleteConfirm = (postIdx, commentIdx)=>{
+    confirmAlert({
+      title: '댓글 삭제 확인',
+      message: '정말 삭제하시겠습니까?',
+      buttons: [
+        {
+          label: '삭제하기',
+          onClick: () => this.commentDelete(postIdx, commentIdx)
+        },
+        {
+          label: '취소',
+          onClick: () => {}
+        }
+      ]
+    });
+  }
   componentDidMount(){
       if(!this.state.pstStSuCd){
           this.getPostList();
@@ -327,7 +362,12 @@ class Index extends React.Component {
                             >
                               수정
                             </button>&nbsp;
-                            <button type="button" className="btn-sm btn-danger">삭제</button> &nbsp;
+                            <button type="button" 
+                                    className="btn-sm btn-danger"
+                                    onClick={e=>{this.commentDeleteConfirm(postIdx, commentIdx)}}
+                            >
+                              삭제
+                            </button> &nbsp;
 
                             <button type="button" className="btn-sm btn-info">답글</button>
                         </div>

@@ -273,4 +273,36 @@
             });
     });
 
+    router.post('/postCmtDel',function(req, res){
+        let params = req.body;
+        console.log('댓글 삭제 \n', params);
+        schema.update({
+            wkCd : 'PST',
+            wkDtCd : 'PST',
+            "subSchema.pstCmt.pstCmtPk" : params.pstCmtPk
+            }
+            ,{$set:{
+                "subSchema.pstCmt.$.pstCmtSep" : '03' // 댓글 상태
+                ,"subSchema.pstCmt.$.pstCmtLtDate" : date.getDate() // 댓글 최종 수정일자 
+            }}
+            , function(err, result) {
+                if (err) {
+                    console.log('error \n', err);
+                    return res.status(500).send("댓글 업데이트 실패 >> " + err)
+                }
+                
+                if (result.n) {
+                    console.log('★★★ 댓글 삭제 성공 ★★★');
+                    res.json({
+                        reCd : '01'
+                    });
+                } else {
+                    console.log("★★★ 댓글 삭제 실패 ★★★ \n",result.n);
+                    res.json({
+                        reCd : '02'
+                    });
+                }
+            });
+    });
+
 module.exports = router;
