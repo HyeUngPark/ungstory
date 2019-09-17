@@ -19,8 +19,6 @@ class Index extends React.Component {
   state = {
     postList : []
     ,pstStSuCd : false
-    ,writeComment : ''
-    ,updateComment : ''
     ,replyComment : ''
   };
 
@@ -51,16 +49,22 @@ class Index extends React.Component {
     }
     api.apiSend('post','postList',param,this.getPostListCallback);
   }
-  commentWrite = (pstPk) => {
-    if(this.state.writeComment === ''){
+  commentWrite = (pstPk, postIdx) => {
+    let postList = this.state.postList;;
+    if(postList[postIdx].wrComment === ''){
       alert('댓글 내용을 입력해주세요.');
       return;
     }else{
       let param ={
         usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
         ,pstPk : pstPk
-        ,pstCmtCt : this.state.writeComment
+        ,pstCmtCt : postList[postIdx].wrComment
       };
+      postList[postIdx].wrComment = '';
+      this.setState({
+        postList : postList
+      });
+
       api.apiSend('post','postCmtWt',param,this.commentWriteCallback);
     }
   }
@@ -71,9 +75,6 @@ class Index extends React.Component {
     }else{
       alert('댓글 등록 실패');
     }
-    this.setState({
-      writeComment : ''
-    });
     this.getPostList();
   }
 
@@ -123,15 +124,20 @@ class Index extends React.Component {
     this.getPostList();
   }
 
-  commentChnage = (e) =>{
+  commentChnage = (e, postIdx) =>{
+    let postList = this.state.postList;
+    postList[postIdx].wrComment = e.target.value;
+
     this.setState({
-      writeComment : e.target.value
+      postList : postList
     });
   }
 
-  commentUtChnage =(e)=>{
+  commentUtChnage =(e, postIdx, commentIdx)=>{
+    let postList = this.state.postList;
+    postList[postIdx].pstCmt[commentIdx].updateComment = e.target.value;
     this.setState({
-      updateComment : e.target.value
+      postList : postList
     });
   }
   replyChange =(e)=>{
@@ -146,9 +152,6 @@ class Index extends React.Component {
     }else{
       alert('댓글 수정 실패');
     }
-    this.setState({
-      updateComment : ''
-    });
     this.getPostList();
   }
   commentUpdate = (cd, postIdx, commentIdx) =>{
@@ -162,17 +165,20 @@ class Index extends React.Component {
         });
       }else if(cd === 'c'){
         postList[postIdx].pstCmt[commentIdx].pstCmtUd = false;
+        postList[postIdx].pstCmt[commentIdx].updateComment = '';
         this.setState({
           postList : postList
-          ,updateComment : ''
         });
       }else if(cd === 'e'){
-        console.log('댓글 수정 버튼 클릭 ]n',this.state.updateComment 
-                    , '\n',postList[postIdx].pstCmt[commentIdx].pstCmtPk);
         let param = {
-          pstCmtCt : this.state.updateComment
+          pstCmtCt : postList[postIdx].pstCmt[commentIdx].updateComment
           ,pstCmtPk : postList[postIdx].pstCmt[commentIdx].pstCmtPk
         };
+        postList[postIdx].pstCmt[commentIdx].updateComment= '';
+        postList[postIdx].pstCmt[commentIdx].pstCmtUd = false;
+        this.setState({
+          postList : postList
+        });
         api.apiSend('post','postCmtUd',param,this.commentUpdateCallback);
       }
     }
@@ -188,9 +194,20 @@ class Index extends React.Component {
 
   commentDelete = (postIdx, commentIdx)=>{
     let postList = this.state.postList;
-
+    let pstCmtDcd;
+    if(postList[postIdx].pstCmt.length === (commentIdx+1)
+     ||postList[postIdx].pstCmt[commentIdx].pstCmtGp !== postList[postIdx].pstCmt[commentIdx+1].pstCmtGp
+    ){
+        pstCmtDcd = '04';
+    }else if(commentIdx !==0 
+      && postList[postIdx].pstCmt[commentIdx].pstCmtGp === postList[postIdx].pstCmt[commentIdx+1].pstCmtGp){
+        pstCmtDcd = '03R';
+    }else{
+        pstCmtDcd = '03';
+    }
     let param = {
       pstCmtPk : postList[postIdx].pstCmt[commentIdx].pstCmtPk
+      ,pstCmtDcd : pstCmtDcd
     };
     api.apiSend('post','postCmtDel',param,this.commentDeleteCallback);
   }
@@ -271,13 +288,14 @@ class Index extends React.Component {
                                   <div className="tab-pane fade show active" id="tabs-icons-text-1" role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
                                       <p className="description">
                                         {
+                                        (post.pstHt && post.pstHt.length >0 ) ?
                                           post.pstHt.map((tag, index)=>{
                                             return(
                                             <a href="#">
                                               #{tag}&nbsp;
                                             </a> 
                                             )
-                                        })
+                                        }) : ''
                                         }
                                       </p>
                                   </div>
@@ -311,6 +329,7 @@ class Index extends React.Component {
                     : ''
                     }
                     {/* 댓글 작성 */}
+                    
                     <Row className="align-items-center avatar-padding">
                       <Col lg="1" className="">
                         <span className="avatar avatar-sm rounded-circle">
@@ -326,8 +345,8 @@ class Index extends React.Component {
                           id="exampleFormControlTextarea1" 
                           rows="3" 
                           placeholder="댓글을 입력하세요" 
-                          onChange = {e=>{this.commentChnage(e)}}
-                          value = {this.state.writeComment}
+                          onChange = {e=>{this.commentChnage(e, postIdx)}}
+                          value = {post.wrComment}
                           ref={(textarea) => { this.textarea = textarea; }}
                         >
                         </textarea>
@@ -335,7 +354,7 @@ class Index extends React.Component {
                       <Col lg="2">
                         <button type="button" 
                                 className="btn btn-primary"
-                                onClick = {e=>{this.commentWrite(post.pstPk)}}
+                                onClick = {e=>{this.commentWrite(post.pstPk, postIdx)}}
                         >
                           작성
                         </button>
@@ -348,7 +367,20 @@ class Index extends React.Component {
                       post.pstCmt.map((comment, commentIdx)=>{
                         return(
                       <div>
-                      <Row className = "align-items-center avatar-padding">
+                    <Row className = "align-items-center avatar-padding"
+                         lg="12"
+                    >
+                        {(comment.pstCmtSep === '02' ||  comment.pstCmtSep === '03R') ? 
+                              <Col lg="1">
+                                <img
+                                  className=""
+                                  alt="..."
+                                  src={require("assets/img/icons/post/reply.png")}
+                                  style ={{width:"36px"
+                                          ,height:"36px"
+                                          }}
+                                    /> </Col>
+                            : ''}
                         <Col lg="1">
                           <span className="avatar avatar-sm rounded-circle">
                             <img
@@ -357,27 +389,26 @@ class Index extends React.Component {
                             />
                           </span>
                         </Col>
-                        <Col lg="5">
+                        <Col lg="8">
                             <a href="#">{comment.usrName}</a> &nbsp;
                             {comment.pstCmtWtDate}
                         </Col>
+                      </Row>
+                      <Row className = "align-items-center avatar-padding">
                         <Col lg="11">
-                          {(comment.pstCmtSep === '02' ) ? 
-                            <i className="bold-right" />
-                            : ''}
                           <div className="card shadow">
                             <div className="card-body">
                                 <div className="tab-content" id="myTabContent">
                                     <div className="tab-pane fade show active" id="tabs-icons-text-1" role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
                                         <p className="description">
                                           {
-                                            (!comment.pstCmtUd) ?  comment.pstCmtCt  : 
+                                            (!comment.pstCmtUd) ?  ((comment.pstCmtSep === '03' || comment.pstCmtSep === '03R') ? '삭제된 댓글입니다.' : comment.pstCmtCt)  : 
                                               <textarea 
                                                 className="form-control " 
                                                 rows="3" 
                                                 placeholder="수정할 댓글을 입력하세요" 
-                                                onChange = {e=>{this.commentUtChnage(e)}}
-                                                value = {this.state.updateComment}
+                                                onChange = {e=>{this.commentUtChnage(e,postIdx, commentIdx)}}
+                                                value = {comment.updateComment}
                                               />
                                           }
                                         </p>

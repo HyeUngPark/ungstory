@@ -148,14 +148,33 @@
             wkDtCd : 'PST',
             "subSchema.usrId" : 'phu8460@naver.com'
         }},
-    //     {$project : {_id : 0}},
-        {$unwind : "$subSchema.pstCmt"},
+        {$unwind : {
+            path: "$subSchema.pstCmt",
+            preserveNullAndEmptyArrays: true       
+        }},
+        {$project : {
+           "subSchema.pstCmt" : { 
+                $cond : [{$ne: [ "$subSchema.pstCmt.pstCmtSep" , "04"]},"$subSchema.pstCmt","$unset"]
+           }
+           ,_id :1
+           ,"wkCd" :  1
+           ,"wkDtCd" : 1
+           ,"fstWrDt" : 1
+           ,"lstWrDt" : 1
+           ,"subSchema.usrName" : 1
+           ,"subSchema.usrId" : 1
+           ,"subSchema.pstPts" : 1
+           ,"subSchema.pstCt" : 1
+           ,"subSchema.pstHt" : 1
+           ,"subSchema.pstPubYn" : 1
+           ,"subSchema.pstPk" : 1
+        }},
         {$sort : {
-            "fstWrDt" : -1,
-            "subSchema.pstCmt.pstCmtGp" : 1
+            _id : 1
+            ,"subSchema.pstCmt.pstCmtGp" : 1
         }},
         {$group:{
-            "_id" : "$id"
+            "_id" : "$_id"
             ,"wkCd" : {"$first":"$wkCd"}
             ,"wkDtCd" : {"$first":"$wkDtCd"}
             ,"fstWrDt" : {"$first":"$fstWrDt"}
@@ -314,7 +333,7 @@
             "subSchema.pstCmt.pstCmtPk" : params.pstCmtPk
             }
             ,{$set:{
-                "subSchema.pstCmt.$.pstCmtSep" : '03' // 댓글 상태
+                "subSchema.pstCmt.$.pstCmtSep" : params.pstCmtDcd
                 ,"subSchema.pstCmt.$.pstCmtLtDate" : date.getDate() // 댓글 최종 수정일자 
             }}
             , function(err, result) {
