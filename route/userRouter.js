@@ -141,43 +141,50 @@
       // 내 게시물
 
       // 전체공개 게시물
-      
-        schema.aggregate([
-            {$match:{
-                wkCd : 'PST',
-                wkDtCd : 'PST',
-                "subSchema.usrId" : 'phu8460@naver.com'
-            }}, 
-            {$project:{
-               commentList  : { 
-               $filter :{   
-                   input: '$subSchema.pstCmt', 
-                   as: 'cmt', 
-                   cond: { $ne: [ "$$cmt.pstCmtSep" , "03"]}
-        
-               }
-            }, ROOT: "$$ROOT"
-            }},
-            {$sort : {
-                "ROOT.fstWrDt" : -1
-                ,"commentList.pstCmtSep" : 1
-                ,"commentList.pstWtDate" : 1
-            }} 
+       
+      schema.aggregate([
+        {$match:{
+            wkCd : 'PST',
+            wkDtCd : 'PST',
+            "subSchema.usrId" : 'phu8460@naver.com'
+        }},
+    //     {$project : {_id : 0}},
+        {$unwind : "$subSchema.pstCmt"},
+        {$sort : {
+            "fstWrDt" : -1,
+            "subSchema.pstCmt.pstCmtGp" : 1
+        }},
+        {$group:{
+            "_id" : "$id"
+            ,"wkCd" : {"$first":"$wkCd"}
+            ,"wkDtCd" : {"$first":"$wkDtCd"}
+            ,"fstWrDt" : {"$first":"$fstWrDt"}
+            ,"lstWrDt" : {"$first":"$lstWrDt"}
+            ,"usrName" : {"$first":"$subSchema.usrName"}
+            ,"usrId" : {"$first":"$subSchema.usrId"}
+            ,"pstPts" : {"$first":"$subSchema.pstPts"}
+            ,"pstCt" : {"$first":"$subSchema.pstCt"}
+            ,"pstHt" : {"$first":"$subSchema.pstHt"}
+            ,"pstCmt" : {"$push":"$subSchema.pstCmt"}
+            ,"pstPubYn" : {"$first":"$subSchema.pstPubYn"}
+            ,"pstPk" : {"$first":"$subSchema.pstPk"}
+        }}
         ],function(err, result) {
             if (err) {
                 console.log('error \n', err);
                 return res.status(500).send("select error >> " + err)
             }
+            console.log(result);
             if (result.length > 0) {
                 let postList = [];                
                 for(var i=0; i<result.length; i++){
                     var tempPhoto = [];
-                    if(result[i].ROOT.subSchema.pstPts 
-                        && result[i].ROOT.subSchema.pstPts.length >0 ){
-                            for(var j=0; j<result[i].ROOT.subSchema.pstPts.length; j++){
+                    if(result[i].pstPts 
+                        && result[i].pstPts.length >0 ){
+                            for(var j=0; j<result[i].pstPts.length; j++){
                                 let tp = {
                                     // 'src': "require('"+result[i].subSchema.pstPts[j]+"')",
-                                    'src': result[i].ROOT.subSchema.pstPts[j],
+                                    'src': result[i].pstPts[j],
                                     'width': 1,
                                     'height': 1 
                                 }
@@ -186,13 +193,13 @@
                     }
 
                     let post ={
-                        pstPk : result[i].ROOT.subSchema.pstPk
-                        ,usrName : result[i].ROOT.subSchema.usrName
-                        ,wrDt : date.getWriteDate(result[i].ROOT.lstWrDt)
+                        pstPk : result[i].pstPk
+                        ,usrName : result[i].usrName
+                        ,wrDt : date.getWriteDate(result[i].lstWrDt)
                         ,pstPts : tempPhoto
-                        ,pstCt : result[i].ROOT.subSchema.pstCt
-                        ,pstHt : result[i].ROOT.subSchema.pstHt
-                        ,pstCmt : result[i].commentList
+                        ,pstCt : result[i].pstCt
+                        ,pstHt : result[i].pstHt
+                        ,pstCmt : result[i].pstCmt
                     };
                     postList.push(post); 
                 }
@@ -204,9 +211,10 @@
                 res.json({
                     reCd : '02'
                 });  
-            }
-        });
+            }     
     });
+        
+});
 
     router.post('/postCmtWt',function(req, res){
         let params = req.body;
