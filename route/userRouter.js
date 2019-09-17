@@ -136,28 +136,48 @@
     });
 
     router.post('/postList',function(req, res){
+      // 친구 게시물
 
-        schema.find({
-            wkCd : 'PST',
-            wkDtCd : 'PST',
-            "subSchema.usrId" : 'phu8460@naver.com'
-        }
-        , function(err, result) {
+      // 내 게시물
+
+      // 전체공개 게시물
+      
+        schema.aggregate([
+            {$match:{
+                wkCd : 'PST',
+                wkDtCd : 'PST',
+                "subSchema.usrId" : 'phu8460@naver.com'
+            }}, 
+            {$project:{
+               commentList  : { 
+               $filter :{   
+                   input: '$subSchema.pstCmt', 
+                   as: 'cmt', 
+                   cond: { $ne: [ "$$cmt.pstCmtSep" , "03"]}
+        
+               }
+            }, ROOT: "$$ROOT"
+            }},
+            {$sort : {
+                "ROOT.fstWrDt" : -1
+                ,"commentList.pstCmtSep" : 1
+                ,"commentList.pstWtDate" : 1
+            }} 
+        ],function(err, result) {
             if (err) {
                 console.log('error \n', err);
                 return res.status(500).send("select error >> " + err)
             }
             if (result.length > 0) {
                 let postList = [];                
-
                 for(var i=0; i<result.length; i++){
-                    let tempPhoto = [];
-                    if(result[i].subSchema.pstPts 
-                        && result[i].subSchema.pstPts.length >0 ){
-                            for(var j=0; j<result[i].subSchema.pstPts.length; j++){
+                    var tempPhoto = [];
+                    if(result[i].ROOT.subSchema.pstPts 
+                        && result[i].ROOT.subSchema.pstPts.length >0 ){
+                            for(var j=0; j<result[i].ROOT.subSchema.pstPts.length; j++){
                                 let tp = {
                                     // 'src': "require('"+result[i].subSchema.pstPts[j]+"')",
-                                    'src': result[i].subSchema.pstPts[j],
+                                    'src': result[i].ROOT.subSchema.pstPts[j],
                                     'width': 1,
                                     'height': 1 
                                 }
@@ -166,17 +186,16 @@
                     }
 
                     let post ={
-                        pstPk : result[i].subSchema.pstPk
-                        ,usrName : result[i].subSchema.usrName
-                        ,wrDt : date.getWriteDate(result[i].lstWrDt)
+                        pstPk : result[i].ROOT.subSchema.pstPk
+                        ,usrName : result[i].ROOT.subSchema.usrName
+                        ,wrDt : date.getWriteDate(result[i].ROOT.lstWrDt)
                         ,pstPts : tempPhoto
-                        ,pstCt : result[i].subSchema.pstCt
-                        ,pstHt : result[i].subSchema.pstHt
-                        ,pstCmt : result[i].subSchema.pstCmt
+                        ,pstCt : result[i].ROOT.subSchema.pstCt
+                        ,pstHt : result[i].ROOT.subSchema.pstHt
+                        ,pstCmt : result[i].commentList
                     };
-                    postList.push(post);
+                    postList.push(post); 
                 }
-                
                 res.json({
                     reCd : '01'
                     ,pstList : postList
@@ -184,10 +203,9 @@
             }else{
                 res.json({
                     reCd : '02'
-                });
+                });  
             }
         });
-
     });
 
     router.post('/postCmtWt',function(req, res){
@@ -203,15 +221,21 @@
                 return res.status(500).send("select error >> " + err)
             }
             if (result.length > 0) {
+                var comments = result[0].subSchema.pstCmt;
+                if(comments && comments.length > 0){
+                    postCmtSchema.pstCmtGp = '0'+(result[0].subSchema.pstCmt[comments.length-1].pstCmtGp*1 + 1);
+                }else{
+                    postCmtSchema.pstCmtGp = '01';
+                }
+
                 var _id = result[0]._id;
                 let commentList = result[0].subSchema.pstCmt;
-                
                 postCmtSchema.pstCmtPk = random.getPk(4);
                 postCmtSchema.usrName = params.usrName;
                 postCmtSchema.pstCmtCt = params.pstCmtCt;
                 postCmtSchema.pstCmtSep = '01';
-                postCmtSchema.pstWtDate = date.getDate();
-                postCmtSchema.pstLtDate = date.getDate();
+                postCmtSchema.pstCmtWtDate = date.getDate();
+                postCmtSchema.pstCmtLtDate = date.getDate();
                 commentList.push(postCmtSchema);
                 schema.updateOne({
                     "_id" : _id
@@ -303,6 +327,61 @@
                     });
                 }
             });
+    });
+
+    router.post('/postCmtRp',function(req, res){
+        let params = req.body;
+        
+        schema.find({
+            wkCd : 'PST',
+            wkDtCd : 'PST',
+            "subSchema.pstPk" : params.pstPk
+        },function(err, result){
+            if (err) {
+                console.log('error \n', err);
+                return res.status(500).send("select error >> " + err)
+            }
+            if (result.length > 0) {
+                var _id = result[0]._id;
+                let commentList = result[0].subSchema.pstCmt;
+                postCmtSchema.pstCmtGp = params.pstCmtGp;
+                postCmtSchema.pstCmtPk = random.getPk(4);
+                postCmtSchema.usrName = params.usrName;
+                postCmtSchema.pstCmtCt = params.pstCmtCt;
+                postCmtSchema.pstCmtSep = '02';
+                postCmtSchema.pstCmtWtDate = date.getDate();
+                postCmtSchema.pstCmtLtDate = date.getDate();
+                commentList.push(postCmtSchema);
+                schema.updateOne({
+                    "_id" : _id
+                }
+                , { $set: {
+                    'subSchema.pstCmt': commentList
+                }}
+                , function(err, result) {
+                    if (err) {
+                        console.log('error \n', err);
+                        return res.status(500).send("select error >> " + err)
+                    }
+                    if (result.n) {
+                        console.log("★★★ 답글 등록 성공 result ★★★ \n",result.n);
+                        res.json({
+                            reCd : '01'
+                        });
+                    } else {
+                        console.log("★★★ 답글 등록 실패 ★★★ \n",result.n);
+                        res.json({
+                            reCd : '02'
+                        });
+                    }
+                }); // update close
+            }else{
+                console.log("★★★ 답글 등록 실패 ★★★ \n",result.n);
+                res.json({
+                    reCd : '02'
+                });
+            }
+        });
     });
 
 module.exports = router;

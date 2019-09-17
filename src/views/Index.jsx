@@ -21,6 +21,7 @@ class Index extends React.Component {
     ,pstStSuCd : false
     ,writeComment : ''
     ,updateComment : ''
+    ,replyComment : ''
   };
 
   getPostListCallback= (result) =>{
@@ -75,6 +76,53 @@ class Index extends React.Component {
     });
     this.getPostList();
   }
+
+  commentReply = (cd, postIdx, commentIdx) =>{
+    let postList = this.state.postList;
+    console.log('commentReply () ',cd , "\n",postList);
+    if(postList){
+      if(cd === 'v'){
+        for(var i=0; i< postList[postIdx].pstCmt.length; i++){
+          if(i==commentIdx){
+            postList[postIdx].pstCmt[commentIdx].pstCmtRp = true;
+          }else{
+            postList[postIdx].pstCmt[i].pstCmtRp = false;
+          }
+        }
+        this.setState({
+          postList : postList
+        });
+      }else if(cd === 'c'){
+        postList[postIdx].pstCmt[commentIdx].pstCmtRp = false;
+        this.setState({
+          postList : postList
+          ,replyComment : ''
+        });
+      }else if(cd === 'e'){
+        let param = {
+          usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
+          ,pstPk : postList[postIdx].pstPk
+          ,pstCmtCt : this.state.replyComment
+          ,pstCmtPk : postList[postIdx].pstCmt[commentIdx].pstCmtPk
+          ,pstCmtGp : postList[postIdx].pstCmt[commentIdx].pstCmtGp
+        };
+        api.apiSend('post','postCmtRp',param,this.commentReplyCallback);
+      }
+    }
+  }
+
+  commentReplyCallback = (result)=>{
+    if(result.reCd==='01'){
+      alert('답글 등록 성공!');
+    }else{
+      alert('답글 등록 실패');
+    }
+    this.setState({
+      replyComment : ''
+    });
+    this.getPostList();
+  }
+
   commentChnage = (e) =>{
     this.setState({
       writeComment : e.target.value
@@ -84,6 +132,11 @@ class Index extends React.Component {
   commentUtChnage =(e)=>{
     this.setState({
       updateComment : e.target.value
+    });
+  }
+  replyChange =(e)=>{
+    this.setState({
+      replyComment : e.target.value
     });
   }
 
@@ -157,6 +210,7 @@ class Index extends React.Component {
       ]
     });
   }
+
   componentDidMount(){
       if(!this.state.pstStSuCd){
           this.getPostList();
@@ -274,6 +328,7 @@ class Index extends React.Component {
                           placeholder="댓글을 입력하세요" 
                           onChange = {e=>{this.commentChnage(e)}}
                           value = {this.state.writeComment}
+                          ref={(textarea) => { this.textarea = textarea; }}
                         >
                         </textarea>
                       </Col>
@@ -307,8 +362,8 @@ class Index extends React.Component {
                             {comment.pstCmtWtDate}
                         </Col>
                         <Col lg="11">
-                          {(comment.pstCmtSep == '02' ) ? 
-                            <i className="ni bold-right" />
+                          {(comment.pstCmtSep === '02' ) ? 
+                            <i className="bold-right" />
                             : ''}
                           <div className="card shadow">
                             <div className="card-body">
@@ -363,15 +418,60 @@ class Index extends React.Component {
                               수정
                             </button>&nbsp;
                             <button type="button" 
-                                    className="btn-sm btn-danger"
+                                    className="btn-sm btn-danger form-control-cursor"
                                     onClick={e=>{this.commentDeleteConfirm(postIdx, commentIdx)}}
                             >
                               삭제
                             </button> &nbsp;
-
-                            <button type="button" className="btn-sm btn-info">답글</button>
+                            <button type="button" 
+                                    className="btn-sm btn-info form-control-cursor"
+                                    onClick = {e=>{this.commentReply('v',postIdx, commentIdx)}}
+                            >
+                              답글
+                            </button>
                         </div>
+                        <br></br>
                         </Col>  
+                        : ''}
+                      {(comment.pstCmtRp) ? 
+                      <div >
+                      <Row className="align-items-center avatar-padding">
+                        <br></br>
+                      <Col lg="1" className="">
+                        <span className="avatar avatar-sm rounded-circle">
+                          <img
+                            alt="..."
+                            src={require("assets/img/theme/team-4-800x800.jpg")}
+                          />
+                        </span>
+                      </Col>
+                      <Col lg="8">
+                        <textarea 
+                          className="form-control " 
+                          id="exampleFormControlTextarea1" 
+                          rows="3" 
+                          placeholder="답글을 입력하세요" 
+                          onChange = {e=>{this.replyChange(e)}}
+                          value = {this.state.replyComment}
+                        >
+                        </textarea>
+                      </Col>
+                      <Col lg="3">
+                        <button type="button" 
+                                className="btn btn-primary form-control-cursor"
+                                onClick = {e=>{this.commentReply('e',postIdx, commentIdx, comment.pstCmtGp)}}
+                                >
+                          작성
+                        </button>
+                        <button type="button" 
+                                className="btn btn-danger form-control-cursor"
+                                onClick = {e=>{this.commentReply('c',postIdx, commentIdx)}}
+                        >
+                          취소
+                        </button>
+                      </Col>
+                      </Row>
+                    </div>
                         : ''}
                       </div> 
                       )}) : ''

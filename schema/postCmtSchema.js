@@ -1,5 +1,6 @@
 var schema = ({
     pstCmtPk  : ''
+   ,pstCmtGp  : ''
    ,usrName   : ''
    ,pstCmtCt  : ''
    ,pstCmtSep : ''
