@@ -92,7 +92,6 @@
 
     router.post('/post',function(req, res){
         let params = req.body;
-        
         // 사용자 이름으로 id 검색 후 입력
         schema.find({
             wkCd: 'USR',
@@ -104,8 +103,17 @@
                 return res.status(500).send("select error >> " + err)
             }
             if (result.length > 0) {
-                console.log("★★★ login history search result ★★★ \n",result[0]);
+              //  console.log("★★★ login history search result ★★★ \n",result[0]);
                 let usrId = result[0].subSchema.usrId;
+                // let ptsList = [];
+                // if(params.pstPts && params.pstPts.length>0){
+                //     var blob = new Blob([params.pstPt]);
+                //     console.log('★★★ 읽은 이미지 ★★★\n',blob);
+                //     ptsList = blob;
+                // }else{
+                //     console.log('★★★ post 이미지 0 ★★★');
+                // }
+
                 postSchema.pstPk = random.getPk(4);
                 postSchema.usrName = params.usrName;
                 postSchema.usrId = usrId;
@@ -121,7 +129,7 @@
                     ,lstWrDt: date.getDate() // 최종 작성일
                     ,subSchema: postSchema
                 }).then((result)=>{
-                    console.log("★★post success★★\n",result);
+                    // console.log("★★post success★★\n",result);
                     res.json({
                         reCd: '01'
                     });
@@ -193,7 +201,7 @@
                 console.log('error \n', err);
                 return res.status(500).send("select error >> " + err)
             }
-            console.log(result);
+            // console.log(result);
             if (result.length > 0) {
                 let postList = [];                
                 for(var i=0; i<result.length; i++){

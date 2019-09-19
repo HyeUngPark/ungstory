@@ -9,7 +9,7 @@ export default class PostWriteModal extends React.Component {
     this.state = { 
       modal: false
       , tag: []
-      , postImgs : []
+      , tempImgs : []
       , PostContent : ''
       , pstPubYn : '01'
     };
@@ -56,7 +56,7 @@ export default class PostWriteModal extends React.Component {
   cancel=()=>{
     this.setState({
       tag:[]
-      ,postImgs :[]
+      ,tempImgs : []
     })
     // this.modalOpen();
     this.modalClose();
@@ -70,10 +70,10 @@ export default class PostWriteModal extends React.Component {
         var reader = new FileReader();
         reader.readAsDataURL(file);
         reader.onloadend = function (file) {
-          var tempList = this.state.postImgs;
+          var tempList = this.state.tempImgs;
             tempList.push(file.target.result);
             this.setState({
-              postImgs : tempList
+              tempImgs : tempList
             });
             e.preventDefault();
           }.bind(this);
@@ -89,10 +89,10 @@ export default class PostWriteModal extends React.Component {
 
     if(e.target){
       // const idx =  e.target.attributes.value.value * 1;
-      const list = this.state.postImgs;
+      const list = this.state.tempImgs;
       if (idx > -1) list.splice(idx, 1)
       this.setState({
-        postImgs : list
+        tempImgs : list
       });
     }
   }
@@ -102,7 +102,7 @@ export default class PostWriteModal extends React.Component {
     
     if(e.target){
       // const idx =  e.target.attributes.value.value * 1;
-      const list = this.state.postImgs;
+      const list = this.state.tempImgs;
       if (idx > -1){
         window.open('about:blank',list[idx]);
       }
@@ -110,7 +110,6 @@ export default class PostWriteModal extends React.Component {
   };
 
   valChange = (cd, e) =>{
-    console.log('cd >> ',cd, ' value >> ', e.target.value);
     if(cd === 'p'){ // 공개여부
       switch(e.target.value){
         case 1:
@@ -136,29 +135,26 @@ export default class PostWriteModal extends React.Component {
     }
   }
 
-  valCheck=() => {
-    // if()
-  };
-
   postCallback = (result) =>{
     if(result.reCd === '01'){
       alert('게시글 작성 성공');
     }else{
       alert('게시글 작성 실패');
     }
-    this.cancel();
+    // this.cancel();
+    window.location.reload();
+
   };
 
   post = () =>{
     // valcheck
-    if(this.state.postImgs.length==0 && this.state.PostContent === ''){
+    if(this.state.tempImgs.length==0 && this.state.PostContent === ''){
       alert('이미지 또는 게시글 내용 중 하나는 필수입니다.');
       return;
     }
-    // postImg
     var param={
       usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
-      ,pstPts : this.state.postImgs
+      ,pstPts : this.state.tempImgs
       ,pstCt : this.state.PostContent
       ,pstHt : this.state.tag
       ,pstPubYn : this.state.pstPubYn
@@ -175,7 +171,7 @@ export default class PostWriteModal extends React.Component {
                         </a>
                       </li>)
     );
-    const imgList = this.state.postImgs.map(
+    const imgList = this.state.tempImgs.map(
       (img,index) => (<li className="form-tag form-tag-li" key={index}>
                       <div
                         style={{
@@ -271,7 +267,7 @@ export default class PostWriteModal extends React.Component {
                          multiple
                         //  value ={this.state.postImgs}
                          onClick={e=>{this.setState({
-                           postImgs : []
+                           tempImgs : []
                          })}}
                          onChange = {this.imgChange}
                     />
@@ -293,7 +289,7 @@ export default class PostWriteModal extends React.Component {
                     paddingRight : '0px'
                   }}>
                     <i className=" ni ni-tag align-items-center">
-                      <label htmlFor="PostImg">&nbsp;해시태그 </label>
+                      &nbsp;해시태그
                     </i>
                   </span>
                 </Col>
