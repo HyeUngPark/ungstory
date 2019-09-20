@@ -30,6 +30,7 @@ class LoginProfile extends React.Component {
         ,usrName : ''
         ,dropdownOpen:false
         ,isModalOpen:false
+        ,seesionCheck : false
     }
 
     toggle = (e) =>{
@@ -57,21 +58,22 @@ class LoginProfile extends React.Component {
 
     loginCkCallback= (result) =>{
         if(result.reCd==="01"){
-          console.log('login 상태 \n',this.state.loginYn);
           this.setState({
-            loginYn : true
+            loginYn : true,
+            seesionCheck : true
           });
   
           let usrInfo = JSON.parse(localStorage.getItem('usrInfo'));
           if(usrInfo){
             this.setState({
               usrName : usrInfo.usrName
+              ,seesionCheck : true
             });
           }
         }else if(result.reCd ==='02'){
-          console.log('비 login 상태 \n',this.state.loginYn);
           this.setState({
             loginYn : false
+            ,seesionCheck : true
           });
         }else if(result.reCd === '03'){
             let usrInfo = JSON.parse(localStorage.getItem('usrInfo'));
@@ -115,7 +117,7 @@ class LoginProfile extends React.Component {
     }
 
     componentDidMount(){
-        if(localStorage.getItem('usrInfo')){
+        if(!this.state.seesionCheck && localStorage.getItem('usrInfo')){
             this.sessionCheck();
         }
     }

@@ -20,15 +20,18 @@ import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 
 class Index extends React.Component {
-  state = {
-    postList : []
-    , pstStSuCd : false
-    , replyComment : ''
-  };
+  constructor(props){
+    // this.getPostList();
+    super(props);
+    this.state =  {
+        postList : []
+        , pstStSuCd : false
+        , replyComment : ''
+    };
+  }
   getPostListCallback= (result) =>{
     let postList = [];
     if(result.reCd==="01"){
-      console.log('게시글 조회 성공 \n',result.pstList);
       postList = result.pstList;
     }else if(result.reCd ==='02'){
       console.log('게시글 조회 실패');
@@ -221,6 +224,7 @@ class Index extends React.Component {
       postList : postList
     });
   }
+  
   postDeleteCallback=(result)=>{
     if(result.reCd === '01'){
       alert('게시글 삭제 완료');
@@ -229,6 +233,7 @@ class Index extends React.Component {
     }
     window.location.reload();
   }
+ 
   postDelete =(postIdx)=>{
     let postList = this.state.postList;
     postList[postIdx].postMg = false;
@@ -267,6 +272,7 @@ class Index extends React.Component {
       });
     }
   }
+  
   commentDeleteConfirm = (postIdx, commentIdx)=>{
     confirmAlert({
       title: '댓글 삭제 확인',
@@ -284,11 +290,11 @@ class Index extends React.Component {
     });
   }
 
-  // componentDidMount(){
-      // if(!this.state.pstStSuCd){
-          // this.getPostList();
-      // }
-  // }
+  componentDidMount(){
+      if(!this.state.pstStSuCd){
+          this.getPostList();
+      }
+  }
 
   render() {
     return (
@@ -316,7 +322,7 @@ class Index extends React.Component {
                                   >
                                       <DropdownToggle 
                                         className="pr-0" 
-                                        onClick={this.postMgToggle(postIdx)}
+                                        onClick={e=>{this.postMgToggle(postIdx)}}
                                         nav>
                                         &nbsp;
                                         <i className="ni ni-settings-gear-65 form-control-cursor"/>
@@ -349,7 +355,7 @@ class Index extends React.Component {
                     <Col lg="12">
                       <div className="card shadow">
                         <div className="card-body">
-                            <div className="tab-content" id="myTabContent">
+                            <div className="tab-content" id="postContent">
                                 <div className="tab-pane fade show active" id="tabs-icons-text-1" role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
                                     <p className="description">
                                         {post.pstCt}
@@ -368,7 +374,7 @@ class Index extends React.Component {
                       <Col lg="8">
                         <div className="card shadow">
                           <div className="card-body">
-                              <div className="tab-content" id="myTabContent">
+                              <div className="tab-content" id="postHashTag">
                                   <div className="tab-pane fade show active" id="tabs-icons-text-1" role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
                                       <p className="description">
                                         {
@@ -394,7 +400,6 @@ class Index extends React.Component {
                   ////////////////////////////////*/}
                   {
                     (post.pstCmt && post.pstCmt.length == 0 ) ? 
-                     <Row className="align-items-center avatar-padding">
                       <Col lg="12">
                         <div className="card shadow">
                           <div className="card-body">
@@ -408,9 +413,7 @@ class Index extends React.Component {
                             </div>
                           </div>
                           <br/>
-                        </Col>
-                      </Row> 
-                    : ''
+                        </Col>: ''
                     }
                     {/* 댓글 작성 */}
                     {(localStorage.getItem('usrInfo')
@@ -483,7 +486,7 @@ class Index extends React.Component {
                         <Col lg="11">
                           <div className="card shadow">
                             <div className="card-body">
-                                <div className="tab-content" id="myTabContent">
+                                <div className="tab-content" id="updateContents">
                                     <div className="tab-pane fade show active" id="tabs-icons-text-1" role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
                                         <p className="description">
                                           {
