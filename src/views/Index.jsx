@@ -6,7 +6,11 @@ import {
   CardHeader,
   Container,
   Row,
-  Col
+  Col,
+  UncontrolledDropdown,
+  DropdownMenu,
+  DropdownItem,
+  DropdownToggle
 } from "reactstrap";
 
 import * as api from "api/api";
@@ -18,25 +22,21 @@ import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 class Index extends React.Component {
   state = {
     postList : []
-    ,pstStSuCd : false
-    ,replyComment : ''
+    , pstStSuCd : false
+    , replyComment : ''
   };
-
   getPostListCallback= (result) =>{
+    let postList = [];
     if(result.reCd==="01"){
       console.log('게시글 조회 성공 \n',result.pstList);
-      this.setState({
-        pstStSuCd : true
-        ,postList : result.pstList
-      });
-      
+      postList = result.pstList;
     }else if(result.reCd ==='02'){
       console.log('게시글 조회 실패');
-      this.setState({
-        pstStSuCd : true
-      });
-      
     }
+    this.setState({
+      pstStSuCd : true
+      ,postList : postList
+    });
   }
 
   getPostList =()=>{
@@ -49,8 +49,9 @@ class Index extends React.Component {
     }
     api.apiSend('post','postList',param,this.getPostListCallback);
   }
+
   commentWrite = (pstPk, postIdx) => {
-    let postList = this.state.postList;;
+    let postList = this.state.postList;
     if(postList[postIdx].wrComment === ''){
       alert('댓글 내용을 입력해주세요.');
       return;
@@ -152,6 +153,7 @@ class Index extends React.Component {
     }else{
       alert('댓글 수정 실패');
     }
+    
     this.getPostList();
   }
   commentUpdate = (cd, postIdx, commentIdx) =>{
@@ -211,6 +213,60 @@ class Index extends React.Component {
     };
     api.apiSend('post','postCmtDel',param,this.commentDeleteCallback);
   }
+
+  postMgToggle = (postIdx) =>{
+    let postList = this.state.postList;
+    postList[postIdx].postMg = true;
+    this.setState({
+      postList : postList
+    });
+  }
+  postDeleteCallback=(result)=>{
+    if(result.reCd === '01'){
+      alert('게시글 삭제 완료');
+    }else if(result.reCd === '02'){
+      alert('게시글 삭제 실패');
+    }
+    window.location.reload();
+  }
+  postDelete =(postIdx)=>{
+    let postList = this.state.postList;
+    postList[postIdx].postMg = false;
+    this.setState({
+      postList : postList
+    });
+    let param = {
+      pstPk : postList[postIdx].pstPk
+    };
+    api.apiSend('post','postDel',param, this.postDeleteCallback); 
+  }
+
+  postMg =(cd, postIdx) =>{
+    if(cd === 'u'){
+      console.log('포스트 수정 ');
+    }else if(cd === 'd'){
+      confirmAlert({
+        title: '댓글 삭제 확인',
+        message: '정말 포스트를 삭제하시겠습니까?',
+        buttons: [
+          {
+            label: '삭제하기',
+            onClick: () => this.postDelete(postIdx)
+          },
+          {
+            label: '취소',
+            onClick: () => {
+              let postList = this.state.postList;
+              postList[postIdx].postMg = false;
+              this.setState({
+                postList : postList
+              });
+            }
+          }
+        ]
+      });
+    }
+  }
   commentDeleteConfirm = (postIdx, commentIdx)=>{
     confirmAlert({
       title: '댓글 삭제 확인',
@@ -228,11 +284,11 @@ class Index extends React.Component {
     });
   }
 
-  componentDidMount(){
-      if(!this.state.pstStSuCd){
-          this.getPostList();
-      }
-  }
+  // componentDidMount(){
+      // if(!this.state.pstStSuCd){
+          // this.getPostList();
+      // }
+  // }
 
   render() {
     return (
@@ -243,9 +299,6 @@ class Index extends React.Component {
         {
           this.state.postList.map((post, postIdx)=>{
             return(
-              ////////////////////////////////////////////////////////////////////////////////////////////////
-              ////////////////////////////////////////////////////////////////////////////////////////////////
-              ////////////////////////////////////////////////////////////////////////////////////////////////
               <Row className="mt-5">
                 <Col className="mb-5 mb-xl-0" xl="8">
                   <Card className="shadow">
@@ -255,7 +308,38 @@ class Index extends React.Component {
                             {post.usrName}
                         </Col>
                         <Col lg="6" className="text-right">
+                            <span>
                             {post.wrDt}
+                            {(post.myPst) ? 
+                                  <UncontrolledDropdown
+                                    isOpen={post.postMg}
+                                  >
+                                      <DropdownToggle 
+                                        className="pr-0" 
+                                        onClick={this.postMgToggle(postIdx)}
+                                        nav>
+                                        &nbsp;
+                                        <i className="ni ni-settings-gear-65 form-control-cursor"/>
+                                      </DropdownToggle>
+                                      <DropdownMenu className="dropdown-menu-arrow " right>
+                                        <DropdownItem
+                                          className="form-control-cursor"
+                                          onClick = {e=>{this.postMg('u',postIdx)}}
+                                        >
+                                          <i className="ni ni-send"/>
+                                            포스트 수정
+                                        </DropdownItem>
+                                        <DropdownItem
+                                          className="form-control-cursor"
+                                          onClick = {e=>{this.postMg('d',postIdx)}}
+                                        >
+                                          <i className="ni ni-basket"/>
+                                            포스트 삭제
+                                        </DropdownItem>
+                                      </DropdownMenu>
+                                  </UncontrolledDropdown>
+                            :''}
+                            </span>
                         </Col>
                       </Row>
                     </CardHeader>
@@ -314,7 +398,7 @@ class Index extends React.Component {
                       <Col lg="12">
                         <div className="card shadow">
                           <div className="card-body">
-                              <div className="tab-content" id="myTabContent">
+                              <div className="tab-content" id="notComment">
                                   <div className="tab-pane fade show active" id="tabs-icons-text-1" role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
                                       <p className="description">
                                         댓글이 없습니다.
@@ -329,7 +413,8 @@ class Index extends React.Component {
                     : ''
                     }
                     {/* 댓글 작성 */}
-                    
+                    {(localStorage.getItem('usrInfo')
+                    && JSON.parse(localStorage.getItem('usrInfo')).usrName ) ?
                     <Row className="align-items-center avatar-padding">
                       <Col lg="1" className="">
                         <span className="avatar avatar-sm rounded-circle">
@@ -359,7 +444,7 @@ class Index extends React.Component {
                           작성
                         </button>
                       </Col>
-                      </Row>
+                      </Row> : ''}
                     <br/>
                     {/* 댓글 내용 */}
                       {
@@ -367,10 +452,10 @@ class Index extends React.Component {
                       post.pstCmt.map((comment, commentIdx)=>{
                         return(
                       <div>
-                    <Row className = "align-items-center avatar-padding"
-                         lg="12"
-                    >
-                        {(comment.pstCmtSep === '02' ||  comment.pstCmtSep === '03R') ? 
+                        <Row className = "align-items-center avatar-padding"
+                            lg="12"
+                        >
+                          {(comment.pstCmtSep === '02' ||  comment.pstCmtSep === '03R') ? 
                               <Col lg="1">
                                 <img
                                   className=""
@@ -417,7 +502,7 @@ class Index extends React.Component {
                               </div>
                           </div>
                         </Col>
-                        {(comment.pstCmtUd) ? 
+                        {(comment.pstCmtUd && post.myPst) ? 
                           <Col lg="11">
                             <br />
                             <div className="col text-right avatar-padding-right-none">
@@ -436,24 +521,29 @@ class Index extends React.Component {
                             </div>
                           </Col>
                           : ''}
-                      </Row> 
-                      {(!comment.pstCmtUd) ? 
+                      </Row>
+                      {(localStorage.getItem('usrInfo')
+                        && JSON.parse(localStorage.getItem('usrInfo')).usrName
+                        && !comment.pstCmtUd) ? 
                         <Col lg="11">
                         <br></br>
                         <div className="col text-right avatar-padding-right-none form-control-cursor">
                             {/* 내 댓글일 경우에만 수정/삭제 */}
-                            <button type="button" 
-                                    className="btn-sm btn-info form-control-cursor"
-                                    onClick ={e=>{this.commentUpdate('v',postIdx, commentIdx)}}
-                            >
-                              수정
-                            </button>&nbsp;
-                            <button type="button" 
-                                    className="btn-sm btn-danger form-control-cursor"
-                                    onClick={e=>{this.commentDeleteConfirm(postIdx, commentIdx)}}
-                            >
-                              삭제
-                            </button> &nbsp;
+                            {(post.myPst) ? 
+                              <span>
+                              <button type="button" 
+                                      className="btn-sm btn-info form-control-cursor"
+                                      onClick ={e=>{this.commentUpdate('v',postIdx, commentIdx)}}
+                              >
+                                수정  
+                              </button> &nbsp;
+                              <button type="button" 
+                                      className="btn-sm btn-danger form-control-cursor"
+                                      onClick={e=>{this.commentDeleteConfirm(postIdx, commentIdx)}}
+                              >
+                                삭제 
+                              </button>  &nbsp;
+                              </span>: ''}
                             <button type="button" 
                                     className="btn-sm btn-info form-control-cursor"
                                     onClick = {e=>{this.commentReply('v',postIdx, commentIdx)}}
@@ -461,9 +551,9 @@ class Index extends React.Component {
                               답글
                             </button>
                         </div>
-                        <br></br>
+                          <br />
                         </Col>  
-                        : ''}
+                        : <br/>}
                       {(comment.pstCmtRp) ? 
                       <div >
                       <Row className="align-items-center avatar-padding">

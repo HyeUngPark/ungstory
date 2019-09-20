@@ -144,6 +144,7 @@
     });
 
     router.post('/postList',function(req, res){
+      var params = req.body;
       // 친구 게시물
 
       // 내 게시물
@@ -154,7 +155,8 @@
         {$match:{
             wkCd : 'PST',
             wkDtCd : 'PST',
-            "subSchema.usrId" : 'phu8460@naver.com'
+            "subSchema.usrId" : 'phu8460@naver.com',
+            "subSchema.pstPubYn" : {"$ne": "04"}
         }},
         {$unwind : {
             path: "$subSchema.pstCmt",
@@ -203,6 +205,7 @@
             }
             // console.log(result);
             if (result.length > 0) {
+                console.log(result.length+'건 조회');
                 let postList = [];                
                 for(var i=0; i<result.length; i++){
                     var tempPhoto = [];
@@ -228,6 +231,14 @@
                         ,pstHt : result[i].pstHt
                         ,pstCmt : result[i].pstCmt
                     };
+
+                    // 내 게시물
+                    if(params.usrName === result[i].usrName){
+                        post.myPst = true;
+                    }else{
+                        post.myPst = false;
+                    }
+
                     postList.push(post); 
                 }
                 res.json({
@@ -417,6 +428,37 @@
                 });
             }
         });
+    });
+    router.post('/postDel',function(req, res){
+        var params = req.body;
+        console.log(params.pstPk," 게시글 삭제 시작");
+        schema.update({
+            wkCd : 'PST',
+            wkDtCd : 'PST',
+            "subSchema.pstPk" : params.pstPk
+            }
+            ,{$set:{
+                "subSchema.pstPubYn" : '04'
+                ,"lstWrDt" : date.getDate() // 댓글 최종 수정일자 
+            }}
+            , function(err, result) {
+                if (err) {
+                    console.log('error \n', err);
+                    return res.status(500).send("포스트 삭제 실패 >> " + err)
+                }
+                
+                if (result.n) {
+                    console.log('★★★ 포스트 삭제 성공 ★★★');
+                    res.json({
+                        reCd : '01'
+                    });
+                } else {
+                    console.log("★★★ 포스트 삭제 실패 ★★★ \n",result.n);
+                    res.json({
+                        reCd : '02'
+                    });
+                }
+            });
     });
 
 module.exports = router;
