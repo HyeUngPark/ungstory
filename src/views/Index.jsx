@@ -15,6 +15,7 @@ import {
 
 import * as api from "api/api";
 import Header from "components/Headers/Header.jsx";
+import PostModifyModal from '../modals/user/PostModifyModal';
 
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
@@ -247,9 +248,7 @@ class Index extends React.Component {
   }
 
   postMg =(cd, postIdx) =>{
-    if(cd === 'u'){
-      console.log('포스트 수정 ');
-    }else if(cd === 'd'){
+    if(cd === 'd'){
       confirmAlert({
         title: '댓글 삭제 확인',
         message: '정말 포스트를 삭제하시겠습니까?',
@@ -288,6 +287,13 @@ class Index extends React.Component {
         }
       ]
     });
+  }
+  modalClose =(postIdx)=>{
+    let postList = this.state.postList;
+    postList[postIdx].postMg = false;
+    this.setState(prevState => ({
+      postList: postList
+    }));
   }
 
   componentDidMount(){
@@ -328,13 +334,7 @@ class Index extends React.Component {
                                         <i className="ni ni-settings-gear-65 form-control-cursor"/>
                                       </DropdownToggle>
                                       <DropdownMenu className="dropdown-menu-arrow " right>
-                                        <DropdownItem
-                                          className="form-control-cursor"
-                                          onClick = {e=>{this.postMg('u',postIdx)}}
-                                        >
-                                          <i className="ni ni-send"/>
-                                            포스트 수정
-                                        </DropdownItem>
+                                        <PostModifyModal callbackFromParent={e=>{this.modalClose(postIdx)}} post={post}/>
                                         <DropdownItem
                                           className="form-control-cursor"
                                           onClick = {e=>{this.postMg('d',postIdx)}}
