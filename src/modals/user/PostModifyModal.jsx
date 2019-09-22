@@ -8,7 +8,6 @@ export default class PostModifyModal extends React.Component {
     super(props);
     let post = this.props.post;
     let tempPts =[], tempHts = [];
-    let pstPubYn ;
     
     if(post.pstPts){
       for(let i=0; i<post.pstPts.length; i++){
@@ -21,24 +20,13 @@ export default class PostModifyModal extends React.Component {
       }
     }
 
-    switch(post.pstPubYn){
-      case '01':
-        pstPubYn = 1;
-        break;
-      case '02':
-        pstPubYn = 2;
-        break;
-      case '03':
-        pstPubYn = 3;
-        break;
-    }
-    
     this.state = { 
       modal: false
+      , pstPk  : post.pstPk
       , tags: tempHts
       , tempImgs : tempPts
       , PostContent : post.pstCt
-      , pstPubYn : pstPubYn
+      , pstPubYn : post.pstPubYn
     };
     this.handleSubmit = this.handleSubmit.bind(this);
     this.modalClose = this.props.callbackFromParent;
@@ -136,23 +124,10 @@ export default class PostModifyModal extends React.Component {
 
   valChange = (cd, e) =>{
     if(cd === 'p'){ // 공개여부
-      switch(e.target.value){
-        case 1:
-          this.setState({
-            pstPubYn : 1
-          });
-          break;
-        case 2:
-          this.setState({
-            pstPubYn : 2
-          });
-          break;
-        case 3:
-          this.setState({
-            pstPubYn : 3
-          });
-          break;
-      }
+      console.log('공개여부+>>'+e.target.value);
+      this.setState({
+        pstPubYn : e.target.value
+      });
     }else if(cd === 'c'){ // 게시글 내용
       this.setState({
         PostContent : e.target.value
@@ -160,31 +135,29 @@ export default class PostModifyModal extends React.Component {
     }
   }
 
-  postCallback = (result) =>{
+  postModifyCallback = (result) =>{
     if(result.reCd === '01'){
-      alert('게시글 작성 성공');
+      alert('게시글 수정 성공');
     }else{
-      alert('게시글 작성 실패');
+      alert('게시글 수정 실패');
     }
-    // this.cancel();
     window.location.reload();
 
   };
 
-  post = () =>{
-    // valcheck
+  postModify = () =>{
     if(this.state.tempImgs.length==0 && this.state.PostContent === ''){
       alert('이미지 또는 게시글 내용 중 하나는 필수입니다.');
       return;
     }
     var param={
-      usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
+      pstPk : this.state.pstPk
       ,pstPts : this.state.tempImgs
       ,pstCt : this.state.PostContent
-      ,pstHt : this.state.tag
+      ,pstHt : this.state.tags
       ,pstPubYn : this.state.pstPubYn
     }
-    api.apiSend('post','post',param,this.postCallback);
+    api.apiSend('put','postModify',param,this.postModifyCallback);
   };
 
   render() {
@@ -339,13 +312,13 @@ export default class PostModifyModal extends React.Component {
                             style={{width:"50%",display:"inline"}}
                             value={this.state.pstPubYn}
                     > 
-                      <option value='1'>
+                      <option value='01'>
                         전체
                       </option>  
-                      <option value='2'>
+                      <option value='02'>
                         친구에게만
                       </option>  
-                      <option value='3'>
+                      <option value='03'>
                         비공개
                       </option>  
                     </select>
@@ -356,7 +329,7 @@ export default class PostModifyModal extends React.Component {
                          color="primary" 
                          className="btn btn-primary" 
                          value="수정"
-                         onClick={this.post}       
+                         onClick={this.postModify}       
                   />
                   <Button color="danger" onClick={this.cancel}>취소</Button>
                 </Col>

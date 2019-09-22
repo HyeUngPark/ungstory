@@ -143,6 +143,44 @@
         }); // find close
     });
 
+    router.put('/postModify',function(req, res){
+        let params = req.body;
+        console.log("★★★"+params.pstPk+"★★★");
+        console.log("★★★"+params.pstCt+"★★★");
+        console.log("★★★"+params.pstHt+"★★★");
+        console.log("★★★"+params.pstpubYn+"★★★");
+        schema.update({
+            wkCd : 'PST',
+            wkDtCd : 'PST',
+            "subSchema.pstPk" : params.pstPk
+            }
+            ,{$set:{
+                "subSchema.pstPts" : params.pstPts
+                ,"subSchema.pstCt" : params.pstCt
+                ,"subSchema.pstHt" : params.pstHt
+                ,"subSchema.pstPubYn" : params.pstPubYn
+                ,"lstWrDt" :  date.getDate()
+            }}
+            , function(err, result) {
+                if (err) {
+                    console.log('error \n', err);
+                    return res.status(500).send("포스트 수정 실패 >> " + err)
+                }
+                console.log(result)
+                if (result.n) {
+                    console.log('★★★ 포스트 수정 성공 ★★★');
+                    res.json({
+                        reCd : '01'
+                    });
+                } else {
+                    console.log("★★★ 포스트 수정 실패 ★★★ \n",result.n);
+                    res.json({
+                        reCd : '02'
+                    });
+                }
+            });
+    });
+
     router.post('/postList',function(req, res){
       var params = req.body;
       // 친구 게시물
