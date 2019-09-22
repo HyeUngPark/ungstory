@@ -7,7 +7,7 @@ export function apiSend(method, url,param,callback) {
     }
     if(method === 'get'){
         sendParams.params = param;
-    }else if(method === 'post'){
+    }else if(method === 'post' || method === 'put'){
         sendParams.data = param;
     }
     
