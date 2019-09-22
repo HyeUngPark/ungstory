@@ -7,12 +7,38 @@ export default class PostModifyModal extends React.Component {
   constructor(props) {
     super(props);
     let post = this.props.post;
+    let tempPts =[], tempHts = [];
+    let pstPubYn ;
+    
+    if(post.pstPts){
+      for(let i=0; i<post.pstPts.length; i++){
+        tempPts.push(post.pstPts[i].src);
+      }
+    }
+    if(post.pstHt){
+      for(var i=0; i<post.pstHt.length; i++){
+        tempHts.push(post.pstHt[i]);
+      }
+    }
+
+    switch(post.pstPubYn){
+      case '01':
+        pstPubYn = 1;
+        break;
+      case '02':
+        pstPubYn = 2;
+        break;
+      case '03':
+        pstPubYn = 3;
+        break;
+    }
+    
     this.state = { 
       modal: false
-      , tag: post.pstHt
-      , tempImgs : post.pstPts
+      , tags: tempHts
+      , tempImgs : tempPts
       , PostContent : post.pstCt
-      , pstPubYn : post.pstPubYn
+      , pstPubYn : pstPubYn
     };
     this.handleSubmit = this.handleSubmit.bind(this);
     this.modalClose = this.props.callbackFromParent;
@@ -29,11 +55,11 @@ export default class PostModifyModal extends React.Component {
 
   addTag = (e) =>{
     if(e.key==="Enter"){
-      const list = this.state.tag;
+      const list = this.state.tags;
       if(list.length<5){
         list.push(e.target.value);
         this.setState({
-          tag : list
+          tags : list
         });
       }else{
         alert("태그는 5개까지만 입력 가능합니다.");
@@ -44,7 +70,7 @@ export default class PostModifyModal extends React.Component {
   removeTag = (e) =>{
     if(e.target){
       const idx =  e.target.attributes.value.value * 1;
-      const list = this.state.tag;
+      const list = this.state.tags;
       if (idx > -1) list.splice(idx, 1)
       this.setState({
         tag : list
@@ -53,7 +79,7 @@ export default class PostModifyModal extends React.Component {
   }
   cancel=()=>{
     this.setState({
-      tag:[]
+      tags:[]
       ,tempImgs : []
     })
     // this.modalOpen();
@@ -80,6 +106,7 @@ export default class PostModifyModal extends React.Component {
       alert("이미지는 5개까지만 업로드 가능합니다.");
       return;
     }
+
   }
 
   removeImg = (idx,e) =>{
@@ -112,17 +139,17 @@ export default class PostModifyModal extends React.Component {
       switch(e.target.value){
         case 1:
           this.setState({
-            pstPubYn : '01'
+            pstPubYn : 1
           });
           break;
         case 2:
           this.setState({
-            pstPubYn : '02'
+            pstPubYn : 2
           });
           break;
         case 3:
           this.setState({
-            pstPubYn : '03'
+            pstPubYn : 3
           });
           break;
       }
@@ -161,7 +188,7 @@ export default class PostModifyModal extends React.Component {
   };
 
   render() {
-    const tagList = this.state.tag.map(
+    const tagList = this.state.tags.map(
       (tag,index) => (<li className="form-tag form-tag-li" key={index}>
                         <a href="javascript:void(0)" className="form-control-cursor">
                           #{tag}
@@ -289,7 +316,7 @@ export default class PostModifyModal extends React.Component {
                 <Col lg="9" style={{paddingLeft:"0"}}>
                   <span>
                     <input className="form-control " 
-                           id="PostHashTag" 
+                           id="PostHashTags" 
                            placeholder="입력후 엔터"
                            style={{height:"30px", width:"150px"}} 
                            onKeyPress={this.addTag}/>
@@ -307,11 +334,10 @@ export default class PostModifyModal extends React.Component {
               <Row>
                 <Col lg="7">
                   <i className="ni ni-lock-circle-open" style={{width:"45%"}}>&nbsp;공개 여부</i>&nbsp;
-                {/* </Col>
-                <Col lg="3"> */}
                     <select className="form-control" 
                             onChange={e=>{this.valChange('p',e)}}
                             style={{width:"50%",display:"inline"}}
+                            value={this.state.pstPubYn}
                     > 
                       <option value='1'>
                         전체
@@ -329,7 +355,7 @@ export default class PostModifyModal extends React.Component {
                   <input type="button" 
                          color="primary" 
                          className="btn btn-primary" 
-                         value="게시"
+                         value="수정"
                          onClick={this.post}       
                   />
                   <Button color="danger" onClick={this.cancel}>취소</Button>

@@ -230,6 +230,7 @@
                         ,pstCt : result[i].pstCt
                         ,pstHt : result[i].pstHt
                         ,pstCmt : result[i].pstCmt
+                        ,pstPubYn : result[i].pstPubYn
                     };
 
                     // 내 게시물
