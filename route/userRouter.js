@@ -105,14 +105,6 @@
             if (result.length > 0) {
               //  console.log("★★★ login history search result ★★★ \n",result[0]);
                 let usrId = result[0].subSchema.usrId;
-                // let ptsList = [];
-                // if(params.pstPts && params.pstPts.length>0){
-                //     var blob = new Blob([params.pstPt]);
-                //     console.log('★★★ 읽은 이미지 ★★★\n',blob);
-                //     ptsList = blob;
-                // }else{
-                //     console.log('★★★ post 이미지 0 ★★★');
-                // }
 
                 postSchema.pstPk = random.getPk(4);
                 postSchema.usrName = params.usrName;
@@ -122,6 +114,7 @@
                 postSchema.pstHt = params.pstHt;
                 postSchema.pstCmt = [];
                 postSchema.pstPubYn = params.pstPubYn;
+                postSchema.pstLike = 0;
                 schema.create({
                     wkCd: 'PST'
                     ,wkDtCd : "PST"
