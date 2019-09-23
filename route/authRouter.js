@@ -29,6 +29,7 @@ router.post('/join', function(req, res) {
     userSchema.usrPt = "";
     userSchema.usrFrds = [];
     userSchema.usrCert = '00'
+    userSchema.usrLikePst = [];
 
     schema.create({
         wkCd: 'USR'
@@ -223,6 +224,7 @@ router.post('/login', function(req, res) {
                         "usrInfo" :{
                             "usrName" : result[0].subSchema.usrName
                         }
+                        ,"usrLikePst" : result[0].subSchema.usrLikePst
                     });       
                 }).catch((err)=>{
                     console.log("★★join fail★★\n",err);
@@ -280,19 +282,20 @@ router.post('/loginCk',function(req, res){
                                 lstWrDt : date.getDate()
                                 ,'subSchema.loginToken': newToken
                             }}
-                            , function(err, result) {
+                            , function(err, uResult) {
                                 if (err) {
                                     console.log('error \n', err);
                                     return res.status(500).send("select error >> " + err)
                                 }
-                                if (result.n) {
-                                    console.log("★★★ 토큰 업데이트 성공 result ★★★ \n",result.n);
+                                if (uResult.n) {
+                                    console.log("★★★ 토큰 업데이트 성공 result ★★★ \n",uResult.n);
                                     res.json({
                                         reCd : '03'
                                         ,usrToken : newToken
+                                        ,usrLikePst : result[0].subSchema.usrLikePst
                                     });
                                 } else {
-                                    console.log("★★★ 토큰 업데이트 실패 ★★★ \n",result.n);
+                                    console.log("★★★ 토큰 업데이트 실패 ★★★ \n",uResult.n);
                                 }
                             }); // update close
                         }

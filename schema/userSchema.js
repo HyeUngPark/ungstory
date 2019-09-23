@@ -5,6 +5,7 @@ var schema = ({
     usrSep: "",
     usrPt:{}
     ,usrFrds:[]
+    ,usrLikePst : []
 });
 
 module.exports = schema;
