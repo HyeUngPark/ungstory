@@ -209,6 +209,7 @@
            ,"subSchema.pstHt" : 1
            ,"subSchema.pstPubYn" : 1
            ,"subSchema.pstPk" : 1
+           ,"subSchema.pstLike" : 1
         }},
         {$sort : {
             _id : 1
@@ -228,6 +229,7 @@
             ,"pstCmt" : {"$push":"$subSchema.pstCmt"}
             ,"pstPubYn" : {"$first":"$subSchema.pstPubYn"}
             ,"pstPk" : {"$first":"$subSchema.pstPk"}
+            ,"pstLike" : {"$first":"$subSchema.pstLike"}
         }}
         ],function(err, result) {
             if (err) {
@@ -262,6 +264,7 @@
                         ,pstHt : result[i].pstHt
                         ,pstCmt : result[i].pstCmt
                         ,pstPubYn : result[i].pstPubYn
+                        ,pstLike : result[i].pstLike
                     };
 
                     // 내 게시물
@@ -461,9 +464,9 @@
             }
         });
     });
+
     router.post('/postDel',function(req, res){
         var params = req.body;
-        console.log(params.pstPk," 게시글 삭제 시작");
         schema.update({
             wkCd : 'PST',
             wkDtCd : 'PST',
@@ -493,4 +496,75 @@
             });
     });
 
+
+    router.put('/postLike',function(req, res){
+        var params = req.body;
+        schema.update({
+                wkCd : 'PST',
+                wkDtCd : 'PST',
+                "subSchema.pstPk" : params.pstPk
+            }
+            ,{$inc: { "subSchema.pstLike" : 1 }}
+            ,{$set: {
+                "lstWrDt" : date.getDate()
+            }}
+            , function(err, uResult) {
+                if (err) {
+                    console.log('error \n', err);
+                    return res.status(500).send("포스트 좋아요 실패 >> " + err)
+                }
+                
+                if (uResult.n) {
+                    console.log('★★★ 포스트 좋아요 성공 ★★★\n');
+                    schema.find({
+                        wkCd : 'USR',
+                        wkDtCd : 'USR',
+                        "subSchema.usrName" : params.usrName
+                    },function(err, fResult){
+                        if (err) {
+                            console.log('error \n', err);
+                            return res.status(500).send("포스트 좋아요 실패 >> " + err)
+                        }
+                        if (fResult.length>0) {
+                            console.log("★★★ 포스트 좋아요 유저 조회 성공 ★★★\n",fResult[0]);
+                            let tempLikePst = fResult[0].subSchema.usrLikePst;
+                            let pstLike = {
+                                pstPk : params.pstPk
+                                ,pstLikeDt : date.getDate()
+                            };
+                            tempLikePst.push(pstLike);
+        
+                            schema.update({
+                                wkCd : 'USR',
+                                wkDtCd : 'USR',
+                                "subSchema.usrName" : params.usrName
+                            },{$set:{
+                                "subSchema.usrLikePst": tempLikePst
+                            }},function(err, result){
+                                if (err) {
+                                    console.log('error \n', err);
+                                    return res.status(500).send("select error >> " + err)
+                                }
+                                if (result.n) {
+                                    console.log('★★★ 포스트 좋아요 user update 성공 ★★★');
+                                    res.json({
+                                        reCd : '01'
+                                    });
+                                }else{
+                                    console.log('★★★ 포스트 좋아요 user update 실패 ★★★');
+                                    res.json({
+                                        reCd : '02'
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }else {
+                    console.log("★★★ 포스트 좋아요 실패 ★★★ \n",result.n);
+                    res.json({
+                        reCd : '02'
+                    });
+                }
+            });
+    });
 module.exports = router;

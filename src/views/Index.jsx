@@ -295,6 +295,24 @@ class Index extends React.Component {
       postList: postList
     }));
   }
+  postLikeCallback = (result) =>{
+    if(result.reCd === '01'){
+      alert('좋아요 성공');
+    }else{
+      alert('좋아요 실패');
+    }
+  }
+  postLike =(pstPk) => {
+    if(pstPk && localStorage.getItem('usrInfo')){
+      let param = {
+        usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
+        ,pstPk : pstPk
+      };
+      api.apiSend('put','postLike',param,this.postLikeCallback);
+    }
+
+
+  }
 
   componentDidMount(){
       if(!this.state.pstStSuCd){
@@ -366,12 +384,23 @@ class Index extends React.Component {
                       </div>
                     </Col>
                      <br />
-                    <Row className="align-items-center ">
-                      <Col lg="3" className="text-right">
-                          {/* <i className=" ni ni-favourite-28"></i> */}
-                          ♡ ♥ &nbsp;(200,000) 
+                    <Row className="align-items-center">
+                      <Col lg="5">
+                          {/* <i className=" ni ni-favourite-28"></i>  ♡ */}
+                          <div className="card shadow">
+                            <div className="card-body">
+                                <div className="tab-content" id="postLike">
+                                    <div className="tab-pane fade show active" id="tabs-icons-text-1" role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
+                                        <p className="description">
+                                        <span onClick={e=>{this.postLike(post.pstPk)}}
+                                              className="text-center form-control-cursor">♥&nbsp;</span> ({post.pstLike}) 
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                          </div>
                         </Col>
-                      <Col lg="8">
+                      <Col lg="5">
                         <div className="card shadow">
                           <div className="card-body">
                               <div className="tab-content" id="postHashTag">
