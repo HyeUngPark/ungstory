@@ -499,12 +499,18 @@
 
     router.put('/postLike',function(req, res){
         var params = req.body;
+        var likeInc = 0;
+        if(params.myLike){
+            likeInc = -1;
+        }else{
+            likeInc = 1;
+        }
         schema.update({
                 wkCd : 'PST',
                 wkDtCd : 'PST',
                 "subSchema.pstPk" : params.pstPk
             }
-            ,{$inc: { "subSchema.pstLike" : 1 }}
+            ,{$inc: { "subSchema.pstLike" : likeInc }}
             ,{$set: {
                 "lstWrDt" : date.getDate()
             }}
@@ -528,11 +534,24 @@
                         if (fResult.length>0) {
                             console.log("★★★ 포스트 좋아요 유저 조회 성공 ★★★\n",fResult[0]);
                             let tempLikePst = fResult[0].subSchema.usrLikePst;
-                            let pstLike = {
-                                pstPk : params.pstPk
-                                ,pstLikeDt : date.getDate()
-                            };
-                            tempLikePst.push(pstLike);
+                            if(likeInc>0 && tempLikePst.indexOf(params.pstPk)< 0){
+                                let pstLike = {
+                                    pstPk : params.pstPk
+                                    ,pstLikeDt : date.getDate()
+                                };
+                                tempLikePst.push(pstLike);
+                            }else{
+                                // 제거 
+                                for(var i=0; i<tempLikePst.length; i++){
+                                    if(tempLikePst[i].pstPk.indexOf(params.pstPk)>-1){
+                                        tempLikePst.splice(i,1);
+                                    }
+                                }
+                            }
+                            ///////////
+                            for(var jj=0; jj<tempLikePst.length; jj++){
+                                console.log(tempLikePst[jj].pstPk);
+                            }
         
                             schema.update({
                                 wkCd : 'USR',
@@ -547,8 +566,14 @@
                                 }
                                 if (result.n) {
                                     console.log('★★★ 포스트 좋아요 user update 성공 ★★★');
+                                    let myLikePst = [];
+                                    
+                                    for(let i=0; i<tempLikePst.length; i++){
+                                        myLikePst.push(tempLikePst[i].pstPk);
+                                    }
                                     res.json({
                                         reCd : '01'
+                                        ,usrLikePst : myLikePst
                                     });
                                 }else{
                                     console.log('★★★ 포스트 좋아요 user update 실패 ★★★');

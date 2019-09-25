@@ -297,21 +297,28 @@ class Index extends React.Component {
   }
   postLikeCallback = (result) =>{
     if(result.reCd === '01'){
-      alert('좋아요 성공');
+      console.log('좋아요 처리 성공');
+      let usrInfo = JSON.parse(localStorage.getItem('usrInfo'));
+      usrInfo.usrLikePst = result.usrLikePst;
+      localStorage.setItem('usrInfo',JSON.stringify(usrInfo));
     }else{
-      alert('좋아요 실패');
+      console.log('좋아요 처리 실패');
     }
+    this.getPostList();
   }
-  postLike =(pstPk) => {
+  postLike =(pstPk, e) => {
     if(pstPk && localStorage.getItem('usrInfo')){
+      let myLike = false;
+      if(JSON.parse(localStorage.getItem('usrInfo')).usrLikePst.indexOf(pstPk)>-1){
+        myLike = true;
+      }
       let param = {
         usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
         ,pstPk : pstPk
+        ,myLike : myLike
       };
       api.apiSend('put','postLike',param,this.postLikeCallback);
     }
-
-
   }
 
   componentDidMount(){
@@ -384,28 +391,25 @@ class Index extends React.Component {
                       </div>
                     </Col>
                      <br />
-                    <Row className="align-items-center">
-                      <Col lg="5">
-                          {/* <i className=" ni ni-favourite-28"></i>  ♡ */}
+                    <Col lg="12">
                           <div className="card shadow">
                             <div className="card-body">
-                                <div className="tab-content" id="postLike">
-                                    <div className="tab-pane fade show active" id="tabs-icons-text-1" role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
-                                        <p className="description">
-                                        <span onClick={e=>{this.postLike(post.pstPk)}}
-                                              className="text-center form-control-cursor">♥&nbsp;</span> ({post.pstLike}) 
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                          </div>
-                        </Col>
-                      <Col lg="5">
-                        <div className="card shadow">
-                          <div className="card-body">
-                              <div className="tab-content" id="postHashTag">
-                                  <div className="tab-pane fade show active" id="tabs-icons-text-1" role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
-                                      <p className="description">
+                                <Row className="tab-content" id="postLike">
+                                    <Col lg="6" className="tab-pane fade show active" role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
+                                        <span className="description form-control-cursor">
+                                        <span onClick={e=>{this.postLike(post.pstPk, e)}}
+                                              className="text-center form-control-cursor">
+                                              <font style={{"font-size" : "large"}}>
+                                                {localStorage.getItem('usrInfo')
+                                                  && JSON.parse(localStorage.getItem('usrInfo')).usrLikePst.indexOf(post.pstPk)>-1
+                                                  ? <span name="like" value="1">♥</span> : <span name="like" value="2">♡</span>
+                                                }
+                                              </font>
+                                              &nbsp;</span> {post.pstLike} 
+                                        </span>
+                                    </Col>
+                                    <Col lg="6" className="tab-pane fade show active" role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
+                                        <span className="description">
                                         {
                                         (post.pstHt && post.pstHt.length >0 ) ?
                                           post.pstHt.map((tag, index)=>{
@@ -416,13 +420,12 @@ class Index extends React.Component {
                                             )
                                         }) : ''
                                         }
-                                      </p>
-                                  </div>
+                                      </span>
+                                    </Col>
+                                  </Row>
                               </div>
-                            </div>
-                        </div>
+                          </div>
                         </Col>
-                      </Row>
                       <br/>
                   {/*////////////////////////////////
                   ////////////// 댓글 //////////////  
