@@ -309,7 +309,8 @@ class Index extends React.Component {
   postLike =(pstPk, e) => {
     if(pstPk && localStorage.getItem('usrInfo')){
       let myLike = false;
-      if(JSON.parse(localStorage.getItem('usrInfo')).usrLikePst.indexOf(pstPk)>-1){
+      if( JSON.parse(localStorage.getItem('usrInfo')).usrLikePst
+         && JSON.parse(localStorage.getItem('usrInfo')).usrLikePst.indexOf(pstPk)>-1){
         myLike = true;
       }
       let param = {
@@ -396,11 +397,13 @@ class Index extends React.Component {
                             <div className="card-body">
                                 <Row className="tab-content" id="postLike">
                                     <Col lg="6" className="tab-pane fade show active" role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
-                                        <span className="description form-control-cursor">
+                                        <span className="description">
                                         <span onClick={e=>{this.postLike(post.pstPk, e)}}
-                                              className="text-center form-control-cursor">
-                                              <font style={{"font-size" : "large"}}>
+                                              className="text-center ">
+                                              <font className = "form-control-cursor"
+                                                    style={{"font-size" : "large"}}>
                                                 {localStorage.getItem('usrInfo')
+                                                  && JSON.parse(localStorage.getItem('usrInfo')).usrLikePst
                                                   && JSON.parse(localStorage.getItem('usrInfo')).usrLikePst.indexOf(post.pstPk)>-1
                                                   ? <span name="like" value="1">♥</span> : <span name="like" value="2">♡</span>
                                                 }

@@ -534,7 +534,8 @@
                         if (fResult.length>0) {
                             console.log("★★★ 포스트 좋아요 유저 조회 성공 ★★★\n",fResult[0]);
                             let tempLikePst = fResult[0].subSchema.usrLikePst;
-                            if(likeInc>0 && tempLikePst.indexOf(params.pstPk)< 0){
+                            if(likeInc>0
+                                && tempLikePst.indexOf(params.pstPk)< 0){
                                 let pstLike = {
                                     pstPk : params.pstPk
                                     ,pstLikeDt : date.getDate()
