@@ -1,14 +1,24 @@
 import React from "react";
 
 // reactstrap components
-import { Button, Container, Row, Col } from "reactstrap";
+import { Button, Container, Row, Col} from "reactstrap";
+import UsrProfileCheck from '../../modals/auth/UsrProfileCheck';
 
 class UserHeader extends React.Component {
+  constructor(props){
+    super(props);
+    this.state =  {
+        postList : []
+    };
+  }
+  static defaultProps = {
+    usrName : localStorage.getItem('usrInfo') ? JSON.parse(localStorage.getItem('usrInfo')).usrName : '' 
+  }
   render() {
     return (
       <>
         <div
-          className="header pb-8 pt-5 pt-lg-8 d-flex align-items-center"
+          className="header pb-8 pt-5 pt-lg-12 d-flex align-items-center"
           style={{
             minHeight: "600px",
             backgroundImage:
@@ -23,18 +33,11 @@ class UserHeader extends React.Component {
           <Container className="d-flex align-items-center" fluid>
             <Row>
               <Col lg="7" md="10">
-                <h1 className="display-2 text-white">Hello Jesse</h1>
+                <h1 className="display-2 text-white">{this.props.usrName}님 반갑습니다.</h1>
                 <p className="text-white mt-0 mb-5">
-                  This is your profile page. You can see the progress you've
-                  made with your work and manage your projects or assigned tasks
+                  프로필 화면 입니다. 프로필 정보를 변경하시려면 "프로필 수정" 버튼을 클릭 후 비밀번호를 확인해주세요.
                 </p>
-                <Button
-                  color="info"
-                  href="#pablo"
-                  onClick={e => e.preventDefault()}
-                >
-                  Edit profile
-                </Button>
+                <UsrProfileCheck/>
               </Col>
             </Row>
           </Container>

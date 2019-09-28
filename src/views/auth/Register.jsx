@@ -275,7 +275,7 @@ class Register extends React.Component {
                         onClick={e=>{this.overCheck('n')}}                        
                     >
                         닉네임 중복체크
-                      </Button>
+                    </Button>
                   </InputGroup>
                  <FormGroup>
                   <InputGroup className="input-group-alternative mb-3" lg="12">
