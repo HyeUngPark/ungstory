@@ -319,6 +319,8 @@ class Index extends React.Component {
         ,myLike : myLike
       };
       api.apiSend('put','postLike',param,this.postLikeCallback);
+    }else{
+      alert('좋아요는 로그인 후 가능합니다.');
     }
   }
 
