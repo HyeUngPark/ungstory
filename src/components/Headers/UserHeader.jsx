@@ -8,8 +8,9 @@ class UserHeader extends React.Component {
   constructor(props){
     super(props);
     this.state =  {
-        postList : []
+      postList : []
     };
+    this.profilePwCheck = this.props.callbackFromParent;
   }
   static defaultProps = {
     usrName : localStorage.getItem('usrInfo') ? JSON.parse(localStorage.getItem('usrInfo')).usrName : '' 
@@ -37,7 +38,7 @@ class UserHeader extends React.Component {
                 <p className="text-white mt-0 mb-5">
                   프로필 화면 입니다. 프로필 정보를 변경하시려면 "프로필 수정" 버튼을 클릭 후 비밀번호를 확인해주세요.
                 </p>
-                <UsrProfileCheck/>
+                <UsrProfileCheck callbackFromParent={this.profilePwCheck}/>
               </Col>
             </Row>
           </Container>

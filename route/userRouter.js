@@ -4,12 +4,14 @@
     var express = require('express');
     var router = express.Router();
     var schema = require('../schema/commonSchema');
+    var loginSchema = require('../schema/loginSchema');
     var postSchema = require('../schema/postSchema');
     var postCmtSchema = require('../schema/postCmtSchema');
     var jwt = require('jsonwebtoken');
     var env = require('dotenv');
     var date = require('../myUtils/dateUtils');
     var random = require('../myUtils/randomUtils');
+    var encrypt = require('../myUtils/encryptUtils');
 
     env.config();
 
@@ -30,7 +32,8 @@
                 }else if(err && err.name === "TokenExpiredError"){
                     console.log('★★★ Token 유효기간 만료 ★★★\n');
                     if(!params.autoLoginCd){
-                        // autoLogin false일 경우 로그아웃 처리
+                    // autoLogin false일 경우 로그아웃 처리
+                        console.log('Token 만료 후 로그아웃 처리');
                         res.json({
                             reCd : '04'
                         });
@@ -41,6 +44,7 @@
                         ,mkDate : new Date()
                     },process.env.tokenKey ,    // 비밀 키
                     {expiresIn: '1h' });
+                    console.log('★★★ Token 재생성 ★★★\n',newToken);
                     
                     // 로그인 이력 업데이트
                     schema.find({
@@ -77,6 +81,8 @@
                                     console.log("★★★ 토큰 업데이트 실패 ★★★ \n",result.n);
                                 }
                             }); // update close
+                        }else{
+                            console.log('로그인 내역에 등록되지않은 Token');                            
                         }
                     }); // find close
                  }
@@ -593,4 +599,56 @@
                 }
             });
     });
+
+    router.post('/profilePwCheck',function(req, res){
+        var params = req.body;
+        console.log('/profilePwCheck');
+        schema.aggregate([
+            {$match:{
+                wkCd : 'USR'
+                , wkDtCd : 'LOGIN'
+                ,"subSchema.loginToken" : params.usrToken
+            }},
+            {$project : {
+               _id : 1
+               ,"subSchema.usrId" : 1
+            }},
+        ],function(aErr, aResult){
+            if (aErr) {
+                console.log('error \n', aErr);
+                return res.status(500).send("select error >> " + aErr);
+            }
+            if (aResult.length > 0) {
+                console.log('★★★profilePwCheck usrId 조회 성공★★★');
+                var usrId = aResult[0].subSchema.usrId;
+                schema.find({
+                    wkCd : 'USR'
+                    ,wkDtCd : 'USR'
+                    ,"subSchema.usrId" : usrId
+                    ,"subSchema.usrPwd" : encrypt.getEncrypt(params.usrPwd)
+                }, function(fErr, fResult){
+                    if (fErr) {
+                        console.log('error \n', fErr);
+                        return res.status(500).send("select error >> " + fErr);
+                    }
+                    if (fResult.length > 0) {
+                        console.log('★★★profilePwCheck pw 검증 성공★★★');
+                        res.json({
+                            reCd : '01'
+                        });
+                    }else{
+                        res.json({
+                            reCd : '02'
+                        });
+                    }
+                });
+            }else{
+                res.json({
+                    reCd : '02'
+                });
+            }  
+        });
+
+    });
+
 module.exports = router;

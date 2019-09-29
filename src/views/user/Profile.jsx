@@ -18,10 +18,24 @@ import {
 import UserHeader from "components/Headers/UserHeader.jsx";
 
 class Profile extends React.Component {
+  constructor(props){
+    super(props);
+    this.state =  {
+        profileCk : false
+    };
+  }
+  profilePwCheck =(rs)=>{
+    if(rs){
+      this.setState({
+        profileCk : true
+      });
+    }
+  }
+
   render() {
     return (
       <>
-        <UserHeader />
+        <UserHeader callbackFromParent={this.profilePwCheck} />
         {/* Page content */}
         <Container className="mt--7" fluid>
           <Row>
@@ -126,78 +140,94 @@ class Profile extends React.Component {
                       내 정보
                     </h6>
                     <div className="pl-lg-4">
+                      
+                        { (this.state.profileCk) ? 
                       <Row>
-                        <Col lg="6">
-                          <FormGroup>
-                            <label
-                              className="form-control-label"
-                              htmlFor="input-email"
-                            >
-                              아이디 (변경 불가)
-                            </label>
-                            <Input
-                              className="form-control-alternative"
-                              id="input-email"
-                              type="text"
-                              value="test@gmail.com"
-                            />
-                          </FormGroup>
-                        </Col>
-                        {/* <Col lg="6">
-                          <FormGroup>
-                            <label
-                              className="form-control-label"
-                              htmlFor="input-username"
-                              >
-                              닉네임
-                            </label>
-                            <Input
-                              className="form-control-alternative"
-                              id="input-username"
-                              type="text"
-                              value ="테스트 네임"
-                            />
-                          </FormGroup>
-                        </Col>      */}
-                        <Col lg="3">
-                          <FormGroup>
-                            <label
-                              className="form-control-label"
-                              htmlFor="input-username"
-                              >
-                              닉네임
-                            </label>
-                            <Input
-                              className="form-control-alternative"
-                              id="input-username"
-                              type="text"
-                              value ="테스트 네임"
-                            />
-                          </FormGroup>
-                        </Col>
-                        <Col lg="3">
-                          <FormGroup>
+                      <Col lg="6">
+                        <FormGroup>
                           <label
-                              className="form-control-label"
-                              htmlFor="profileNameCheck"
+                            className="form-control-label"
+                            htmlFor="input-email"
                           >
-                            &nbsp;
+                            아이디 (변경 불가)
                           </label>
-                            {/* <span 
-                              className="mt-4 btn btn-info" 
-                            >
-                            </span> */}
-                            <Button
-                                className = "form-button-marginTop"
-                                color="primary"
-                                id="profileNameCheck"
-                                // onClick={e=>{this.overCheck('n')}}                        
-                                >
-                                닉네임 중복검사
-                            </Button>
+                          <Input
+                            className="form-control-alternative"
+                            id="input-email"
+                            type="text"
+                            value="test@gmail.com"
+                          />
+                        </FormGroup>
+                      </Col>
+                      <Col lg="3">
+                          <FormGroup>
+                            <label
+                              className="form-control-label"
+                              htmlFor="input-username"
+                              >
+                              닉네임
+                            </label>
+                            <Input
+                              className="form-control-alternative"
+                              id="input-username"
+                              type="text"
+                              value ="테스트 네임"
+                            />
                           </FormGroup>
-                        </Col>     
-                      </Row>
+                          </Col>
+                          <Col lg="3">
+                            <FormGroup>
+                            <label
+                                className="form-control-label"
+                                htmlFor="profileNameCheck"
+                            >
+                              &nbsp;
+                            </label>
+                              <Button
+                                  className = "form-button-marginTop"
+                                  color="primary"
+                                  id="profileNameCheck"
+                                  // onClick={e=>{this.overCheck('n')}}                        
+                                  >
+                                  닉네임 중복검사
+                              </Button>
+                            </FormGroup>
+                           </Col> </Row> :
+                          <Row>
+                            <Col lg="6">
+                              <FormGroup>
+                                <label
+                                  className="form-control-label"
+                                  htmlFor="input-email"
+                                >
+                                  아이디 (변경 불가)
+                                </label>
+                                <Input
+                                  className="form-control-alternative"
+                                  id="input-email"
+                                  type="text"
+                                  value="test@gmail.com"
+                                />
+                              </FormGroup>
+                             </Col>
+                             <Col lg="6">
+                              <FormGroup>
+                                <label
+                                  className="form-control-label"
+                                  htmlFor="input-username"
+                                  >
+                                  닉네임
+                                </label>
+                                <Input
+                                  className="form-control-alternative"
+                                  id="input-username"
+                                  type="text"
+                                  value ="테스트 네임"
+                                />
+                              </FormGroup>
+                            </Col>   
+                          </Row>
+                        }
                       <Row>
                         <Col lg="12">
                           <FormGroup>

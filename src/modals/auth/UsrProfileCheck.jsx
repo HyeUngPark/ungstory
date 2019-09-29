@@ -12,7 +12,7 @@ export default class UsrProfileCheck extends React.Component {
       ,usrPw : ''
     };
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.modalClose = this.props.callbackFromParent;
+    this.profilePwCheck = this.props.callbackFromParent;
   }
   toggle = (e) => {
     this.setState({
@@ -28,15 +28,19 @@ export default class UsrProfileCheck extends React.Component {
     this.setState({
       usrPw : ''
     });
+    
     this.toggle();
   }
 
-  pwFindCallback = (result)=>{
+  pwCheckCallback = (result)=>{
     if(result.reCd==="01"){
       alert('확인 되었습니다.');
+      this.profilePwCheck(true);
       this.cancel();
     }else if(result.reCd ==='02'){
       alert('비밀번호가 올바르지 않습니다.');
+    }else{
+      alert('서버오류');
     }
     return;
   }
@@ -53,12 +57,12 @@ export default class UsrProfileCheck extends React.Component {
     let pwVal = this.state.usrPw;
     let pwValid = new passwordValidator();
     // Add properties to it
+    
     pwValid
     .is().min(8)                                    // Minimum length 8
     .is().max(15)                                  // Maximum length 100
     // .has().uppercase()                              // Must have uppercase letters
     .has().lowercase()                              // Must have lowercase letters
-    .has().digits()                                 // Must have digits
     .has().not().spaces()                           // Should not have spaces
     .is().not().oneOf(['Passw0rd', 'Password123']); // Blacklist these values
     if(pwVal===''){
@@ -66,7 +70,8 @@ export default class UsrProfileCheck extends React.Component {
       return;
     }else if(pwValid.validate(pwVal)){
       let param={
-        usrPw : this.state.usrPw
+        usrPwd : pwVal
+        ,usrToken : JSON.parse(localStorage.getItem('usrInfo')).usrToken
       };
       api.apiSend('post','profilePwCheck',param,this.pwCheckCallback);
     }else{
@@ -109,7 +114,7 @@ export default class UsrProfileCheck extends React.Component {
                          color="primary" 
                          className="btn btn-primary" 
                          value="확인"
-                         onClick={this.pwCheck}
+                         onClick={e=>{this.pwCheck()}}
                   />
                   <Button color="danger" onClick={this.cancel}>취소</Button>
                 </Col>
