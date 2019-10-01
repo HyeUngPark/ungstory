@@ -15,21 +15,25 @@ import {
   Col
 } from "reactstrap";
 
+import DateTimePicker from 'react-widgets/lib/DateTimePicker';
 import * as api from "api/api";
-
 var passwordValidator = require('password-validator');
 
 class Register extends React.Component {
-  state ={
-    usrName : ''
-    ,usrId : ''
-    ,usrPw1 : ''
-    ,usrPw2 : ''
-    ,pwSameCd : 0
-    ,pwSafeCd : 0
-    ,usrNameCk : 0
-    ,usrIdCk : 0
-    ,usrArg01 : false
+  constructor(props){
+    super(props);
+    this.state =  {
+      usrName : ''
+      ,usrId : ''
+      ,usrPw1 : ''
+      ,usrPw2 : ''
+      ,pwSameCd : 0
+      ,pwSafeCd : 0
+      ,usrNameCk : 0
+      ,usrIdCk : 0
+      ,usrArg01 : false
+      ,usrBirth : ''
+    };
   }
 
   checkCallback = (result) =>{
@@ -105,6 +109,10 @@ class Register extends React.Component {
     }else if(sep==='a'){
       this.setState({
         usrArg01 : !this.state.usrArg01
+      });
+    }else if(sep==='b'){
+      this.setState({
+        usrBirth :e
       });
     }
 
@@ -368,6 +376,16 @@ class Register extends React.Component {
                     </div>
                   </small>
                 </div>
+                <FormGroup>
+                  <DateTimePicker
+                    onChange={e=>this.valChange(e, 'b')}
+                    defaultValue = {new Date()}
+                    format={{ raw: 'yyyy-mm-dd'}}
+                    time={false}
+                    value = {this.state.usrBirth}
+                  />
+                </FormGroup>
+
                 <Row className="my-4">
                   <Col xs="12">
                     <div className="custom-control custom-control-alternative custom-checkbox">
