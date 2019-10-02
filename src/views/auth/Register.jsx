@@ -15,7 +15,9 @@ import {
   Col
 } from "reactstrap";
 
-import DateTimePicker from 'react-widgets/lib/DateTimePicker';
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+
 import * as api from "api/api";
 var passwordValidator = require('password-validator');
 
@@ -32,7 +34,7 @@ class Register extends React.Component {
       ,usrNameCk : 0
       ,usrIdCk : 0
       ,usrArg01 : false
-      ,usrBirth : ''
+      ,usrBirth : new Date()
     };
   }
 
@@ -111,6 +113,7 @@ class Register extends React.Component {
         usrArg01 : !this.state.usrArg01
       });
     }else if(sep==='b'){
+      console.log(e);
       this.setState({
         usrBirth :e
       });
@@ -202,6 +205,13 @@ class Register extends React.Component {
       alert('아이디를 확인해주세요');
       return;
     }
+    var rightNow = new Date();
+    var today = rightNow.toISOString().slice(0,10);
+    var birth = this.state.usrBirth.toISOString().slice(0,10);
+    if(today === birth){
+      alert("생일을 선택해주세요.");
+      return;
+    }
     // 비밀번호
     if(this.state.pwSameCd !== 1 || this.state.pwSafeCd !== 1){
       alert('비밀번호를 확인해주세요');
@@ -217,6 +227,7 @@ class Register extends React.Component {
        usrId : this.state.usrId
       ,usrName : this.state.usrName
       ,usrPwd : this.state.usrPw1
+      ,usrBirth : this.state.usrBirth
     };
     api.apiSend('post','join',param,this.joinCallback);
 
@@ -377,13 +388,25 @@ class Register extends React.Component {
                   </small>
                 </div>
                 <FormGroup>
-                  <DateTimePicker
-                    onChange={e=>this.valChange(e, 'b')}
-                    defaultValue = {new Date()}
-                    format={{ raw: 'yyyy-mm-dd'}}
-                    time={false}
-                    value = {this.state.usrBirth}
-                  />
+                  <InputGroup className="input-group-alternative">
+                    <InputGroupAddon addonType="prepend">
+                      <InputGroupText >
+                        <i className="ni ni-lock-circle-open" />
+                      </InputGroupText>
+                    </InputGroupAddon>
+                    <span className="form-control">
+                    <DatePicker
+                      selected={this.state.usrBirth}
+                      onChange={date => this.valChange(date,'b')}
+                      peekNextMonth
+                      showMonthDropdown
+                      showYearDropdown
+                      dropdownMode="select"
+                      dateFormat="yyyy/MM/dd"
+                      className="form-control-border-none form-control-cursor"
+                    />
+                    </span>
+                    </InputGroup>
                 </FormGroup>
 
                 <Row className="my-4">

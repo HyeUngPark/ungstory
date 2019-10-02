@@ -30,6 +30,7 @@ router.post('/join', function(req, res) {
     userSchema.usrFrds = [];
     userSchema.usrCert = '00'
     userSchema.usrLikePst = [];
+    userSchema.usrBirth = params.usrBirth;
 
     schema.create({
         wkCd: 'USR'
