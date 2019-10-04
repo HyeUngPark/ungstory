@@ -16,12 +16,15 @@ import {
 } from "reactstrap";
 // core components
 import UserHeader from "components/Headers/UserHeader.jsx";
+import * as api from "api/api";
 
 class Profile extends React.Component {
   constructor(props){
     super(props);
     this.state =  {
         profileCk : false
+        ,getProfile : false
+        ,profileData : {}
     };
   }
   profilePwCheck =(rs)=>{
@@ -31,7 +34,31 @@ class Profile extends React.Component {
       });
     }
   }
-
+  getProfileCallback  = (result) =>{
+    if(result.reCd === '01'){
+      console.log('프로필 조회 성공');
+      this.setState({
+        getProfile : true
+        ,profileData : result.profileData
+      });
+    }else{
+      console.log('프로필 조회 실패');
+      this.setState({
+        getProfile : true
+      });
+    }
+  }
+  getProfile =() =>{
+    let param = {
+      usrToken : JSON.parse(localStorage.getItem('usrInfo')).usrToken
+    };
+    api.apiSend('post','getProfile',param,this.getProfileCallback);
+  }
+  componentDidMount(){
+    if(!this.state.getProfile && localStorage.getItem('usrInfo')){
+        this.getProfile();
+    }
+  }
   render() {
     return (
       <>
@@ -81,42 +108,27 @@ class Profile extends React.Component {
                     <div className="col">
                       <div className="card-profile-stats d-flex justify-content-center mt-md-5">
                         <div>
+                          <span className="description">친구</span>
                           <span className="heading">22</span>
-                          <span className="description">Friends</span>
                         </div>
                         <div>
-                          <span className="heading">10</span>
-                          <span className="description">Photos</span>
+                          <span className="description">사진</span>
+                          <span className="heading">{this.state.profileData.pstPts}</span>
                         </div>
                         <div>
-                          <span className="heading">89</span>
-                          <span className="description">Comments</span>
+                          <span className="description">활동(댓글, 좋아요)</span>
+                          <span className="heading">{this.state.profileData.pstPts}</span>
                         </div>
                       </div>
                     </div>
                   </Row>
                   <div className="text-center">
                     <h3>
-                      Jessica Jones
-                      <span className="font-weight-light">, 27</span>
+                      {this.state.profileData.usrName}
                     </h3>
-                    <div className="h5 font-weight-300">
-                      <i className="ni location_pin mr-2" />
-                      Bucharest, Romania
-                    </div>
-                    <div className="h5 mt-4">
-                      <i className="ni business_briefcase-24 mr-2" />
-                      Solution Manager - Creative Tim Officer
-                    </div>
-                    <div>
-                      <i className="ni education_hat mr-2" />
-                      University of Computer Science
-                    </div>
                     <hr className="my-4" />
                     <p>
-                      Ryan — the name taken by Melbourne-raised, Brooklyn-based
-                      Nick Murphy — writes, performs and records all of his own
-                      music.
+                      {this.state.profileData.usrMsg}
                     </p>
                     <a href="#pablo" onClick={e => e.preventDefault()}>
                       Show more
@@ -155,7 +167,7 @@ class Profile extends React.Component {
                             className="form-control-alternative"
                             id="input-email"
                             type="text"
-                            value="test@gmail.com"
+                            value={this.state.profileData.usrId}
                           />
                         </FormGroup>
                       </Col>
@@ -171,7 +183,7 @@ class Profile extends React.Component {
                               className="form-control-alternative"
                               id="input-username"
                               type="text"
-                              value ="테스트 네임"
+                              value ={this.state.profileData.usrName}
                             />
                           </FormGroup>
                           </Col>
@@ -206,7 +218,7 @@ class Profile extends React.Component {
                                   className="form-control-alternative"
                                   id="input-email"
                                   type="text"
-                                  value="test@gmail.com"
+                                  value={this.state.profileData.usrId}
                                 />
                               </FormGroup>
                              </Col>
@@ -222,7 +234,7 @@ class Profile extends React.Component {
                                   className="form-control-alternative"
                                   id="input-username"
                                   type="text"
-                                  value ="테스트 네임"
+                                  value ={this.state.profileData.usrName}
                                 />
                               </FormGroup>
                             </Col>   
@@ -269,25 +281,21 @@ class Profile extends React.Component {
                     <div className="pl-lg-4">
                       <FormGroup>
                         <label>최근 접속 기록</label>
+                        {
+                          (this.state.profileData.loginDate
+                        && this.state.profileData.loginDate.length >0 ) ?
+                        this.state.profileData.loginDate.map((data, dataIdx)=>{
+                        return(
                         <Input
                           className="form-control-alternative"
                           rows="4"
                           type="text"
-                          value="2019.09.29 17:55"
+                          value={data}
                         />
-                        <Input
-                          className="form-control-alternative"
-                          rows="4"
-                          type="text"
-                          value="2019.09.29 17:55"
-                        />
-                        <Input
-                          className="form-control-alternative"
-                          rows="4"
-                          type="text"
-                          value="2019.09.29 17:55"
-                        />
-                      </FormGroup>
+                        )})
+                        :''
+                        }
+                       </FormGroup>
                     </div>
                   </Form>
                 </CardBody>

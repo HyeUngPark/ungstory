@@ -651,4 +651,110 @@
 
     });
 
+    router.post('/getProfile',function(req, res){
+        var params = req.body;
+        // console.log('★★★getProfile usrToken★★★\n',params.usrToken);
+        schema.find({
+            wkCd : 'USR',
+            wkDtCd : 'LOGIN',
+            "subSchema.loginToken" : params.usrToken
+        },function(err, result){
+            if (err) {
+                console.log('error \n', err);
+                return res.status(500).send("select error >> " + err)
+            }
+            if (result.length > 0) {
+                var usrId = result[0].subSchema.usrId;
+                schema.aggregate([
+                    {$match:{
+                      "subSchema.usrId" : usrId
+                    }},
+                    {$unwind : {
+                          path: "$subSchema.pstCmt",
+                          preserveNullAndEmptyArrays: true
+                    }},
+                    {$unwind : {
+                          path: "$subSchema.pstPts",
+                          preserveNullAndEmptyArrays: true
+                    }},
+                    {$project : {
+                        "_id" : 0
+                        ,"subSchema.usrName" : 1
+                        ,"subSchema.usrId" : 1
+                        ,"subSchema.usrPt" :1
+                        ,"subSchema.usrMsg" : 1
+                        ,"subSchema.pstPts" : {
+                                 $cond : [
+                                   {$and:[
+                                       {$ne: ["$subSchema.pstPubYn" , "04"]}
+                                   ]}//and
+                                   ,"$subSchema.pstPts"
+                                   ,"$unset"]
+                         }
+                        ,"subSchema.pstCmt" : { 
+                                       $cond : [
+                                           {$and:[
+                                               {$ne: ["$subSchema.pstCmt.pstCmtSep" , "04"]}
+                                              ,{$eq: ["$subSchema.pstCmt.usrName","$subSchema.usrName"]}
+              
+                                           ]}//and
+                                           ,"$subSchema.pstCmt"
+                                           ,"$unset"]
+                          }// pstCmt
+                        ,"subSchema.usrLikePst" : {
+                              $size : {"$ifNull":["$subSchema.usrLikePst",[]]}
+                        }
+                        ,"subSchema.loginDate" : 1
+                    }},
+                    {$lookup:{
+                      from : "subSchema.pstCmt"
+                      ,localField : 'usrName'
+                      ,foreignField : 'subSchema.usrName'
+                      ,as : 'pstCmt'
+                    }},
+                    {$sort : {
+                        "subSchema.loginDate" : -1
+                    }},
+                    {$group:{
+                        "_id" : "$_id"
+                        ,"usrName" : {"$max":"$subSchema.usrName"}
+                        ,"usrId" : {"$first":"$subSchema.usrId"}
+                        ,"usrMsg" : {"$max":"$subSchema.usrMsg"}
+                        ,"pstPts" : {"$push":"$subSchema.pstPts"}
+                        ,"usrPt" : {"$max":"$subSchema.usrPt"}
+                        ,"pstCmt" : {"$push":"$subSchema.pstCmt"}
+                        ,"usrLikePst" : {"$max":"$subSchema.usrLikePst"}
+                        ,"loginDate" : {"$push":"$subSchema.loginDate"}
+                    }},
+            ],function(aErr, aResult){
+                if (aErr) {
+                    console.log('error \n', aErr);
+                    return res.status(500).send("select error >> " + aErr)
+                }
+                // console.log(result);
+                if (aResult.length > 0) {
+                    // console.log("★★★getProfile data★★★\n",aResult);
+                    console.log(aResult[0].loginDate.length, ", ",aResult[0].loginDate.slice(0,2))
+                    var profileData = {
+                        loginDate : aResult[0].loginDate.length >3 ? aResult[0].loginDate.slice(0,2) : aResult[0].loginDate
+                        ,usrActive : aResult[0].usrLikePst + aResult[0].pstCmt.length
+                        // ,pstCmt : aResult.pstCmt.length
+                        ,pstPts : aResult[0].pstPts.length
+                        ,usrPt : aResult[0].usrPt
+                        ,usrId : aResult[0].usrId
+                        ,usrName :aResult[0].usrName
+                        ,usrMsg : aResult[0].usrMsg
+                    };
+                    res.json({
+                        reCd : '01'
+                        ,profileData : profileData
+                    })
+                }else{
+                    res.json({reCd:'02'});
+                }
+              });
+            }
+        });
+    });
+
 module.exports = router;
