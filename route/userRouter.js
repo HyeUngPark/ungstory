@@ -734,9 +734,8 @@
                 // console.log(result);
                 if (aResult.length > 0) {
                     // console.log("★★★getProfile data★★★\n",aResult);
-                    console.log(aResult[0].loginDate.length, ", ",aResult[0].loginDate.slice(0,2))
                     var profileData = {
-                        loginDate : aResult[0].loginDate.length >3 ? aResult[0].loginDate.slice(0,2) : aResult[0].loginDate
+                        loginDate : aResult[0].loginDate.length >3 ? aResult[0].loginDate.slice(0,3) : aResult[0].loginDate
                         ,usrActive : aResult[0].usrLikePst + aResult[0].pstCmt.length
                         // ,pstCmt : aResult.pstCmt.length
                         ,pstPts : aResult[0].pstPts.length
