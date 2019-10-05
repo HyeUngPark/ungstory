@@ -9,7 +9,6 @@ import {
   FormGroup,
   Form,
   Input,
-  InputGroup,
   Container,
   Row,
   Col
@@ -17,7 +16,7 @@ import {
 // core components
 import UserHeader from "components/Headers/UserHeader.jsx";
 import * as api from "api/api";
-
+import ProfileChange from "../../modals/auth/ProfileChange";
 class Profile extends React.Component {
   constructor(props){
     super(props);
@@ -83,7 +82,7 @@ class Profile extends React.Component {
                 </Row>
                 <CardHeader className="text-center border-0 pt-8 pt-md-4 pb-0 pb-md-4">
                   <div className="d-flex justify-content-between">
-                    <Button
+                    {/* <Button
                       className="mr-4"
                       color="info"
                       href="#pablo"
@@ -91,16 +90,17 @@ class Profile extends React.Component {
                       size="sm"
                     >
                       Connect
-                    </Button>
-                    <Button
+                    </Button> */}
+                    {/* <Button
                       className="float-right"
                       color="default"
                       href="#pablo"
                       onClick={e => e.preventDefault()}
                       size="sm"
                     >
-                      Message
-                    </Button>
+                      프로필 사진 수정
+                    </Button> */}
+                    <ProfileChange usrId={this.state.profileData.usrId}/>
                   </div>
                 </CardHeader>
                 <CardBody className="pt-0 pt-md-4">

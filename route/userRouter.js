@@ -756,4 +756,61 @@
         });
     });
 
+    router.post('/getPostImgList',function(req, res){
+    var params = req.body;
+
+    schema.aggregate([
+        {$match:{
+            wkCd : 'PST'
+            ,wkDtCd : 'PST'
+            ,"subSchema.usrId" : params.usrId
+        }},
+        {$unwind : {
+              path: "$subSchema.pstPts",
+              preserveNullAndEmptyArrays: true       
+        }},
+        {$project : {
+            "_id" : 0
+            ,"subSchema.pstPts" :{
+              $cond : [{$and:[
+                  {$ne: ["$subSchema.pstPts" , []]}
+                  ,{$ne: ["$subSchema.pstPubYn","04"]}
+              ]}//and
+              ,"$subSchema.pstPts","$unset"]//codition
+            }
+        }},
+        {$sort : {
+            "lstWrDt" : -1
+        }},
+        {$group:{
+            "_id" : "$_id"
+            ,"pstPts" : {"$push":"$subSchema.pstPts"}
+        }}
+       ],function(err, result) {
+            if (err) {
+                console.log('error \n', err);
+                return res.status(500).send("select error >> " + err)
+            }
+            // console.log(result);
+            if (result.length > 0) {
+                console.log('★★★ 포스팅 이미지 리스트',result[0].pstPts.length, '건 조회 성공 ★★★\n');
+                res.json({
+                    reCd : '01'
+                    ,postImgList : result[0].pstPts
+                });
+            }else if(result.length === 0){
+                console.log('★★★ 포스팅 이미지 리스트 없음 ★★★\n');
+                res.json({ 
+                    reCd : '03'
+                });
+            }else{
+                console.log('★★★ 포스팅 이미지 리스트 조회 실패 ★★★\n');
+                res.json({
+                    reCd : '02'
+                });
+            }
+        });
+    });
+
+
 module.exports = router;
