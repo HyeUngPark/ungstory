@@ -3,6 +3,8 @@ import { Button, Modal, ModalBody,ModalHeader, Card , Row, Col} from 'reactstrap
 
 import * as api from "api/api";
 import PostImgList from './PostImgList';
+import { confirmAlert } from 'react-confirm-alert'; // Import
+import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 
 export default class ProfileChange extends React.Component {
   constructor(props) {
@@ -13,15 +15,8 @@ export default class ProfileChange extends React.Component {
     };
     this.handleSubmit = this.handleSubmit.bind(this);
     this.modalClose = this.props.callbackFromParent;
-  
   }
   
-  modalClose =(e)=>{
-    console.log("PwFind modalClose()");
-    // this.setState(prevState => ({
-    //     isModalOpen: !prevState.isModalOpen
-    // }));
-  }
   toggle = (e) => {
     this.setState({
       modal: !this.state.modal
@@ -39,17 +34,31 @@ export default class ProfileChange extends React.Component {
     this.toggle();
   }
 
-  pwFindCallback = (result)=>{
+  profileModifyCallback = (result)=>{
     if(result.reCd==="01"){
-      alert('임시 비밀번호가 발급되었습니다. 이메일을 확인해주세요');
-      this.cancel();
+      alert('프로필 변경 성공');
     }else if(result.reCd ==='02'){
-      alert('비밀번호 찾기를 실패했습니다.')
+      alert('프로필 변경 실패');
     }
-    return;
+    this.cancel();
+    this.modalClose();
   }
-  profileModify = ()=>{
+  profileModify = (cd)=>{
+    let param={
+      usrId : this.props.usrId
+    }
+    if(cd !== 'id' && this.state.tempImgs === ''){
+      alert('변경할 이미지를 선택해주세요.');
+      return;
+    }else if(cd === 'id'){
 
+      param.usrPt = '';
+      param.changeCd = 'img';
+    }else{
+      param.usrPt = this.state.tempImgs;
+      param.changeCd = 'img';
+    }
+    api.apiSend('put','profileChange',param, this.profileModifyCallback);
   }
   imgView =(e)=>{
 
@@ -66,8 +75,29 @@ export default class ProfileChange extends React.Component {
             e.preventDefault();
         }.bind(this);
     }else{
-      alert("프로필 이미지는 1개까지만 선택 가능합니다.");
+      alert("프로필 이미지는 1개만 선택 가능합니다.");
       return;
+    }
+  }
+  deleteProfileImg = ()=>{
+    if(this.props.usrPt === ''){
+      alert('이미 프로필 이미지가 없습니다.');
+      return;
+    }else{
+      confirmAlert({
+        title: '프로필 이미지 삭제 확인',
+        message: '정말 프로필 이미지를 삭제하시겠습니까?',
+        buttons: [
+          {
+            label: '삭제하기',
+            onClick: () => this.profileModify('id')
+          },
+          {
+            label: '취소',
+            onClick: () => {}
+          }
+        ],
+      });
     }
   }
 
@@ -75,21 +105,6 @@ export default class ProfileChange extends React.Component {
     this.setState({
       tempImgs : ""
     });
-  }
-  pwFind =() =>{
-    let idVal = this.state.usrId;
-    if(idVal===''){
-      alert('이메일을 입력해 주세요.');
-      return;
-    }else if(idVal.indexOf('@')<0 || idVal.indexOf('.')<0){ // 이메일 형식 체크
-      alert("이메일 형식을 지켜주세요\nex)test@test.com");
-      return;
-    }
-
-    let param={
-      usrId : this.state.usrId
-   };
-   api.apiSend('post','pwFind',param,this.pwFindCallback);
   }
   imgSelect =(img) =>{
     this.setState({
@@ -108,19 +123,23 @@ export default class ProfileChange extends React.Component {
           >
             프로필 사진 수정
           </Button>
-          <Modal isOpen={this.state.modal} backdrop={false} onKeyUp={(e)=>{
-            if(e.key === "Escape"){
-              this.cancel();
-            }
-          }}>
+          <Modal isOpen={this.state.modal} 
+                 zIndex = "90"
+                 backdrop={false} 
+                 onKeyUp={(e)=>{
+                  if(e.key === "Escape"){
+                    this.cancel();
+                  }
+                }
+          }>
           <form className="card shadow" onSubmit={this.handleSubmit}>
           <Card className="bg-secondary shadow border-0">
             <h5 className="display-4">&nbsp;프로필 사진 변경</h5>
             <ModalBody>
               <Row>
-                <Col lg="6">
+                <Col lg="4">
                   {/* 이미지 등록 */}
-                  <i className=" ni ni-image align-items-center">
+                  <i className="ni ni-image align-items-center">
                     <label 
                       className ="form-control-cursor"
                       htmlFor="newImg"
@@ -139,12 +158,30 @@ export default class ProfileChange extends React.Component {
                          onChange = {this.imgChange}
                     />
                 </Col>
-                <Col lg="6">
+                <Col lg="4">
                   {/* 올린 사진들 중 선택 */}
                   <PostImgList 
                       callbackFromParent={this.imgSelect}
                       usrId = {this.props.usrId}/>
                 </Col>
+                <Col lg="4">
+                  {/* 프로필 이미지 삭제 */}
+                  <i className="ni ni-basket align-items-center">
+                    <label 
+                      className ="form-control-cursor"
+                      htmlFor="delImg"
+                    >
+                      &nbsp;이미지 삭제
+                    </label>
+                  </i>
+                  <input type="button" 
+                         className="form-display-none"
+                         name="filename[]" 
+                         id="delImg" 
+                         onClick={this.deleteProfileImg}
+                    />
+                </Col>
+                <hr className="my-4" />
               </Row>
               {this.state.tempImgs !== "" ? 
               <Row>
@@ -181,21 +218,22 @@ export default class ProfileChange extends React.Component {
                     </span>
                   </div>
                 </Col>
+                <hr className="my-4" />
               </Row>
               :''}
               <Row>
-              {/* 확인 */}
-              <Col lg="12">
-                  <input type="button" 
-                         color="primary" 
-                         className="btn btn-primary" 
-                         value="확인"
-                         onClick={e=>{this.profileModify()}}       
-                  />
-                  <Button color="danger" onClick={this.cancel}>취소</Button>
-              </Col>
+                <Col lg="12" className="text-center">
+                    {/* 확인 */}
+                    <input type="button" 
+                          color="primary" 
+                          className="btn btn-primary" 
+                          value="확인"
+                          onClick={e=>{this.profileModify('iu')}}       
+                    />
+                    {/* 취소 */}
+                    <Button color="danger" onClick={this.cancel}>취소</Button>
+                </Col>
               </Row>
-              {/* 취소 */}
              
             </ModalBody>
             </Card>

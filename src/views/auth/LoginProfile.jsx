@@ -92,7 +92,7 @@ class LoginProfile extends React.Component {
         ,usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
         ,autoLoginCd : JSON.parse(localStorage.getItem('usrInfo')).autoLoginCd
       }
-      api.apiSend('post','loginCk',param,this.loginCkCallback);
+      api.apiSend('post','/auth/loginCk',param,this.loginCkCallback);
     }
 
     logoutCallback = (result) =>{
@@ -144,7 +144,10 @@ class LoginProfile extends React.Component {
                             <span className="avatar avatar-sm rounded-circle">
                             <img
                                 alt="..."
-                                src={require("assets/img/theme/team-4-800x800.jpg")}
+                                src={(localStorage.getItem('usrInfo') 
+                                && JSON.parse(localStorage.getItem('usrInfo')).usrPt !== '')  
+                                ? JSON.parse(localStorage.getItem('usrInfo')).usrPt
+                                : require("assets/img/theme/no-profile-130x130.png")}
                             />
                             </span>
                             <Media className="ml-2 d-none d-lg-block">

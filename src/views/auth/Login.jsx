@@ -55,6 +55,7 @@ class Login extends React.Component {
       let usrInfo = JSON.parse(localStorage.getItem('usrInfo'));
       usrInfo.usrToken = result.usrToken;
       usrInfo.usrName = result.usrInfo.usrName;
+      usrInfo.usrPt = result.usrInfo.usrPt;
       localStorage.setItem('usrInfo',JSON.stringify(usrInfo));
       this.props.history.push('/');
     }else if(result.reCd ==='02'){

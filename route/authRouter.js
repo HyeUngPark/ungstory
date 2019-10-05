@@ -173,7 +173,7 @@ router.post('/login', function(req, res) {
             console.log('error \n', err);
             return res.status(500).send("select error >> " + err)
         }
-        console.log("★★★ login ★★★\n",result);
+        console.log("★★★ login ★★★\n");
         if (result.length > 0) {
             if(result[0].subSchema.usrCert === '00'){
                 // 미인증 아이디
@@ -209,7 +209,7 @@ router.post('/login', function(req, res) {
                 loginSchema.usrId = result[0].subSchema.usrId;
                 loginSchema.connIp = ipAddress;
                 loginSchema.loginDate = date.getDate();
-
+                console.log('프로필 > \n',result[0].subSchema.usrPt);
                 // 로그인 내역 추가
                 schema.create({
                     wkCd: 'USR'
@@ -224,6 +224,7 @@ router.post('/login', function(req, res) {
                         "usrToken" : token,
                         "usrInfo" :{
                             "usrName" : result[0].subSchema.usrName
+                            ,"usrPt" : result[0].subSchema.usrPt
                         }
                         ,"usrLikePst" : result[0].subSchema.usrLikePst
                     });       
@@ -239,7 +240,6 @@ router.post('/login', function(req, res) {
         }
     });
 });
-
 router.post('/loginCk',function(req, res){
     let params = req.body;
     if(params.usrToken){
@@ -252,56 +252,60 @@ router.post('/loginCk',function(req, res){
             }else if(err && err.name === "TokenExpiredError"){
                 console.log('★★★ Token 유효기간 만료 ★★★\n');
                 if(!params.autoLoginCd){
-                    // autoLogin false일 경우 로그아웃 처리
+                // autoLogin false일 경우 로그아웃 처리
+                    console.log('Token 만료 후 로그아웃 처리');
                     res.json({
                         reCd : '04'
                     });
                 }else{
-                    // token 재생성
-                    let newToken = jwt.sign({
-                        usrName : params.usrName
-                    },process.env.tokenKey ,    // 비밀 키
-                    {expiresIn: '1h' });
-                    
-                    // 로그인 이력 업데이트
-                    schema.find({
-                        wkCd: 'USR',
-                        wkDtCd : 'LOGIN',
-                        "subSchema.loginToken": params.usrToken
-                    }, function(err, result) {
-                        if (err) {
-                            console.log('error \n', err);
-                            return res.status(500).send("select error >> " + err)
+                // token 재생성
+                let newToken = jwt.sign({
+                    usrName : params.usrName
+                    ,mkDate : new Date()
+                },process.env.tokenKey ,    // 비밀 키
+                {expiresIn: '1h' });
+                console.log('★★★ Token 재생성 ★★★\n',newToken);
+                
+                // 로그인 이력 업데이트
+                schema.find({
+                    wkCd: 'USR',
+                    wkDtCd : 'LOGIN',
+                    "subSchema.loginToken": params.usrToken
+                }, function(err, result) {
+                    if (err) {
+                        console.log('error \n', err);
+                        return res.status(500).send("select error >> " + err)
+                    }
+                    if (result.length > 0) {
+                        console.log("★★★ login history search result ★★★ \n",result[0]);
+                        var _id = result[0]._id;
+                        schema.updateOne({
+                            "_id" : _id
                         }
-                        if (result.length > 0) {
-                            console.log("★★★ login history search result ★★★ \n",result[0]);
-                            var _id = result[0]._id;
-                            schema.updateOne({
-                                "_id" : _id
+                        , { $set: {
+                            lstWrDt : date.getDate()
+                            ,'subSchema.loginToken': newToken
+                        }}
+                        , function(err, result) {
+                            if (err) {
+                                console.log('error \n', err);
+                                return res.status(500).send("select error >> " + err)
                             }
-                            , { $set: {
-                                lstWrDt : date.getDate()
-                                ,'subSchema.loginToken': newToken
-                            }}
-                            , function(err, uResult) {
-                                if (err) {
-                                    console.log('error \n', err);
-                                    return res.status(500).send("select error >> " + err)
-                                }
-                                if (uResult.n) {
-                                    console.log("★★★ 토큰 업데이트 성공 result ★★★ \n",uResult.n);
-                                    res.json({
-                                        reCd : '03'
-                                        ,usrToken : newToken
-                                        ,usrLikePst : result[0].subSchema.usrLikePst
-                                    });
-                                } else {
-                                    console.log("★★★ 토큰 업데이트 실패 ★★★ \n",uResult.n);
-                                }
-                            }); // update close
-                        }
-                    }); // find close
-                }
+                            if (result.n) {
+                                console.log("★★★ 토큰 업데이트 성공 result ★★★ \n",result.n);
+                                res.json({
+                                    reCd : '03'
+                                    ,usrToken : newToken
+                                });
+                            } else {
+                                console.log("★★★ 토큰 업데이트 실패 ★★★ \n",result.n);
+                            }
+                        }); // update close
+                    }else{
+                        console.log('로그인 내역에 등록되지않은 Token');                            
+                    }
+                }); // find close
+             }
             }
             });
         }else{
@@ -310,23 +314,6 @@ router.post('/loginCk',function(req, res){
             reCd : '02'
         });
     }
-    /*
-    var params = req.body;
-    let session = req.session;
-    // console.log('params token ', params.usrToken);
-    // console.log('session token ', session.usrToken);
-    if(session.usrToken && session.usrToken === params.usrToken){
-        console.log("★★★login Session Check LOGIN★★★");
-        res.json({
-            reCd : '01'
-        })
-    }else{
-        console.log("★★★login Session Check NOT LOGIN★★★");
-        res.json({
-            reCd : '02'
-        })
-    }   
-*/
 });
 
 router.post('/logout',function(req,res){

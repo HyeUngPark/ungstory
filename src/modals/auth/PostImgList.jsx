@@ -25,18 +25,18 @@ export default class PostImgList extends React.Component {
   cancel=()=>{
     this.setState({
       imgList : []
+      ,imgListCk : false
     });
     this.toggle();
   }
 
   getPostImgListCallback = (result)=>{
     if(result.reCd==="01"){
-      console.log('내 사진목록 조회 성공 >> ',result.PostImgList.length);
       this.setState({
         imgListCk : true
-        ,imgList : result.PostImgList
+        ,imgList : result.postImgList
         ,modal: !this.state.modal
-      })
+      });
     }else if(result.reCd ==='02'){
       console.log('내 사진목록 조회 실패');
       this.setState({
@@ -84,7 +84,7 @@ export default class PostImgList extends React.Component {
               className ="form-control-cursor"
               htmlFor="imgList"
             >
-              &nbsp;포스팅한 이미지 
+              &nbsp;포스팅 이미지 
             </label>
           </i>
           <input type="button" 
@@ -105,7 +105,7 @@ export default class PostImgList extends React.Component {
             <ModalBody>
               <Row>
                 <Col lg="12">
-                {(
+                {( this.state.imgList &&
                   this.state.imgList.length >0 ) ? 
                   this.state.imgList.map(
                     (img,index) => (<li className="form-tag form-tag-li" key={index}>
@@ -128,12 +128,13 @@ export default class PostImgList extends React.Component {
                         </div>
                       </li>)
                       )
-              :'포스팅한 사진이 없습니다.'}
+              :<div>'포스팅한 사진이 없습니다.'<br/></div>}
                 </Col>
+                <hr className="my-4" />
               </Row>
               <Row>
               {/* 확인 */}
-              <Col lg="12">
+              <Col lg="12" className="text-center">
                   <Button color="danger" onClick={this.cancel}>닫기</Button>
               </Col>
               </Row>

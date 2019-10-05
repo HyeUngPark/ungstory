@@ -20,81 +20,6 @@
         res.redirect('../index.html');
     });
 
-    router.post('/loginCk',function(req, res){
-        let params = req.body;
-        if(params.usrToken){
-            jwt.verify(params.usrToken,process.env.tokenKey,function(err, decoded){
-                if(decoded){
-                    console.log('★★★ LOGIN CHECK SUCCESS ★★★');
-                    res.json({
-                        reCd : '01'
-                    });
-                }else if(err && err.name === "TokenExpiredError"){
-                    console.log('★★★ Token 유효기간 만료 ★★★\n');
-                    if(!params.autoLoginCd){
-                    // autoLogin false일 경우 로그아웃 처리
-                        console.log('Token 만료 후 로그아웃 처리');
-                        res.json({
-                            reCd : '04'
-                        });
-                    }else{
-                    // token 재생성
-                    let newToken = jwt.sign({
-                        usrName : params.usrName
-                        ,mkDate : new Date()
-                    },process.env.tokenKey ,    // 비밀 키
-                    {expiresIn: '1h' });
-                    console.log('★★★ Token 재생성 ★★★\n',newToken);
-                    
-                    // 로그인 이력 업데이트
-                    schema.find({
-                        wkCd: 'USR',
-                        wkDtCd : 'LOGIN',
-                        "subSchema.loginToken": params.usrToken
-                    }, function(err, result) {
-                        if (err) {
-                            console.log('error \n', err);
-                            return res.status(500).send("select error >> " + err)
-                        }
-                        if (result.length > 0) {
-                            console.log("★★★ login history search result ★★★ \n",result[0]);
-                            var _id = result[0]._id;
-                            schema.updateOne({
-                                "_id" : _id
-                            }
-                            , { $set: {
-                                lstWrDt : date.getDate()
-                                ,'subSchema.loginToken': newToken
-                            }}
-                            , function(err, result) {
-                                if (err) {
-                                    console.log('error \n', err);
-                                    return res.status(500).send("select error >> " + err)
-                                }
-                                if (result.n) {
-                                    console.log("★★★ 토큰 업데이트 성공 result ★★★ \n",result.n);
-                                    res.json({
-                                        reCd : '03'
-                                        ,usrToken : newToken
-                                    });
-                                } else {
-                                    console.log("★★★ 토큰 업데이트 실패 ★★★ \n",result.n);
-                                }
-                            }); // update close
-                        }else{
-                            console.log('로그인 내역에 등록되지않은 Token');                            
-                        }
-                    }); // find close
-                 }
-                }
-                });
-            }else{
-            console.log('★★★ 변조되거나 잘못된 Token ★★★');
-            res.json({
-                reCd : '02'
-            });
-        }
-    });
 
     router.post('/post',function(req, res){
         let params = req.body;
@@ -242,9 +167,8 @@
                 console.log('error \n', err);
                 return res.status(500).send("select error >> " + err)
             }
-            // console.log(result);
             if (result.length > 0) {
-                console.log(result.length+'건 조회');
+                // console.log(result.length+'건 조회');
                 let postList = [];                
                 for(var i=0; i<result.length; i++){
                     var tempPhoto = [];
@@ -538,7 +462,7 @@
                             return res.status(500).send("포스트 좋아요 실패 >> " + err)
                         }
                         if (fResult.length>0) {
-                            console.log("★★★ 포스트 좋아요 유저 조회 성공 ★★★\n",fResult[0]);
+                            console.log("★★★ 포스트 좋아요 유저 조회 성공 ★★★\n");
                             let tempLikePst = fResult[0].subSchema.usrLikePst;
                             if(likeInc>0
                                 && tempLikePst.indexOf(params.pstPk)< 0){
@@ -554,10 +478,6 @@
                                         tempLikePst.splice(i,1);
                                     }
                                 }
-                            }
-                            ///////////
-                            for(var jj=0; jj<tempLikePst.length; jj++){
-                                console.log(tempLikePst[jj].pstPk);
                             }
         
                             schema.update({
@@ -812,5 +732,33 @@
         });
     });
 
-
+    router.put('/profileChange',function(req, res){
+        let params = req.body;
+        if(params.changeCd === 'img'){
+            schema.update({
+                wkCd : 'USR',
+                wkDtCd : 'USR',
+                "subSchema.usrId" : params.usrId
+                }
+                ,{$set:{
+                    "subSchema.usrPt" : params.usrPt
+                    ,"lstWrDt" :  date.getDate()
+                }}
+                , function(err, result) {
+                    if (err) {
+                        console.log('error \n', err);
+                        return res.status(500).send("포스트 수정 실패 >> " + err)
+                    }
+                    if (result.n) {
+                        res.json({
+                            reCd:'01'
+                        });
+                    }else{
+                        res.json({
+                            reCd:'02'
+                        });
+                    }
+                });
+        }
+    });
 module.exports = router;

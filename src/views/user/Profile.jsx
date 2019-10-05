@@ -53,6 +53,9 @@ class Profile extends React.Component {
     };
     api.apiSend('post','getProfile',param,this.getProfileCallback);
   }
+  profileChangeCallback =() =>{
+    this.getProfile();
+  }
   componentDidMount(){
     if(!this.state.getProfile && localStorage.getItem('usrInfo')){
         this.getProfile();
@@ -74,7 +77,9 @@ class Profile extends React.Component {
                         <img
                           alt="..."
                           className="rounded-circle"
-                          src={require("assets/img/theme/team-4-800x800.jpg")}
+                          src={this.state.profileData.usrPt !=="" 
+                              ? this.state.profileData.usrPt
+                              : require("assets/img/theme/no-profile-130x130.png")}
                         />
                       </a>
                     </div>
@@ -100,7 +105,11 @@ class Profile extends React.Component {
                     >
                       프로필 사진 수정
                     </Button> */}
-                    <ProfileChange usrId={this.state.profileData.usrId}/>
+                    <ProfileChange 
+                      usrId={this.state.profileData.usrId}
+                      usrPt = {this.state.profileData.usrPt}
+                      callbackFromParent={this.profileChangeCallback}
+                    />
                   </div>
                 </CardHeader>
                 <CardBody className="pt-0 pt-md-4">
