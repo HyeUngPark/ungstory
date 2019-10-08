@@ -206,10 +206,58 @@
 
                     postList.push(post); 
                 }
-                res.json({
-                    reCd : '01'
-                    ,pstList : postList
+                /* 댓글 프로필 사진 조회 */
+                let cmtUsrList = [];
+                for(var j=0; j<postList.length; j++){
+                    if(postList[j].pstCmt.length>0){
+                        for(var k=0; k<postList[j].pstCmt.length; k++){
+                            cmtUsrList.indexOf(postList[j].pstCmt[k].usrName)<0 ? 
+                            cmtUsrList.push(postList[j].pstCmt[k].usrName) : '';
+                        }
+                    }
+                }
+                console.log('★★★★★',cmtUsrList.length,'명 프로필 사진 조회 시작 ★★★★★');
+                schema.aggregate([
+                    {$match:{
+                        wkCd : 'USR',
+                        wkDtCd : 'USR',
+                        "subSchema.usrName" : {$in:cmtUsrList}
+                    }},
+                    {$project : {
+                        "subSchema.usrName" : 1
+                       ,"subSchema.usrPt" : 1
+                    }},
+                    {$group :{
+                        "_id" : "$_id"
+                        ,"usrName" : {"$first"  : "$subSchema.usrName"}
+                        ,"usrPt" : {"$first"  : "$subSchema.usrPt"}
+                    }}
+                ],function(profileErr, profileResult){
+                    if (profileErr) {
+                        console.log('error \n', profileErr);
+                        return res.status(500).send("select error >> " + profileErr);
+                    }
+                    if (profileResult.length > 0) {
+                        for(var jj=0; jj<postList.length; jj++){
+                            if(postList[jj].pstCmt.length>0){
+                                for(var kk=0; kk<postList[jj].pstCmt.length; kk++){
+                                    for(var ii =0; ii<profileResult.length; ii++){
+                                        if(profileResult[ii].usrName === postList[jj].pstCmt[kk].usrName){
+                                            postList[jj].pstCmt[kk].usrPt = profileResult[ii].usrPt;
+                                            console.log(profileResult[ii].usrName,' 이미지 등록\n');
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    res.json({
+                        reCd : '01'
+                        ,pstList : postList
+                    });
                 });
+
+                
             }else{
                 res.json({
                     reCd : '02'
@@ -752,6 +800,7 @@
                     if (result.n) {
                         res.json({
                             reCd:'01'
+                            ,usrPt : params.usrPt
                         });
                     }else{
                         res.json({
@@ -761,4 +810,5 @@
                 });
         }
     });
+
 module.exports = router;

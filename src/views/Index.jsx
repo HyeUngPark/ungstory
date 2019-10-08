@@ -22,7 +22,6 @@ import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 
 class Index extends React.Component {
   constructor(props){
-    // this.getPostList();
     super(props);
     this.state =  {
         postList : []
@@ -513,7 +512,9 @@ class Index extends React.Component {
                           <span className="avatar avatar-sm rounded-circle">
                             <img
                               alt="..."
-                              src={require("assets/img/theme/team-4-800x800.jpg")}
+                              src={(comment.usrPt &&comment.usrPt !=="") 
+                              ? comment.usrPt
+                              : require("assets/img/theme/no-profile-130x130.png")}
                             />
                           </span>
                         </Col>

@@ -31,15 +31,21 @@ export default class ProfileChange extends React.Component {
     this.setState({
       tempImgs : ''
     });
+
     this.toggle();
   }
-
+  
   profileModifyCallback = (result)=>{
     if(result.reCd==="01"){
       alert('프로필 변경 성공');
     }else if(result.reCd ==='02'){
       alert('프로필 변경 실패');
     }
+    
+    let usrInfo = JSON.parse(localStorage.getItem('usrInfo'));
+    usrInfo.usrPt = result.usrPt;
+    localStorage.setItem('usrInfo',JSON.stringify(usrInfo));
+
     this.cancel();
     this.modalClose();
   }
@@ -117,7 +123,7 @@ export default class ProfileChange extends React.Component {
           <Button
             className="float-right"
             color="default"
-            href="#pablo"
+            href="jvascript:void(0)"
             onClick={e => this.toggle()}
             size="sm"
           >

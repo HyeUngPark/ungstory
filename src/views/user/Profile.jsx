@@ -54,6 +54,10 @@ class Profile extends React.Component {
     api.apiSend('post','getProfile',param,this.getProfileCallback);
   }
   profileChangeCallback =() =>{
+    // this.setState({
+    //   profileCk : false
+    // });
+    this.props.history.push('/user/user-profile');
     this.getProfile();
   }
   componentDidMount(){
