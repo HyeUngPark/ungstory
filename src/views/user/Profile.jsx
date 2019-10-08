@@ -24,6 +24,14 @@ class Profile extends React.Component {
         profileCk : false
         ,getProfile : false
         ,profileData : {}
+        ,name : {
+          nameCk : false
+          ,nameCd : false
+        }
+        ,pw : {
+          pw1: ''
+          ,pw2 : ''
+        }
     };
   }
   profilePwCheck =(rs)=>{
@@ -53,12 +61,67 @@ class Profile extends React.Component {
     };
     api.apiSend('post','getProfile',param,this.getProfileCallback);
   }
-  profileChangeCallback =() =>{
+  profileChangeCallback =(result) =>{
     // this.setState({
     //   profileCk : false
     // });
+    if(result && result.reCd ==='01'){
+      alert('프로필 수정 성공');
+    }else if(result && result.reCd === '02'){
+      alert('프로필 수정 실패');
+    }
     this.props.history.push('/user/user-profile');
     this.getProfile();
+  }
+  profileChange = () =>{
+    let profileDate = this.state.profileData;
+    
+    // password 체크
+    let changePw = this.state.pw;
+    if(changePw.pw1 !=='' || changePw.pw2 !== ''){
+      // pw validation
+      if(true){
+
+      }else{
+        alert('패스워드를 확인해주세요');
+        return;
+      }
+    }
+    
+    // 닉네임 변경할 경우 
+    let changeName = this.state.name;
+    if(changeName.nameCd){
+      let oldName = JSON.parse(localStorage.getItem('usrInfo')).usrName;
+      if(oldName !== profileDate && !changeName.nameCk){
+        alert('닉네임을 변경하시려면 닉네임 중복검사를 해주세요.');
+        return;
+      }
+    }
+
+  }
+  valChange=(cd, e)=>{
+    if(cd === 'p1'){
+      let changePw = this.state.pw;
+      changePw.pw1 = e.target.value;
+      this.setState({
+        pw : changePw
+      });
+    }else if(cd === 'p2'){
+      let changePw = this.state.pw;
+      changePw.pw2 = e.target.value;
+      this.setState({
+        pw : changePw
+      });
+    }
+    console.log(cd ,' >> ',e.target.value);
+    console.log('state.pw  >> ',this.state.pw);
+  }
+  cancel = () =>{
+    this.setState({
+      profileCk:false
+      ,nameCk : false
+      ,nameCd : false
+    });
   }
   componentDidMount(){
     if(!this.state.getProfile && localStorage.getItem('usrInfo')){
@@ -100,20 +163,21 @@ class Profile extends React.Component {
                     >
                       Connect
                     </Button> */}
-                    {/* <Button
+                    
+                    <ProfileChange 
+                      usrId={this.state.profileData.usrId}
+                      usrPt = {this.state.profileData.usrPt}
+                      callbackFromParent={this.profileChangeCallback}
+                    />
+                    <Button
                       className="float-right"
                       color="default"
                       href="#pablo"
                       onClick={e => e.preventDefault()}
                       size="sm"
                     >
-                      프로필 사진 수정
-                    </Button> */}
-                    <ProfileChange 
-                      usrId={this.state.profileData.usrId}
-                      usrPt = {this.state.profileData.usrPt}
-                      callbackFromParent={this.profileChangeCallback}
-                    />
+                      프로필 대화명 수정
+                    </Button>
                   </div>
                 </CardHeader>
                 <CardBody className="pt-0 pt-md-4">
@@ -165,8 +229,8 @@ class Profile extends React.Component {
                       내 정보
                     </h6>
                     <div className="pl-lg-4">
-                      
                         { (this.state.profileCk) ? 
+                    <div>
                       <Row>
                       <Col lg="6">
                         <FormGroup>
@@ -217,7 +281,58 @@ class Profile extends React.Component {
                                   닉네임 중복검사
                               </Button>
                             </FormGroup>
-                           </Col> </Row> :
+                           </Col> 
+                           </Row> 
+                           <Row>
+                            <Col lg="12">
+                              <FormGroup>
+                                <label
+                                  className="form-control-label"
+                                  htmlFor="profilePwd"
+                                >
+                                  비밀번호
+                                </label>
+                                <Input
+                                  className="form-control-alternative"
+                                  id="profilePwd"
+                                  placeholder="비밀번호 변경을 원하시면 입력해주세요"
+                                  type="password"
+                                  value={this.state.pw.pw1}
+                                  onChange={e=>{this.valChange('p1',e)}}
+                                />
+                              </FormGroup>
+                            </Col>
+                            <Col lg="12">
+                              <FormGroup>
+                                <label
+                                  className="form-control-label"
+                                  htmlFor="profilePwdConfirm"
+                                >
+                                  비밀번호 확인 
+                                </label>
+                                <Input
+                                  className="form-control-alternative"
+                                  id="profilePwdConfirm"
+                                  placeholder="비밀번호 변경을 원하시면 입력해주세요"
+                                  type="password"
+                                  value={this.state.pw.pw2}
+                                  onChange={e=>{this.valChange('p2',e)}}
+                                />
+                              </FormGroup>
+                            </Col>
+                          </Row>
+                          <Row lg="12">
+                            <input type="button" 
+                                color="primary" 
+                                className="btn btn-primary" 
+                                value="변경하기"
+                                onClick={e=>{this.profileChange()}}
+                            />
+                            <Button color="danger" onClick={this.cancel}>취소</Button>
+                          </Row>
+
+                          </div>
+                           :
                           <Row>
                             <Col lg="6">
                               <FormGroup>
@@ -225,7 +340,7 @@ class Profile extends React.Component {
                                   className="form-control-label"
                                   htmlFor="input-email"
                                 >
-                                  아이디 (변경 불가)
+                                  아이디
                                 </label>
                                 <Input
                                   className="form-control-alternative"
@@ -253,40 +368,7 @@ class Profile extends React.Component {
                             </Col>   
                           </Row>
                         }
-                      <Row>
-                        <Col lg="12">
-                          <FormGroup>
-                            <label
-                              className="form-control-label"
-                              htmlFor="profilePwd"
-                            >
-                              비밀번호
-                            </label>
-                            <Input
-                              className="form-control-alternative"
-                              id="profilePwd"
-                              placeholder="비밀번호 변경을 원하시면 입력해주세요"
-                              type="password"
-                            />
-                          </FormGroup>
-                        </Col>
-                        <Col lg="12">
-                          <FormGroup>
-                            <label
-                              className="form-control-label"
-                              htmlFor="profilePwdConfirm"
-                            >
-                              비밀번호 확인 
-                            </label>
-                            <Input
-                              className="form-control-alternative"
-                              id="profilePwdConfirm"
-                              placeholder="비밀번호 변경을 원하시면 입력해주세요"
-                              type="password"
-                            />
-                          </FormGroup>
-                        </Col>
-                      </Row>
+                     
                     </div>
                     <hr className="my-4" />
                     {/* 접속 정보 */}
