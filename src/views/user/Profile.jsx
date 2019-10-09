@@ -17,6 +17,8 @@ import {
 import UserHeader from "components/Headers/UserHeader.jsx";
 import * as api from "api/api";
 import ProfileChange from "../../modals/auth/ProfileChange";
+var passwordValidator = require('password-validator');
+
 class Profile extends React.Component {
   constructor(props){
     super(props);
@@ -27,6 +29,7 @@ class Profile extends React.Component {
         ,name : {
           nameCk : false
           ,nameCd : false
+          ,usrName : ''
         }
         ,pw : {
           pw1: ''
@@ -43,10 +46,13 @@ class Profile extends React.Component {
   }
   getProfileCallback  = (result) =>{
     if(result.reCd === '01'){
-      console.log('프로필 조회 성공');
+      console.log('프로필 조회 성공\n',result);
+      let name = this.state.name;
+      name.usrName = result.profileData.usrName;
       this.setState({
         getProfile : true
         ,profileData : result.profileData
+        ,name : name
       });
     }else{
       console.log('프로필 조회 실패');
@@ -66,24 +72,52 @@ class Profile extends React.Component {
     //   profileCk : false
     // });
     if(result && result.reCd ==='01'){
-      alert('프로필 수정 성공');
+      if(result.svCd === 'np' || result.svCd ==='pwd' || result.svCd ==='name'){
+        alert('닉네임과 비밀번호를 수정한 경우 재로그인 필요합니다.');
+        localStorage.removeItem('usrInfo');
+        this.props.history.push('/');
+      }
     }else if(result && result.reCd === '02'){
       alert('프로필 수정 실패');
+    }else if(result && result.reCd === '03'){
+      alert('이미 사용하는 패스워드 입니다.');
+    }else{
+      // alert('프로필 수정 성공');
+      this.props.history.push('/user/user-profile');
+      this.getProfile();
     }
-    this.props.history.push('/user/user-profile');
-    this.getProfile();
   }
+
   profileChange = () =>{
-    let profileDate = this.state.profileData;
-    
+    var param ={
+      usrId : this.state.profileData.usrId
+      ,usrPw : ''
+    };
     // password 체크
     let changePw = this.state.pw;
-    if(changePw.pw1 !=='' || changePw.pw2 !== ''){
-      // pw validation
-      if(true){
-
+    if(changePw.pw1 ==='' && changePw.pw2 === ''){
+      // pass
+    }else if(changePw.pw1 ==='' || changePw.pw2 === ''){
+      alert('패스워드와 패스워드 확인을 입력해주세요.');
+      return;
+    }else if(changePw.pw1 !== changePw.pw2){
+      alert('입력하신 패스워드가 다릅니다.');
+      return;
+    }else{
+      let pwVal = changePw.pw1;
+      let pwValid = new passwordValidator();
+      pwValid
+      .is().min(8)                                    // Minimum length 8
+      .is().max(15)                                  // Maximum length 100
+      // .has().uppercase()                              // Must have uppercase letters
+      .has().lowercase()                              // Must have lowercase letters
+      .has().not().spaces()                           // Should not have spaces
+      .is().not().oneOf(['Passw0rd', 'Password123']); // Blacklist these values
+      if(pwValid.validate(pwVal)){
+        param.usrPw = changePw.pw1;
+        param.changeCd = 'pwd';
       }else{
-        alert('패스워드를 확인해주세요');
+        alert('비밀번호가 안전하지 않습니다.');
         return;
       }
     }
@@ -92,11 +126,20 @@ class Profile extends React.Component {
     let changeName = this.state.name;
     if(changeName.nameCd){
       let oldName = JSON.parse(localStorage.getItem('usrInfo')).usrName;
-      if(oldName !== profileDate && !changeName.nameCk){
+      if(oldName !==  changeName.usrName && !changeName.nameCk){
         alert('닉네임을 변경하시려면 닉네임 중복검사를 해주세요.');
         return;
+      }else if(oldName !== changeName.usrName && changeName.nameCk){
+        param.usrName = oldName;
+        param.changeName = changeName.usrName;
+        param.changeCd = 'name';
       }
     }
+
+    if(changeName.nameCd &&  param.usrPw !== ''){
+      param.changeCd = 'np';
+    }
+    api.apiSend('put','profileChange',param,this.profileChangeCallback);
 
   }
   valChange=(cd, e)=>{
@@ -112,18 +155,59 @@ class Profile extends React.Component {
       this.setState({
         pw : changePw
       });
+    }else if(cd ==='n'){
+      let name = this.state.name;
+      name.usrName = e.target.value;
+      name.nameCd = true;
+      this.setState({
+        name : name
+      });
     }
-    console.log(cd ,' >> ',e.target.value);
-    console.log('state.pw  >> ',this.state.pw);
   }
+  checkCallback =(result) =>{
+    if(result.reCd ==='01'){
+      alert('사용 가능한 닉네임');
+      let name = this.state.name;
+      name.nameCk =true;
+      this.setState({
+        name : name
+      });
+    }else{
+      alert('사용 불 가능한 닉네임');
+    }
+  }
+
+  overCheck =() =>{
+    if(this.state.name.usrName !=='' && 
+    this.state.name.usrName !== this.state.profileData.usrName){
+      let param ={
+        usrName : this.state.name.usrName
+      };
+      api.apiSend('get','/auth/nameCheck',param,this.checkCallback);
+    }else if(this.state.name.usrName === this.state.profileData.usrName){
+      alert('기존 닉네임과 같습니다.');
+      let name = this.state.name;
+      name.nameCd = false;
+      this.setState({
+        name : name
+      });
+    }else{
+      alert('닉네임을 입력해주세요.');
+    }
+  }
+
   cancel = () =>{
+    let name = this.state.name;
+    name.nameCd=false;
+    name.nameCk=false;
+    
     this.setState({
       profileCk:false
-      ,nameCk : false
-      ,nameCd : false
+      ,name : name
     });
   }
-  componentDidMount(){
+
+  componentDidMount () {
     if(!this.state.getProfile && localStorage.getItem('usrInfo')){
         this.getProfile();
     }
@@ -171,7 +255,7 @@ class Profile extends React.Component {
                     />
                     <Button
                       className="float-right"
-                      color="default"
+                      color="info"
                       href="#pablo"
                       onClick={e => e.preventDefault()}
                       size="sm"
@@ -205,7 +289,7 @@ class Profile extends React.Component {
                     </h3>
                     <hr className="my-4" />
                     <p>
-                      {this.state.profileData.usrMsg}
+                      {(this.state.profileData.usrMsg !== '') ? this.state.profileData.usrMsg : '대화명이 없습니다.'}
                     </p>
                     <a href="#pablo" onClick={e => e.preventDefault()}>
                       Show more
@@ -260,7 +344,9 @@ class Profile extends React.Component {
                               className="form-control-alternative"
                               id="input-username"
                               type="text"
-                              value ={this.state.profileData.usrName}
+                              placeholder="비밀번호 변경을 원하시면 입력해주세요"
+                              value ={this.state.name.usrName}
+                              onChange={e=>this.valChange('n',e)}
                             />
                           </FormGroup>
                           </Col>
@@ -276,7 +362,7 @@ class Profile extends React.Component {
                                   className = "form-button-marginTop"
                                   color="primary"
                                   id="profileNameCheck"
-                                  // onClick={e=>{this.overCheck('n')}}                        
+                                  onClick={e=>{this.overCheck()}}                        
                                   >
                                   닉네임 중복검사
                               </Button>
@@ -354,15 +440,15 @@ class Profile extends React.Component {
                               <FormGroup>
                                 <label
                                   className="form-control-label"
-                                  htmlFor="input-username"
+                                  htmlFor="input-username2"
                                   >
                                   닉네임
                                 </label>
                                 <Input
                                   className="form-control-alternative"
-                                  id="input-username"
+                                  id="input-username2"
                                   type="text"
-                                  value ={this.state.profileData.usrName}
+                                  value ={this.state.name.usrName}
                                 />
                               </FormGroup>
                             </Col>   

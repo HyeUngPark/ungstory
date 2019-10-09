@@ -106,6 +106,9 @@ export default class UsrProfileCheck extends React.Component {
                       type="password" 
                       value={this.state.usrPw}
                       onChange={e=>{this.valChange(e,'p')}}
+                      onKeyPress={e=>{if(e.key==='Enter'){
+                        this.pwCheck();
+                      }}}
                     />
 
                 </Col>

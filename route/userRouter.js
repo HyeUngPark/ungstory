@@ -4,10 +4,8 @@
     var express = require('express');
     var router = express.Router();
     var schema = require('../schema/commonSchema');
-    var loginSchema = require('../schema/loginSchema');
     var postSchema = require('../schema/postSchema');
     var postCmtSchema = require('../schema/postCmtSchema');
-    var jwt = require('jsonwebtoken');
     var env = require('dotenv');
     var date = require('../myUtils/dateUtils');
     var random = require('../myUtils/randomUtils');
@@ -244,7 +242,7 @@
                                     for(var ii =0; ii<profileResult.length; ii++){
                                         if(profileResult[ii].usrName === postList[jj].pstCmt[kk].usrName){
                                             postList[jj].pstCmt[kk].usrPt = profileResult[ii].usrPt;
-                                            console.log(profileResult[ii].usrName,' 이미지 등록\n');
+                                            // console.log(profileResult[ii].usrName,' 이미지 등록\n');
                                         }
                                     }
                                 }
@@ -782,6 +780,7 @@
 
     router.put('/profileChange',function(req, res){
         let params = req.body;
+        // console.log('/profileChange\n',params);
         if(params.changeCd === 'img'){
             schema.update({
                 wkCd : 'USR',
@@ -807,8 +806,271 @@
                             reCd:'02'
                         });
                     }
+            });
+        }else if(params.changeCd === 'pwd'){
+            schema.find({
+                wkCd : 'USR'
+                ,wkDtCd : 'USR'
+                ,"subSchema.usrId" : params.usrId
+                ,"subSchema.usrPwd" : encrypt.getEncrypt(params.usrPw)
+            },function(err,result){
+                if (err) {
+                    console.log('error \n', err);
+                    return res.status(500).send("비밀번호 수정 실패 >> " + err);
+                }
+                if (result.length > 0) {
+                    console.log("★★★기존 비밀번호★★★");
+                    res.json({
+                        reCd : '03' // 이미 사용하는 패스워드
+                        ,svCd : params.changeCd
+                    });
+                    return;
+                }else{
+                    schema.update({
+                        wkCd : 'USR',
+                        wkDtCd : 'USR',
+                        "subSchema.usrId" : params.usrId
+                        }
+                        ,{$set:{
+                            "subSchema.usrPwd" :  encrypt.getEncrypt(params.usrPw)
+                            ,"lstWrDt" :  date.getDate()
+                        }}
+                        , function(err, result) {
+                            if (err) {
+                                console.log('error \n', err);
+                                return res.status(500).send("비밀번호 수정 실패 >> " + err);
+                            }
+                            if (result.n) {
+                                console.log("★★★비밀번호 수정 성공★★★");
+                                res.json({
+                                    reCd : '01'
+                                    ,svCd : params.changeCd
+                                });
+                            }else{
+                                console.log("★★★비밀번호 수정 실패★★★");
+                                res.json({
+                                    reCd : '02'
+                                });
+                            }
+                    });
+                }
+            });
+        }else if(params.changeCd === 'name'){
+                //1.유저 닉네임 업데이트
+                schema.update({
+                    wkCd : 'USR',
+                    wkDtCd : 'USR',
+                    "subSchema.usrId" : params.usrId
+                    }
+                    ,{$set:{
+                        "subSchema.usrName" : params.changeName
+                        ,"lstWrDt" :  date.getDate()
+                    }}
+                    , function(nameErr, nameResult) {
+                        if (nameErr) {
+                            console.log('error \n', nameErr);
+                            return res.status(500).send("유저 닉네임 수정 실패 >> " + nameErr);
+                        }
+                        if (nameResult.n) {
+                            console.log('★★★ 유저 닉네임 수정 성공 ★★★');
+                            //2. 포스팅 닉네임 업데이트
+                            schema.update({
+                                wkCd : 'PST',
+                                wkDtCd : 'PST',
+                                "subSchema.usrId" : params.usrId
+                                }
+                                ,{$set:{
+                                    "subSchema.usrName" : params.changeName
+                                    // ,"lstWrDt" :  date.getDate()
+                                }}
+                                ,{multi:true}
+                                , function(postErr, postResult) {
+                                    if (postErr) {
+                                        console.log('error \n', postErr);
+                                        return res.status(500).send("유저 닉네임 수정 실패 >> " + postErr);
+                                    }
+                                    if (postResult.n) {
+                                        console.log('★★★ 포스트 닉네임 수정 성공 ★★★');
+                                        // 3. 댓글 닉네임 업데이트
+                                        schema.update({
+                                            wkCd : 'PST',
+                                            wkDtCd : 'PST',
+                                            "subSchema.pstCmt.usrName" : params.usrName
+                                        }
+                                        ,{$set:{
+                                            "subSchema.pstCmt.$[].usrName" : params.changeName
+                                            // ,"lstWrDt" :  date.getDate()
+                                        }}
+                                        ,{multi:true}
+                                        , function(cmtErr, cmtResult) {
+                                            if (cmtErr) {
+                                                console.log('error \n', cmtErr);
+                                                return res.status(500).send("포스트 닉네임 수정 실패 >> " + cmtErr);
+                                            }
+                                            if (cmtResult.n) {
+                                                console.log('★★★ 댓글 닉네임 수정 성공 ★★★');
+                                                res.json({
+                                                    reCd : '01'
+                                                    ,svCd : params.changeCd
+                                                });
+                                            }else{
+                                                console.log('일치하는 댓글 없음');
+                                                res.json({
+                                                    reCd : '01'
+                                                    ,svCd : params.changeCd
+                                                });
+                                            }
+                                        });
+                                    }else{
+                                        console.log('일치하는 포스팅 없음');
+                                        res.json({
+                                             reCd : '01'
+                                            ,svCd : params.changeCd
+                                        });
+                            }
+                        });
+                    }else{
+                        console.log('유저 닉네임 업데이트 실패');
+                        res.json({
+                            reCd : '02'
+                        });
+                    }
+            });
+        }else if(params.changeCd === 'np'){
+            schema.find({
+                wkCd : 'USR'
+                ,wkDtCd : 'USR'
+                ,"subSchema.usrId" : params.usrId
+                ,"subSchema.usrPwd" : encrypt.getEncrypt(params.usrPw)
+            },function(err,result){
+                if (err) {
+                    console.log('error \n', err);
+                    return res.status(500).send("비밀번호 수정 실패 >> " + err);
+                }
+                if (result.length > 0) {
+                    console.log("★★★기존 비밀번호★★★");
+                    res.json({
+                        reCd : '03' // 이미 사용하는 패스워드
+                        ,svCd : params.changeCd
+                    });
+                    return;
+                }else{
+                    schema.update({
+                        wkCd : 'USR',
+                        wkDtCd : 'USR',
+                        "subSchema.usrId" : params.usrId
+                        }
+                        ,{$set:{
+                            "subSchema.usrPwd" :  encrypt.getEncrypt(params.usrPw)
+                            ,"lstWrDt" :  date.getDate()
+                        }}
+                        , function(err, result) {
+                            if (err) {
+                                console.log('error \n', err);
+                                return res.status(500).send("비밀번호 수정 실패 >> " + err);
+                            }
+                            if (result.n) {
+                                console.log("★★★비밀번호 수정 성공★★★");
+                                    // res.json({
+                                    //     reCd : '01'
+                                    //     ,svCd : params.changeCd
+                                    // });
+                    //1.유저 닉네임 업데이트
+                    schema.update({
+                        wkCd : 'USR',
+                        wkDtCd : 'USR',
+                        "subSchema.usrId" : params.usrId
+                        }
+                        ,{$set:{
+                            "subSchema.usrName" : params.changeName
+                            ,"lstWrDt" :  date.getDate()
+                        }}
+                        , function(nameErr, nameResult) {
+                            if (nameErr) {
+                                console.log('error \n', nameErr);
+                                return res.status(500).send("유저 닉네임 수정 실패 >> " + nameErr);
+                            }
+                            if (nameResult.n) {
+                                console.log('★★★ 유저 닉네임 수정 성공 ★★★');
+                                // res.json({
+                                //     reCd:'01'
+                                //     ,usrPt : params.usrPt
+                                // });
+                                //2. 포스팅 닉네임 업데이트
+                                schema.update({
+                                    wkCd : 'PST',
+                                    wkDtCd : 'PST',
+                                    "subSchema.usrId" : params.usrId
+                                    }
+                                    ,{$set:{
+                                        "subSchema.usrName" : params.changeName
+                                        // ,"lstWrDt" :  date.getDate()
+                                    }}
+                                    ,{multi:true}
+                                    , function(postErr, postResult) {
+                                        if (postErr) {
+                                            console.log('error \n', postErr);
+                                            return res.status(500).send("유저 닉네임 수정 실패 >> " + postErr);
+                                        }
+                                        if (postResult.n) {
+                                            console.log('★★★ 포스트 닉네임 수정 성공 ★★★');
+                                            // 3. 댓글 닉네임 업데이트
+                                            schema.update({
+                                                wkCd : 'PST',
+                                                wkDtCd : 'PST',
+                                                "subSchema.pstCmt.usrName" : params.usrName
+                                            }
+                                            ,{$set:{
+                                                "subSchema.pstCmt.$[].usrName" : params.changeName
+                                                // ,"lstWrDt" :  date.getDate()
+                                            }}
+                                            ,{multi:true}
+                                            , function(cmtErr, cmtResult) {
+                                                if (cmtErr) {
+                                                    console.log('error \n', cmtErr);
+                                                    return res.status(500).send("포스트 닉네임 수정 실패 >> " + cmtErr);
+                                                }
+                                                if (cmtResult.n) {
+                                                    console.log('★★★ 댓글 닉네임 수정 성공 ★★★');
+                                                    res.json({
+                                                        reCd : '01'
+                                                        ,svCd : params.changeCd
+                                                    });
+                                                }else{
+                                                    console.log('일치하는 댓글 없음');
+                                                    res.json({
+                                                        reCd : '01'
+                                                        ,svCd : params.changeCd
+                                                    });
+                                                }
+                                            });
+                                        }else{
+                                            console.log('일치하는 포스팅 없음');
+                                            res.json({
+                                                reCd : '01'
+                                                ,svCd : params.changeCd
+                                            });
+                                            }
+                                        });
+                                  }else{
+                                    console.log('유저 닉네임 업데이트 실패');
+                                    res.json({
+                                        reCd : '02'
+                                    });
+                                }
+                             });
+                            }else{
+                                console.log("★★★비밀번호 수정 실패★★★");
+                                res.json({
+                                    reCd : '02'
+                                });
+                            }
+                        });
+                    }
                 });
-        }
-    });
+            }
+
+        });
+
 
 module.exports = router;

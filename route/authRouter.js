@@ -39,7 +39,7 @@ router.post('/join', function(req, res) {
         ,lstWrDt: date.getDate() // 최종 작성일
         ,subSchema: userSchema
     }).then((result)=>{
-        console.log("★★join success★★\n",result);
+        console.log("★★join success★★\n");
         // 인증메일 발송
         let mailParam={
             toEmail: userSchema.usrId,
@@ -74,7 +74,7 @@ router.get('/joinResponse',function(req, res){
             console.log('error \n', err);
             return res.status(500).send("select error >> " + err)
         }if (result.length > 0) {
-            console.log("★★★ result ★★★ \n",result[0]);
+            console.log("★★★ result ★★★ \n");
             
             schema.updateOne({
                 "_id" : result[0]._id
@@ -139,21 +139,22 @@ router.get('/nameCheck', function(req, res) {
     var params = req.query;
     schema.find({
         "wkCd": 'USR',
+        "wkDtCd": 'USR',
         "subSchema.usrName": params.usrName
     }, function(err, result) {
         if (err) {
             console.log('error \n', err);
             return res.status(500).send("select error >> " + err)
         }
-        console.log("★★★nameCheck★★★\n",result);
+        console.log("★★★nameCheck★★★ >> ",result.length ,"\n");
         if (result.length > 0) {
             res.json({ 
-                svCd : params.svCd
+                svCd : params.svCd ? params.svCd : ''
                ,reCd : "02" 
             })
         } else {
             res.json({
-                svCd : params.svCd
+                svCd : params.svCd ? params.svCd : ''
                ,reCd : '01' 
         });
         }
@@ -209,7 +210,6 @@ router.post('/login', function(req, res) {
                 loginSchema.usrId = result[0].subSchema.usrId;
                 loginSchema.connIp = ipAddress;
                 loginSchema.loginDate = date.getDate();
-                console.log('프로필 > \n',result[0].subSchema.usrPt);
                 // 로그인 내역 추가
                 schema.create({
                     wkCd: 'USR'
