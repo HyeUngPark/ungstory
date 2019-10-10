@@ -58,7 +58,8 @@ class Login extends React.Component {
       usrInfo.usrPt = result.usrInfo.usrPt;
       usrInfo.usrLikePst = result.usrLikePst;
       localStorage.setItem('usrInfo',JSON.stringify(usrInfo));
-      this.props.history.push('/');
+      // this.props.history.push('/');
+      window.location.reload();
     }else if(result.reCd ==='02'){
       alert('아이디 또는 비밀번호를 확인해주세요');
     }else if(result.reCd ==='03'){
@@ -82,7 +83,6 @@ class Login extends React.Component {
       return;
     }
     // 자동 로그인 여부 저장
-    console.log('로그인 자동 여부 > ',this.state.remberCd);
     let usrInfo = {
       autoLoginCd : this.state.remberCd
     }

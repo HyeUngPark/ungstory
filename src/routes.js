@@ -1,12 +1,13 @@
 import Index from "views/Index.jsx";
 import Profile from "views/user/Profile.jsx";
 import Tables from "views/user/Tables.jsx";
+import UserSearch from "views/user/UserSearch.jsx";
 import Icons from "views/user/Icons.jsx";
 
 import Register from "views/auth/Register.jsx";
 import Login from "views/auth/Login.jsx";
 
-var routes = [
+var routes =[
   {
     path: "/index",
     name: "Main",
@@ -22,20 +23,6 @@ var routes = [
     layout: "/user"
   },
   {
-    path: "/user-profile",
-    name: "User Profile",
-    icon: "ni ni-single-02 text-yellow",
-    component: Profile,
-    layout: "/user"
-  },
-  {
-    path: "/tables",
-    name: "Tables",
-    icon: "ni ni-bullet-list-67 text-red",
-    component: Tables,
-    layout: "/user"
-  },
-  {
     path: "/login",
     name: "Login",
     icon: "ni ni-key-25 text-info",
@@ -48,6 +35,39 @@ var routes = [
     icon: "ni ni-circle-08 text-pink",
     component: Register,
     layout: "/auth"
-  }
+  },
+  {
+    path: "/tables",
+    name: "Tables",
+    icon: "ni ni-bullet-list-67 text-red",
+    component: Tables,
+    layout: "/user"
+  },
+  {
+    path: "/user-search",
+    name: "user-search",
+    icon: "ni ni-single-02",
+    component: UserSearch,
+    layout: "/user"
+  },
 ];
+/* 
+  회원 전용 메뉴
+*/
+// 프로필 페이지
+  if(localStorage.getItem('usrInfo')){
+  routes.push(
+    {
+      path: "/user-profile",
+      name: "User Profile",
+      icon: "ni ni-single-02 text-yellow",
+      component: Profile,
+      layout: "/user"
+    });
+  }
+
+/* 
+  비회원 전용 메뉴
+*/
+
 export default routes;
