@@ -186,10 +186,14 @@ class Sidebar extends React.Component {
                 <DropdownItem className="noti-title" header tag="div">
                   <h6 className="text-overflow m-0">Welcome!</h6>
                 </DropdownItem>
-                <DropdownItem to="/admin/user-profile" tag={Link}>
-                  <i className="ni ni-single-02" />
-                  <span>My profile</span>
-                </DropdownItem>
+                {
+                  localStorage.getItem('usrInfo') ? 
+                  <DropdownItem to="/admin/user-profile" tag={Link}>
+                    <i className="ni ni-single-02" />
+                    <span>My profile</span>
+                  </DropdownItem>  
+                  : ''
+                }
                 <DropdownItem to="/admin/user-profile" tag={Link}>
                   <i className="ni ni-settings-gear-65" />
                   <span>Settings</span>

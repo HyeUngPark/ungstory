@@ -458,7 +458,6 @@ class Profile extends React.Component {
                     <h6 className="heading-small text-muted mb-4">최근 접속 기록</h6>
                     <div className="pl-lg-4">
                       <FormGroup>
-                        <label>최근 접속 기록</label>
                         {
                           (this.state.profileData.loginDate
                         && this.state.profileData.loginDate.length >0 ) ?
@@ -471,7 +470,13 @@ class Profile extends React.Component {
                           value={data}
                         />
                         )})
-                        :''
+                        :
+                          <Input
+                          className="form-control-alternative"
+                          rows="4"
+                          type="text"
+                          value='최근 접속기록이 없습니다.'
+                        />
                         }
                        </FormGroup>
                     </div>
