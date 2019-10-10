@@ -17,6 +17,7 @@ import {
 import UserHeader from "components/Headers/UserHeader.jsx";
 import * as api from "api/api";
 import ProfileChange from "../../modals/auth/ProfileChange";
+import ProfileMsgChange from "../../modals/auth/ProfileMsgChange";
 var passwordValidator = require('password-validator');
 
 class Profile extends React.Component {
@@ -238,30 +239,16 @@ class Profile extends React.Component {
                 </Row>
                 <CardHeader className="text-center border-0 pt-8 pt-md-4 pb-0 pb-md-4">
                   <div className="d-flex justify-content-between">
-                    {/* <Button
-                      className="mr-4"
-                      color="info"
-                      href="#pablo"
-                      onClick={e => e.preventDefault()}
-                      size="sm"
-                    >
-                      Connect
-                    </Button> */}
-                    
                     <ProfileChange 
                       usrId={this.state.profileData.usrId}
                       usrPt = {this.state.profileData.usrPt}
                       callbackFromParent={this.profileChangeCallback}
                     />
-                    <Button
-                      className="float-right"
-                      color="info"
-                      href="#pablo"
-                      onClick={e => e.preventDefault()}
-                      size="sm"
-                    >
-                      프로필 대화명 수정
-                    </Button>
+                    <ProfileMsgChange 
+                      usrId={this.state.profileData.usrId}
+                      usrMsg = {this.state.profileData.usrMsg}
+                      callbackFromParent={this.profileChangeCallback}
+                    />
                   </div>
                 </CardHeader>
                 <CardBody className="pt-0 pt-md-4">
@@ -289,6 +276,16 @@ class Profile extends React.Component {
                     </h3>
                     <hr className="my-4" />
                     <p>
+                      <div className="d-flex justify-content-between">
+                      <Button
+                        className="float-left"
+                        color="default"
+                        href="jvascript:void(0)"
+                        size="sm"
+                      >
+                        대화명
+                      </Button>
+                      </div>
                       {(this.state.profileData.usrMsg !== '') ? this.state.profileData.usrMsg : '대화명이 없습니다.'}
                     </p>
                     <a href="#pablo" onClick={e => e.preventDefault()}>

@@ -1068,6 +1068,34 @@
                         });
                     }
                 });
+            }else if(params.changeCd === 'msg'){
+                schema.updateOne({
+                    wkCd :'USR'
+                    ,wkDtCd : 'USR'
+                    ,"subSchema.usrId" : params.usrId
+                },{$set:{
+                    lstWrDt : date.getDate()
+                    ,"subSchema.usrMsg" : params.usrMsg
+                }}
+                ,function(err, result){
+                    if (err) {
+                        console.log('error \n', err);
+                        return res.status(500).send("프로필 대화명 수정 실패 >> " + err);
+                    }
+                    if (result.n) {
+                        console.log("★★★프로필 대화명 수정 성공★★★");
+                        res.json({
+                            reCd : '01'
+                            ,svCd : params.changeCd
+                        });
+                    }else{
+                        console.log("★★★프로필 대화명 수정 성공★★★");
+                        res.json({
+                            reCd : '02'
+                            ,svCd : params.changeCd
+                        });
+                    }
+                });
             }
 
         });
