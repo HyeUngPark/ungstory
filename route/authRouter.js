@@ -225,8 +225,8 @@ router.post('/login', function(req, res) {
                         "usrInfo" :{
                             "usrName" : result[0].subSchema.usrName
                             ,"usrPt" : result[0].subSchema.usrPt
+                            ,"usrLikePst" : result[0].subSchema.usrLikePst
                         }
-                        ,"usrLikePst" : result[0].subSchema.usrLikePst
                     });       
                 }).catch((err)=>{
                     console.log("★★join fail★★\n",err);
