@@ -1,7 +1,7 @@
 import Index from "views/Index.jsx";
 import Profile from "views/user/Profile.jsx";
 import Tables from "views/user/Tables.jsx";
-import UserSearch from "views/user/UserSearch.jsx";
+import FriendSearch from "views/user/FriendSearch.jsx";
 import Icons from "views/user/Icons.jsx";
 
 import Register from "views/auth/Register.jsx";
@@ -44,10 +44,10 @@ var routes =[
     layout: "/user"
   },
   {
-    path: "/user-search",
-    name: "user-search",
+    path: "/friend-Search",
+    name: "Friend Search",
     icon: "ni ni-single-02",
-    component: UserSearch,
+    component: FriendSearch,
     layout: "/user"
   },
 ];

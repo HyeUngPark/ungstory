@@ -1100,5 +1100,83 @@
 
         });
 
+        router.post('/frendSearch',function(req, res){
+            var params = req.body;
+            schema.aggregate([
+                {$match : {
+                    wkCd : 'USR'
+                    ,wkDtCd : 'USR'
+                    ,"subSchema.usrName" : params.usrName
+                }}
+                ,{$project:{
+                    _id : 0
+                   ,"subSchema.usrFrds" : 1
+                }}
+                ,{$group:{
+                   _id : "$_id"
+                   ,"myFrd" : {"$first":"$subSchema.usrFrds"}
+                }}
+            ],function(fError, fResult){
+                if (fError) {
+                    console.log('error \n', fError);
+                    return res.status(500).send("내 친구 목록 조회 실패 >> " + fError)
+                }
+                // console.log(result);
+                if (fResult.length > 0) {
+                    schema.aggregate([
+                        {$match : {
+                            wkCd : 'USR'
+                            ,wkDtCd : 'USR'
+                            ,"subSchema.usrName" : '/'+params.searchName+'/'
+                        }}
+                        ,{$project:{
+                    //         _id : 0
+                           "subSchema.usrName" : 1
+                           ,"subSchema.usrPt" : 1
+                           ,"subSchema.usrFrds" : 1
+                           ,"eqFrd" : 1
+                        }}
+                        ,{$group:{
+                           _id : "$_id"
+                           ,"usrName" : {"$first":"$subSchema.usrName"}
+                           ,"usrPt" : {"$first":"$subSchema.usrPt"}
+                           , "usrFrds" :  {"$first":"$subSchema.usrFrds"}
+                        }}
+                    ],function(err, result) {
+                        if (err) {
+                            console.log('error \n', err);
+                            return res.status(500).send("친구 검색 실패 >> " + err)
+                        }
+                        // console.log(result);
+                        if (result.length > 0) {
+                            var myFrd =fResult.myFrd;
+                            var searchList = result;
+                            for(let i=0; i<myFrd.length; i++){
+                                for(let j=0; j<searchList.length; j++){
+                                    let frdCt = 0;
+                                    for(let k=0; k<searchList[j].usrFrds.length;){
+                                        if(myFrd[i] === searchList[j].usrFrds[k]){
+                                            frdCt ++;
+                                        }
+                                    }
+                                    searchList[j].eqFrd = frdCt;
+                                }
+                            }
+
+                            res.json({
+                                reCd : '01'
+                                ,frdList : searchList 
+                            });
+                        }else{
+                            res.json({
+                                reCd : '02'
+                            });
+                        }
+                    });
+                }
+            });
+        });            
+
+
 
 module.exports = router;
