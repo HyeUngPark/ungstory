@@ -9,7 +9,7 @@ var os =require('os');
 // mongoose local debugging setting
 app.use(function(req,res,next){
   if(req.headers && req.headers.host === 'localhost:5000'){
-      db.setDebug(true);
+      db.setDebug(false);
   }
   next();
 });

@@ -1109,7 +1109,7 @@
                     ,"subSchema.usrName" : params.usrName
                 }}
                 ,{$project:{
-                    _id : 0
+                    _id : 1
                    ,"subSchema.usrFrds" : 1
                 }}
                 ,{$group:{
@@ -1121,48 +1121,58 @@
                     console.log('error \n', fError);
                     return res.status(500).send("내 친구 목록 조회 실패 >> " + fError)
                 }
-                // console.log(result);
+                let matchQuery = ".*"+params.searchName+".*";
                 if (fResult.length > 0) {
                     schema.aggregate([
                         {$match : {
                             wkCd : 'USR'
                             ,wkDtCd : 'USR'
-                            ,"subSchema.usrName" : '/'+params.searchName+'/'
+                            ,"subSchema.usrName" :  {$regex:matchQuery}
+                        }}
+                        ,{$unwind :{
+                            path: "$subSchema.usrFrds",
+                            preserveNullAndEmptyArrays: true     
                         }}
                         ,{$project:{
-                    //         _id : 0
+                            _id : 1,
                            "subSchema.usrName" : 1
                            ,"subSchema.usrPt" : 1
                            ,"subSchema.usrFrds" : 1
-                           ,"eqFrd" : 1
                         }}
                         ,{$group:{
                            _id : "$_id"
                            ,"usrName" : {"$first":"$subSchema.usrName"}
                            ,"usrPt" : {"$first":"$subSchema.usrPt"}
-                           , "usrFrds" :  {"$first":"$subSchema.usrFrds"}
+                           , "usrFrds" :  {"$push":"$subSchema.usrFrds"}
                         }}
                     ],function(err, result) {
                         if (err) {
                             console.log('error \n', err);
                             return res.status(500).send("친구 검색 실패 >> " + err)
                         }
-                        // console.log(result);
                         if (result.length > 0) {
-                            var myFrd =fResult.myFrd;
+                            var myFrd = fResult[0].myFrd;
                             var searchList = result;
-                            for(let i=0; i<myFrd.length; i++){
-                                for(let j=0; j<searchList.length; j++){
-                                    let frdCt = 0;
-                                    for(let k=0; k<searchList[j].usrFrds.length;){
-                                        if(myFrd[i] === searchList[j].usrFrds[k]){
-                                            frdCt ++;
+                                for(let i=0; i<myFrd.length; i++){
+                                    for(let j=0; j<searchList.length; j++){
+                                        if(myFrd.indexOf(searchList[j].usrName)>-1){
+                                            searchList[j].frdYn = true;
+                                            // console.log('이미 친구인 친구 ',searchList[j].usrName);
+                                        }else{
+                                            searchList[j].frdYn = false;
+                                            // console.log('친구 아님 ',searchList[j].usrName);
                                         }
+                                        let frdCt = 0;
+                                        
+                                        for(let k=0; k<searchList[j].usrFrds.length;){
+                                            if(myFrd[i] === searchList[j].usrFrds[k]){
+                                                frdCt ++;
+                                                console.log(searchList[j].usrName,' 함께아는친구 있음');
+                                            }
+                                        }
+                                        searchList[j].eqFrd = frdCt;
                                     }
-                                    searchList[j].eqFrd = frdCt;
                                 }
-                            }
-
                             res.json({
                                 reCd : '01'
                                 ,frdList : searchList 
