@@ -4,6 +4,16 @@ var serveStatic = require('serve-static');
 var path = require('path');
 var port = process.env.PORT || 5000;
 var db = require('./mongo');
+var os =require('os');
+
+// mongoose local debugging setting
+app.use(function(req,res,next){
+  if(req.headers && req.headers.host === 'localhost:5000'){
+      db.setDebug(true);
+  }
+  next();
+});
+
 /* 
 router module
 */
