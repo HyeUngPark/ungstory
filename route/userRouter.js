@@ -1122,6 +1122,10 @@
                     return res.status(500).send("내 친구 목록 조회 실패 >> " + fError)
                 }
                 let matchQuery = ".*"+params.searchName+".*";
+                let myFrd = fResult[0].myFrd;
+                let myName = [];
+                myName.push(params.usrName);
+
                 if (fResult.length > 0) {
                     schema.aggregate([
                         {$match : {
@@ -1129,21 +1133,39 @@
                             ,wkDtCd : 'USR'
                             ,"subSchema.usrName" :  {$regex:matchQuery}
                         }}
-                        ,{$unwind :{
-                            path: "$subSchema.usrFrds",
-                            preserveNullAndEmptyArrays: true     
-                        }}
                         ,{$project:{
                             _id : 1,
-                           "subSchema.usrName" : 1
-                           ,"subSchema.usrPt" : 1
-                           ,"subSchema.usrFrds" : 1
+                            "subSchema.usrName" : 1
+                            ,"subSchema.usrPt" : 1
+                            ,"subSchema.usrFrds" : 1
+                            ,frdYn : 1
+                            ,withFrd : 1
                         }}
                         ,{$group:{
                            _id : "$_id"
-                           ,"usrName" : {"$first":"$subSchema.usrName"}
+                           ,"usrName" : {"$max":"$subSchema.usrName"}
                            ,"usrPt" : {"$first":"$subSchema.usrPt"}
-                           , "usrFrds" :  {"$push":"$subSchema.usrFrds"}
+                           ,"frdYn" : {"$sum" : "$frdYn"}
+                           ,"withFrd" : {"$sum" : "$withFrd"}
+                           ,"usrFrds" : {"$first":"$subSchema.usrFrds"}
+                        }}
+                        ,{$addFields: {
+                            withFrd : {
+                                $size:{
+                                    $setIntersection:["$usrFrds",myFrd]
+                                }
+                            }
+                            ,frdYn : {
+                                $cond:
+                                    [{$gt:[
+                                        {$size:{
+                                            $setIntersection:["$usrFrds",myName]}
+                                        }
+                                        ,0]}
+                                        ,true
+                                        ,false
+                                    ]
+                            }
                         }}
                     ],function(err, result) {
                         if (err) {
@@ -1151,31 +1173,9 @@
                             return res.status(500).send("친구 검색 실패 >> " + err)
                         }
                         if (result.length > 0) {
-                            var myFrd = fResult[0].myFrd;
-                            var searchList = result;
-                                for(let i=0; i<myFrd.length; i++){
-                                    for(let j=0; j<searchList.length; j++){
-                                        if(myFrd.indexOf(searchList[j].usrName)>-1){
-                                            searchList[j].frdYn = true;
-                                            // console.log('이미 친구인 친구 ',searchList[j].usrName);
-                                        }else{
-                                            searchList[j].frdYn = false;
-                                            // console.log('친구 아님 ',searchList[j].usrName);
-                                        }
-                                        let frdCt = 0;
-                                        
-                                        for(let k=0; k<searchList[j].usrFrds.length;){
-                                            if(myFrd[i] === searchList[j].usrFrds[k]){
-                                                frdCt ++;
-                                                console.log(searchList[j].usrName,' 함께아는친구 있음');
-                                            }
-                                        }
-                                        searchList[j].eqFrd = frdCt;
-                                    }
-                                }
                             res.json({
                                 reCd : '01'
-                                ,frdList : searchList 
+                                ,frdList : result 
                             });
                         }else{
                             res.json({

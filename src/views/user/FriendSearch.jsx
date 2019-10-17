@@ -161,15 +161,19 @@ class FriendSearch extends React.Component {
                         </Media>
                       </th>
                       <td>
-                          {search.eqFrd>0 ? 
+                         {search.usrName === JSON.parse(localStorage.getItem('usrInfo')).usrName ?
+                         <div className="d-flex align-items-center">
+                            본인
+                          </div>
+                          : search.withFrd>0 ? 
                           <div className="d-flex align-items-center">
-                            00 명 
+                            {search.withFrd} 명 
                           </div>
                             :
                           <div className="d-flex align-items-center">
                             함께아는 친구 없음 
                           </div>
-                          }
+                        }
                       </td>
                       <td>
                         <div className="d-flex align-items-center">
