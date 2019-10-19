@@ -1,5 +1,6 @@
 var schema =({
-    frdTg : []
+    frdReq : ''
+    ,frdRes : ''
     ,frdSt : ''
 });
 
