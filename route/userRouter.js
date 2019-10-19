@@ -1167,6 +1167,10 @@
                                     ]
                             }
                         }}
+                        ,{$sort:{
+                            "withFrd" : -1
+                            ,"frdYn" : -1
+                        }}
                     ],function(err, result) {
                         if (err) {
                             console.log('error \n', err);
