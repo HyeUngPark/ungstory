@@ -4,7 +4,6 @@ var serveStatic = require('serve-static');
 var path = require('path');
 var port = process.env.PORT || 5000;
 var db = require('./mongo');
-var os =require('os');
 
 // mongoose local debugging setting
 app.use(function(req,res,next){
@@ -20,6 +19,7 @@ router module
 var commonRouter = require('./route/commonRouter');
 var userRouter = require('./route/userRouter');
 var authRouter = require('./route/authRouter');
+var frdRouter = require('./route/friendRouter');
 
 var bodyParser = require('body-parser');
 var session = require('express-session');
@@ -48,11 +48,10 @@ app.use(session({
 
 app.use(serveStatic(path.join(__dirname, '/build')));
 
-
-
 app.use('/', commonRouter);
 app.use('/auth', authRouter);
 app.use('/user', userRouter);
+app.use('/frd', frdRouter);
 
 var server = app.listen(port, function() {
   console.log("★★★ Server Started ★★★");

@@ -246,9 +246,35 @@ router.post('/loginCk',function(req, res){
         jwt.verify(params.usrToken,process.env.tokenKey,function(err, decoded){
             if(decoded){
                 console.log('★★★ LOGIN CHECK SUCCESS ★★★');
-                res.json({
-                    reCd : '01'
+                
+                // 알람 목록 가져오기
+                schema.aggregate([
+                    {$match : {
+                        wkCd : 'USR'
+                        ,wkDtCd : 'USR'
+                        ,"subSchema.usrName" :  {$regex:matchQuery}
+                    }}
+                    ,{$project:{
+                        _id : 1
+                        ,"subSchema" : 1
+                    }}
+                ],function(err, result) {
+                    let resultList ={
+                        reCd : '01'
+                    };
+                    if (err) {
+                        console.log('error \n', err);
+                        // return res.status(500).send("알람 조회 실패 >> " + err)
+                    }
+                    if (result.length > 0) {
+                        console.log('★★★ 알람 목록 조회 성공 ★★★');
+                        let noticeList = [];
+                        noticeList = result;
+                        resultList.noticeList = noticeList;
+                    }
+                    res.json(resultList);
                 });
+
             }else if(err && err.name === "TokenExpiredError"){
                 console.log('★★★ Token 유효기간 만료 ★★★\n');
                 if(!params.autoLoginCd){

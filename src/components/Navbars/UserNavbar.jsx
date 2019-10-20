@@ -24,6 +24,7 @@ import LoginProfile from '../../views/auth/LoginProfile';
 class UserNavbar extends React.Component {
   state ={
     loginYn : false
+    ,noticeList : {}
   };
   constructor(props){
     super(props);
@@ -51,6 +52,12 @@ class UserNavbar extends React.Component {
   noticeClick = (e, index) => {
     console.log("noticeClick >> ", index);
   };
+
+  getNotice = (result)=>{
+    this.setState({
+      noticeList : result    
+    });
+  }
 
   render() {
     return (
@@ -119,7 +126,7 @@ class UserNavbar extends React.Component {
               </FormGroup>
               &nbsp;&nbsp;&nbsp;
               </div>
-              <LoginProfile isMobile = "N"/>
+              <LoginProfile isMobile = "N" callbackFromParent={this.getNotice}/>
           </Form>
           </Container>
         </Navbar>

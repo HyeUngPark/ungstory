@@ -13,6 +13,7 @@ import {
 } from "reactstrap";
 // core components
 import Header from "components/Headers/Header.jsx";
+import { confirmAlert } from 'react-confirm-alert'; // Import
 import * as api from "api/api";
 
 class FriendSearch extends React.Component {
@@ -25,10 +26,38 @@ class FriendSearch extends React.Component {
     };
   }
 
-  friendAction = (cd ,searchIdx) =>{
-    if(cd==='y'){ // 친구 신청
-      console.log(this.state.searchList[searchIdx],' 친구 신청');
+  friendRequestCallback =(rs) =>{
+    if(rs.reCd === '01'){
+      alert('친구 요청 성공');
+    }else {
+      alert('친구 요청 실패');
     }
+  }
+
+  friendRequest = (frd) =>{
+    let param={
+      frdReq : JSON.parse(localStorage.getItem('usrInfo')).usrName
+      ,frdRes : frd.usrName
+    };
+    api.apiSend('post','/frd/friendRequest',param,this.friendRequestCallback);      
+  }
+
+  friendAction = (searchIdx) =>{
+    let searchList = this.state.searchList;
+    confirmAlert({
+      title: '친구신청 확인',
+      message: '정말 '+searchList[searchIdx].usrName+'님에게 친구 신청 하시겠습니까?',
+      buttons: [
+        {
+          label: '신청',
+          onClick: () => {this.friendRequest(searchList[searchIdx]);}
+        },
+        {
+          label: '취소',
+          onClick: () => {}
+        }
+      ],
+    });
   }
 
   valChange =(e, cd)=>{
@@ -75,7 +104,7 @@ class FriendSearch extends React.Component {
         usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
         ,searchName : searchName
       };
-      api.apiSend('post','frendSearch',param,this.friendSearchCallback);      
+      api.apiSend('post','/frd/frendSearch',param,this.friendSearchCallback);      
     }else{
       alert('검색할 닉네임을 입력해주세요');
     }
@@ -186,7 +215,7 @@ class FriendSearch extends React.Component {
                               color="primary" 
                               className="btn btn-primary" 
                               value="친구 신청"
-                              onClick={e=>{this.friendAction('y',searchIdx)}}
+                              onClick={e=>{this.friendAction(searchIdx)}}
                             />
                             : '친구'
                         }

@@ -24,13 +24,17 @@ import PostWriteModal from '../../modals/user/PostWriteModal';
 import * as api from "api/api";
 
 class LoginProfile extends React.Component {
- 
-    state ={
-        loginYn : false
-        ,usrName : ''
-        ,dropdownOpen:false
-        ,isModalOpen:false
-        ,seesionCheck : false
+    constructor(props) {
+        super(props);
+        this.state = {
+            loginYn : false
+            ,usrName : ''
+            ,dropdownOpen:false
+            ,isModalOpen:false
+            ,seesionCheck : false
+            ,noticeList : []
+        };
+        this.getNotice = this.props.callbackFromParent;
     }
 
     toggle = (e) =>{
@@ -58,18 +62,18 @@ class LoginProfile extends React.Component {
 
     loginCkCallback= (result) =>{
         if(result.reCd==="01"){
-          this.setState({
-            loginYn : true,
-            seesionCheck : true
-          });
-  
-          let usrInfo = JSON.parse(localStorage.getItem('usrInfo'));
-          if(usrInfo){
-            this.setState({
-              usrName : usrInfo.usrName
-              ,seesionCheck : true
-            });
-          }
+            let updateResult = {
+                loginYn : true
+                ,seesionCheck : true
+            };
+            if(localStorage.getItem('usrInfo')){
+                updateResult.usrName = JSON.parse(localStorage.getItem('usrInfo')).usrName;
+            }
+    
+            if(result.noticeList){
+                this.getNotice(result.noticeList);
+            }
+            this.setState(updateResult);
         }else if(result.reCd ==='02'){
           this.setState({
             loginYn : false
