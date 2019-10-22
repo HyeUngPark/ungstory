@@ -2,10 +2,6 @@ import React from "react";
 import { Link } from "react-router-dom";
 // reactstrap components
 import {
-  DropdownMenu,
-  DropdownItem,
-  UncontrolledDropdown,
-  DropdownToggle,
   Form,
   FormGroup,
   InputGroupAddon,
@@ -13,10 +9,7 @@ import {
   Input,
   InputGroup,
   Navbar,
-  Nav,
   Container,
-  Media,
-  NavLink,
 } from "reactstrap";
 
 import LoginProfile from '../../views/auth/LoginProfile';
@@ -91,10 +84,28 @@ class UserNavbar extends React.Component {
               <FormGroup className="mb-0 form-control-cursor" onClick={e=>this.noticeClick(e,1)}>
                 <InputGroup className="input-group-alternative">
                   <InputGroupAddon addonType="prepend">
-                      <InputGroupText>
-                        <i className=" ni ni-single-02"/>
-                        &nbsp;
-                      </InputGroupText>
+                  <InputGroupText
+                        style={{
+                          position: "relative"
+                        }}
+                      >
+                          <a href="javascript:void(0)" 
+                            className="form-control-cursor"
+                          //  onClick={e=>{this.imgView(index,e)}}
+                          >
+                            <i className="ni ni-single-02"/>
+                          </a>
+                          <span className="form-control-notice"
+                                // value={index} 
+                                style ={{
+                                  position:'absolute',
+                                  right:'0px',
+                                  top:'0px',
+                                }}
+                          >
+                            11
+                          </span>
+                        </InputGroupText>
                     </InputGroupAddon>
                 </InputGroup>
               </FormGroup>

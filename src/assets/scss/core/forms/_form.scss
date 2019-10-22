@@ -83,6 +83,15 @@ textarea[resize="horizontal"] {
     font-size: $font-size-base;
 }
 
+.form-control-notice{
+    color : red;
+    font-size: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-left: 3px;
+    padding-left: 0px;
+}
+
 .form-control-cursor{
     cursor: pointer;
 }

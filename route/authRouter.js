@@ -252,7 +252,7 @@ router.post('/loginCk',function(req, res){
                     {$match : {
                         wkCd : 'USR'
                         ,wkDtCd : 'USR'
-                        ,"subSchema.usrName" :  {$regex:matchQuery}
+                        ,"subSchema.usrName" :  params.usrName
                     }}
                     ,{$project:{
                         _id : 1
