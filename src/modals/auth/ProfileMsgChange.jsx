@@ -58,6 +58,12 @@ export default class ProfileMsgChange extends React.Component {
     }); 
   }
   confirmAlert =() =>{
+    let asIsMsg = this.props.usrMsg;
+    let toBeMsg = this.state.usrMsg;
+    if(asIsMsg === toBeMsg){
+      alert('이전과 다른 대화명을 입력해 주세요.');
+      return;
+    }
     confirmAlert({
       title: '대화명 수정 확인',
       message: '정말 대화명을 변경하시겠습니까?',
