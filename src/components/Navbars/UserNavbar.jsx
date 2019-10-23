@@ -42,8 +42,14 @@ class UserNavbar extends React.Component {
 }
 
   // closes the collapse
-  noticeClick = (e, index) => {
-    console.log("noticeClick >> ", index);
+  noticeClick = (e, cd) => {
+    if(cd === 'f'){ // friend request popup
+
+    }else if(cd ==='m'){ // message popup
+
+    }else if(cd === 'n'){ // post, friend request notice popup
+
+    }
   };
 
   getNotice = (result)=>{
@@ -94,17 +100,21 @@ class UserNavbar extends React.Component {
                           //  onClick={e=>{this.imgView(index,e)}}
                           >
                             <i className="ni ni-single-02"/>
+                            &nbsp;
                           </a>
-                          <span className="form-control-notice"
-                                // value={index} 
-                                style ={{
-                                  position:'absolute',
-                                  right:'0px',
-                                  top:'0px',
-                                }}
-                          >
-                            11
-                          </span>
+                            {this.state.noticeList && this.state.noticeList.frdNotice > 0 ?
+                              <span className="form-control-notice"
+                                    // value={index} 
+                                    style ={{
+                                      position:'absolute',
+                                      right:'0px',
+                                      top:'0px',
+                                    }}
+                              >
+                                {this.state.noticeList.frdNotice}
+                              </span>
+                            : ''
+                            }
                         </InputGroupText>
                     </InputGroupAddon>
                 </InputGroup>
@@ -115,10 +125,32 @@ class UserNavbar extends React.Component {
               <FormGroup className="mb-0 form-control-cursor" onClick={e=>this.noticeClick(e,2)}>
                 <InputGroup className="input-group-alternative">
                   <InputGroupAddon addonType="prepend">
-                      <InputGroupText>
-                        <i className=" ni ni-chat-round"></i>
-                        &nbsp;
-                      </InputGroupText>
+                  <InputGroupText
+                        style={{
+                          position: "relative"
+                        }}
+                      >
+                          <a href="javascript:void(0)" 
+                            className="form-control-cursor"
+                          //  onClick={e=>{this.imgView(index,e)}}
+                          >
+                          <i className=" ni ni-chat-round"></i>
+                          &nbsp;
+                          </a>
+                            {this.state.noticeList && this.state.noticeList.msgNotice > 0 ?
+                              <span className="form-control-notice"
+                                    // value={index} 
+                                    style ={{
+                                      position:'absolute',
+                                      right:'0px',
+                                      top:'0px',
+                                    }}
+                              >
+                                {this.state.noticeList.msgNotice}
+                              </span>
+                            : ''
+                            }
+                        </InputGroupText>
                     </InputGroupAddon>
                 </InputGroup>
               </FormGroup>
@@ -128,10 +160,32 @@ class UserNavbar extends React.Component {
               <FormGroup className="mb-0 form-control-cursor" onClick={e=>this.noticeClick(e,3)} href="#">
                 <InputGroup className="input-group-alternative">
                   <InputGroupAddon addonType="prepend">
-                      <InputGroupText>
+                  <InputGroupText
+                        style={{
+                          position: "relative"
+                        }}
+                      >
+                          <a href="javascript:void(0)" 
+                            className="form-control-cursor"
+                          //  onClick={e=>{this.imgView(index,e)}}
+                          >
                           <i className=" ni ni-bulb-61"></i>
                           &nbsp;
-                      </InputGroupText>
+                          </a>
+                            {this.state.noticeList && this.state.noticeList.pstNotice > 0 ?
+                              <span className="form-control-notice"
+                                    // value={index} 
+                                    style ={{
+                                      position:'absolute',
+                                      right:'0px',
+                                      top:'0px',
+                                    }}
+                              >
+                                {this.state.noticeList.pstNotice}
+                              </span>
+                            : ''
+                            }
+                        </InputGroupText>
                     </InputGroupAddon>
                 </InputGroup>
               </FormGroup>

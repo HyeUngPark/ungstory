@@ -1,6 +1,5 @@
 var schema =({
     usrName : ''
-    ,noticeCd : ''
     ,noticeCt : ''
     ,readYn	: false
 });

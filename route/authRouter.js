@@ -249,14 +249,52 @@ router.post('/loginCk',function(req, res){
                 
                 // 알람 목록 가져오기
                 schema.aggregate([
-                    {$match : {
-                        wkCd : 'USR'
-                        ,wkDtCd : 'USR'
-                        ,"subSchema.usrName" :  params.usrName
-                    }}
-                    ,{$project:{
-                        _id : 1
-                        ,"subSchema" : 1
+                    {$facet:{    
+                        frdNotice : [
+                            {$match : {
+                                wkCd : 'NOT'
+                                ,wkDtCd : "FRD"
+                                ,"subSchema.usrName" :  params.usrName
+                                ,"subSchema.readYn" : false
+                            }}
+                            ,{ $group: { 
+                                _id: null, 
+                                count: { $sum: 1 } 
+                            }}
+                            ,{ $project: { 
+                                _id: 0 
+                            }}
+                            ]
+                        ,pstNotice : [
+                            {$match : {
+                                wkCd : 'NOT'
+                                ,wkDtCd : "PST"
+                                ,"subSchema.usrName" :  params.usrName 
+                                ,"subSchema.readYn" : false
+                            }}
+                            ,{ $group: { 
+                                _id: null, 
+                                count: { $sum: 1 } 
+                            }}
+                            ,{ $project: { 
+                                _id: 0 
+                            }}
+                        ]
+                        ,msgNotice : [
+                            {$match : {
+                                wkCd : 'NOT'
+                                ,wkDtCd : "MSG"
+                                ,"subSchema.usrName" :  params.usrName 
+                                ,"subSchema.readYn" : false
+                            }}
+                            ,{ $group: { 
+                                _id: null, 
+                                count: { $sum: 1 } 
+                            }}
+                            ,{ $project: { 
+                                _id: 0 
+                            }}
+                        ]
                     }}
                 ],function(err, result) {
                     let resultList ={
@@ -268,8 +306,10 @@ router.post('/loginCk',function(req, res){
                     }
                     if (result.length > 0) {
                         console.log('★★★ 알람 목록 조회 성공 ★★★');
-                        let noticeList = [];
-                        noticeList = result;
+                        let noticeList = {};
+                        result[0].frdNotice.length> 0 ? noticeList.frdNotice = result[0].frdNotice[0].count : noticeList.frdNotice =0;
+                        result[0].pstNotice.length> 0 ? noticeList.pstNotice = result[0].pstNotice[0].count : noticeList.pstNotice =0;
+                        result[0].msgNotice.length> 0 ? noticeList.msgNotice = result[0].msgNotice[0].count : noticeList.msgNotice =0;
                         resultList.noticeList = noticeList;
                     }
                     res.json(resultList);

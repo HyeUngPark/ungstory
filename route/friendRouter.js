@@ -120,7 +120,6 @@ router.post('/friendRequest',function(req,res){
     }).then((result)=>{
         console.log("★★ friend request success ★★\n");
         
-        ntSchema.noticeCd = 'frd';
         ntSchema.noticeCt = '친구 요청';
         ntSchema.usrName = params.frdRes;
         ntSchema.readYn = false;
@@ -150,5 +149,96 @@ router.post('/friendRequest',function(req,res){
         });
     });
 });
+
+router.post('/frdReqList',function(req, res){
+    var params = req.body;
+    schema.aggregate([
+        {$match : {
+            wkCd : 'USR'
+            ,wkDtCd : 'USR'
+            ,"subSchema.usrName" : params.usrName
+        }}
+        ,{$project:{
+            _id : 1
+           ,"subSchema.usrFrds" : 1
+        }}
+        ,{$group:{
+           _id : "$_id"
+           ,"myFrd" : {"$first":"$subSchema.usrFrds"}
+        }}
+    ],function(fError, fResult){
+        if (fError) {
+            console.log('error \n', fError);
+            return res.status(500).send("내 친구 목록 조회 실패 >> " + fError)
+        }
+        let matchQuery = ".*"+params.searchName+".*";
+        let myFrd = fResult[0].myFrd;
+        let myName = [];
+        myName.push(params.usrName);
+
+        if (fResult.length > 0) {
+            schema.aggregate([
+                {$match : {
+                    wkCd : 'USR'
+                    ,wkDtCd : 'USR'
+                    ,"subSchema.usrName" :  {$regex:matchQuery}
+                }}
+                ,{$project:{
+                    _id : 1,
+                    "subSchema.usrName" : 1
+                    ,"subSchema.usrPt" : 1
+                    ,"subSchema.usrFrds" : 1
+                    ,frdYn : 1
+                    ,withFrd : 1
+                }}
+                ,{$group:{
+                   _id : "$_id"
+                   ,"usrName" : {"$max":"$subSchema.usrName"}
+                   ,"usrPt" : {"$first":"$subSchema.usrPt"}
+                   ,"frdYn" : {"$sum" : "$frdYn"}
+                   ,"withFrd" : {"$sum" : "$withFrd"}
+                   ,"usrFrds" : {"$first":"$subSchema.usrFrds"}
+                }}
+                ,{$addFields: {
+                    withFrd : {
+                        $size:{
+                            $setIntersection:["$usrFrds",myFrd]
+                        }
+                    }
+                    ,frdYn : {
+                        $cond:
+                            [{$gt:[
+                                {$size:{
+                                    $setIntersection:["$usrFrds",myName]}
+                                }
+                                ,0]}
+                                ,true
+                                ,false
+                            ]
+                    }
+                }}
+                ,{$sort:{
+                    "withFrd" : -1
+                    ,"frdYn" : -1
+                }}
+            ],function(err, result) {
+                if (err) {
+                    console.log('error \n', err);
+                    return res.status(500).send("친구 검색 실패 >> " + err)
+                }
+                if (result.length > 0) {
+                    res.json({
+                        reCd : '01'
+                        ,frdList : result 
+                    });
+                }else{
+                    res.json({
+                        reCd : '02'
+                    });
+                }
+            });
+        }
+    });
+});            
 
 module.exports = router;
