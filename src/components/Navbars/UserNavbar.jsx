@@ -13,6 +13,7 @@ import {
 } from "reactstrap";
 
 import LoginProfile from '../../views/auth/LoginProfile';
+import FrdReqList from '../../modals/frd/FrdReqList';
 
 class UserNavbar extends React.Component {
   state ={
@@ -95,13 +96,7 @@ class UserNavbar extends React.Component {
                           position: "relative"
                         }}
                       >
-                          <a href="javascript:void(0)" 
-                            className="form-control-cursor"
-                          //  onClick={e=>{this.imgView(index,e)}}
-                          >
-                            <i className="ni ni-single-02"/>
-                            &nbsp;
-                          </a>
+                          <FrdReqList/>
                             {this.state.noticeList && this.state.noticeList.frdNotice > 0 ?
                               <span className="form-control-notice"
                                     // value={index} 

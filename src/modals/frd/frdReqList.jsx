@@ -1,9 +1,9 @@
 import React from 'react';
-import { Button, Modal, ModalBody,ModalHeader, Card , Row, Col, Input} from 'reactstrap';
+import { Button, Modal, ModalBody,Table, Card , Media, Row, Col} from 'reactstrap';
 
 import * as api from "api/api";
 
-export default class frdReqList extends React.Component {
+export default class FrdReqList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -20,17 +20,8 @@ export default class frdReqList extends React.Component {
     });
   }
 
-
   handleSubmit(event) {
     event.preventDefault();
-  }
-
-  cancel=()=>{
-    this.setState({
-      // usrPw : ''
-    });
-    
-    this.toggle();
   }
 
   frdReqListCallback = (result)=>{
@@ -41,6 +32,8 @@ export default class frdReqList extends React.Component {
       })
     }else if(result.reCd ==='02'){
       console.log('친구 신청 목록 조회 실패');
+    }else if(result.reCd === '03'){
+      console.log('친구 신청 목록 없음');
     }else{
       alert('서버오류');
     }
@@ -61,28 +54,41 @@ export default class frdReqList extends React.Component {
 
     }
   }
+  // close = () =>{
+  //   this.setState({
+  //     frdReqList : []
+  //   });
+  //   this.toggle();
 
+  // }
   render() {
     return (
         <div>
             <a 
+                className= "form-control-cursor"
                 href="javascript:void(0)"
                 onClick={this.toggle}
             >
-                <small className="btn btn-info">친구 신청 목록</small>
+            <i className="ni ni-single-02"/>
+            &nbsp;
           </a>
-          <Modal isOpen={this.state.modal} backdrop={false} onKeyUp={(e)=>{
-            if(e.key === "Escape"){
-              this.cancel();
-            }
-          }}>
-          <form className="card shadow" onSubmit={this.handleSubmit}>
+          <Modal 
+            isOpen={this.state.modal} 
+            backdrop={false} 
+            onKeyUp={(e)=>{
+              if(e.key === "Escape"){
+                this.cancel();
+              }
+            }}
+            style ={{
+              width : '80%'
+            }}
+          >
+        <form className="card shadow" onSubmit={this.handleSubmit}>
           <Card className="bg-secondary shadow border-0">
-
             <h5 className="display-4">&nbsp;친구 신청 목록</h5>
- 
             <ModalBody>
-            <Table className="align-items-center table-flush table-font" responsive>
+            <Table className="align-items-center table-flush table-font table-overflow-hidden" responsive>
                   <thead className="thead-light justify-content-center">
                     <tr>
                       <th scope="col">유저</th>
@@ -110,18 +116,14 @@ export default class frdReqList extends React.Component {
                             id="tooltip806693074"
                             onClick={e => e.preventDefault()}
                           >
-                            {/* <img
+                            <img
                               alt="..."
                               className="rounded-circle"
                               src={(
-                                search.usrPt !== ''
-                                ? search.usrPt
+                                frd.usrPt !== ''
+                                ? frd.usrPt
                                 : require("assets/img/theme/no-profile-130x130.png"))}
-                            /> */}
-                            <img
-                              alt="..."
-                              src={require("assets/img/theme/team-4-800x800.jpg")}
-                            />
+                            /> 
                           </a>
                             &nbsp;
                           <Media>
@@ -150,16 +152,24 @@ export default class frdReqList extends React.Component {
                           onClick={e=>{this.frdRes('y',frdIdx)}}
                         />
                         <Button color="danger" onClick={e=>{this.frdRes('n',frdIdx)}}>
-                          취소
+                          거절
                         </Button>
                       </td>
                     </tr>
                     );
                     })
                   }
-                  </tbody>
-                </Table>
-              
+                </tbody>
+              </Table>
+              <br/>
+              <Row className="align-items-center justify-content-center"> 
+                <Button 
+                  color="danger" 
+                  onClick={e=>{this.toggle()}}
+                >
+                      닫기
+                </Button>
+              </Row>
             </ModalBody>
             </Card>
             </form>
