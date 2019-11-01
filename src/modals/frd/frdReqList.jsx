@@ -49,12 +49,33 @@ export default class FrdReqList extends React.Component {
     }
   }
 
-  frdRes =(cd, frdIdx) => {
-    if(cd === 'y'){ // 친구 수락
-
-    }else if(cd ==='n'){ // 친구 거절
-
+  frdResCallback = (result) =>{
+    let ynMsg = '';
+    if(result.ynCd ==='Y'){
+      ynMsg = '수락';
+    }else{
+      ynMsg = '거절';
     }
+
+    if(result.reCd === '01'){
+      alert('친구 '+ynMsg+ ' 성공');
+    }else if(result.reCd ==='02'){
+      alert('친구 '+ynMsg+ ' 실패');
+    }
+    this.frdReqList();
+  }
+
+  frdRes =(cd, frdIdx) => {
+    let param ={
+      frdReq : this.state.frdReqList[frdIdx].usrName
+      ,frdRes : JSON.parse(localStorage.getItem('usrInfo')).usrName
+    };
+    if(cd === 'y'){ // 친구 수락
+      param.ynCd = 'Y';
+    }else if(cd ==='n'){ // 친구 거절
+      param.ynCd = 'N';
+    }
+    api.apiSend('put','/frd/frdYn',param,this.frdResCallback);
   }
   // close = () =>{
   //   this.setState({

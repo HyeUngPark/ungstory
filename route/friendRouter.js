@@ -173,7 +173,6 @@ router.post('/frdReqList',function(req, res){
             console.log('error \n', fError);
             return res.status(500).send("내 친구 목록 조회 실패 >> " + fError)
         }
-        let matchQuery = ".*"+params.searchName+".*";
         let myFrd = [];
 
         if (fResult.length > 0) {
@@ -254,7 +253,98 @@ router.post('/frdReqList',function(req, res){
         });
 
     });
-
 });            
+
+router.put('/frdYn',function(req, res){
+    let params = req.body;
+        // 1.frdSchema 상태 변경 
+        console.log('★★★ 친구 요청 응답 ★★★\n',params);
+        schema.update({
+            wkCd : 'FRD'
+            ,wkDtCd : 'FRD'
+            ,"subSchema.frdReq": params.frdReq
+            ,"subSchema.frdRes" : params.frdRes
+            ,"subSchema.frdSt" : 'S'
+        }
+        , { $set: {
+            lstWrDt : date.getDate()
+            ,'subSchema.frdSt': params.ynCd
+        }}
+        , function(fErr, fResult) {
+            if (fErr) {
+                console.log('error \n', fErr);
+                return res.status(500).send("친구 수락 실패 " + fErr)
+            }
+            if (fResult.n) {
+                console.log('★★★ 친구수락 - frdSchema 변경 완료 ★★★');
+                
+                if(params.ynCd === 'N'){ // 친구 거절이면 종료
+                    res.json({
+                        reCd : '01'
+                        ,ynCd : params.ynCd
+                    });
+                    return;
+                }else if(params.ynCd ==='Y'){ // 친구 수락
+                // 2. 요청, 수신자 친구목록에 친구 추가
+                // 2-1. 요청자 친구 목록에 추가
+                schema.update({
+                    wkCd : 'USR'
+                    ,wkDtCd : 'USR'
+                    ,"subSchema.usrName" : params.frdReq
+                }
+                ,{ $push : 
+                    {"subSchema.usrFrds" : params.frdRes}
+                }
+                , function(uErr1, uResult1) {
+                    if (uErr1) {
+                        console.log('error \n', uErr1);
+                        return res.status(500).send("친구 수락 실패 " + uErr1)
+                    }
+                    if (uResult1.n) {
+                        console.log('★★★ 친구수락 - 요청자 친구목록 추가 완료 ★★★');
+                        // 2-2. 수신자 친구 목록에 추가
+                        schema.update({
+                            wkCd : 'USR'
+                            ,wkDtCd : 'USR'
+                            ,"subSchema.usrName" : params.frdRes
+                        }
+                        ,{ $push : 
+                            {"subSchema.usrFrds" : params.frdReq}
+                        }
+                        , function(uErr2, uResult2) {
+                            if (uErr2) {
+                                console.log('error \n', uErr2);
+                                return res.status(500).send("친구 수락 실패 " + uErr2)
+                            }
+                            if (uResult2.n) {
+                                console.log('★★★ 친구수락 - 수신자 친구목록 추가 완료 ★★★');
+                                res.json({
+                                    reCd : '01'
+                                    ,ynCd : params.ynCd
+                                });
+                            }else{
+                                res.json({
+                                    reCd : '02'
+                                    ,ynCd : params.ynCd
+                                });
+                            }
+                        });
+                    }else{
+                        res.json({
+                            reCd : '02'
+                            ,ynCd : params.ynCd
+                        });
+                    }
+                });
+            }
+        }else{
+            res.json({
+                reCd:'02'
+                ,ynCd : params.ynCd
+            });
+        }
+    });
+
+});
 
 module.exports = router;
