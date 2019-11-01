@@ -41,10 +41,12 @@ export default class FrdReqList extends React.Component {
   }
 
   frdReqList = () =>{
-    let param={
-      usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
-    };
-    api.apiSend('post','/frd/frdReqList',param,this.frdReqListCallback);
+    if(localStorage.getItem('usrInfo')){
+      let param={
+        usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
+      };
+      api.apiSend('post','/frd/frdReqList',param,this.frdReqListCallback);
+    }
   }
 
   frdRes =(cd, frdIdx) => {
