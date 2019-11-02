@@ -20,6 +20,7 @@ var commonRouter = require('./route/commonRouter');
 var userRouter = require('./route/userRouter');
 var authRouter = require('./route/authRouter');
 var frdRouter = require('./route/friendRouter');
+var notRouter = require('./route/noticeRouter');
 
 var bodyParser = require('body-parser');
 var session = require('express-session');
@@ -52,6 +53,7 @@ app.use('/', commonRouter);
 app.use('/auth', authRouter);
 app.use('/user', userRouter);
 app.use('/frd', frdRouter);
+app.use('/not', notRouter);
 
 var server = app.listen(port, function() {
   console.log("★★★ Server Started ★★★");

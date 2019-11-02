@@ -77,13 +77,21 @@ export default class FrdReqList extends React.Component {
     }
     api.apiSend('put','/frd/frdYn',param,this.frdResCallback);
   }
-  // close = () =>{
-  //   this.setState({
-  //     frdReqList : []
-  //   });
-  //   this.toggle();
+  notClearCallback = (rs) =>{
+    if(rs.reCd === '01'){
+      console.log('친구 알람 클리어 성공');
+    }else{
+      console.log('친구 알람 클리어 실패');
+    }
+  }
 
-  // }
+  notClear = () =>{
+    let param ={
+      usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
+    };
+    api.apiSend('put','/not/frdNotClear',param,this.notClearCallback);
+  }
+
   render() {
     return (
         <div>
@@ -106,6 +114,7 @@ export default class FrdReqList extends React.Component {
             style ={{
               width : '80%'
             }}
+            onShow = {e=>{this.notClear()}}
           >
         <form className="card shadow" onSubmit={this.handleSubmit}>
           <Card className="bg-secondary shadow border-0">
