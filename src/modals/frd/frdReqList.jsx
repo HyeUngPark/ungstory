@@ -9,12 +9,16 @@ export default class FrdReqList extends React.Component {
     this.state = {
       modal : false
       ,frdReqList : []
+      ,firstCd : false
     };
     this.handleSubmit = this.handleSubmit.bind(this);
     this.profilePwCheck = this.props.callbackFromParent;
     this.frdReqList();
   }
   toggle = (e) => {
+    if(!this.state.firstCd){
+      this.notClear();
+    }
     this.setState({
       modal: !this.state.modal
     });
@@ -29,7 +33,7 @@ export default class FrdReqList extends React.Component {
       console.log('친구 신청 목록 조회 성공');
       this.setState({
         frdReqList : result.frdReqList
-      })
+      });
     }else if(result.reCd ==='02'){
       console.log('친구 신청 목록 조회 실패');
     }else if(result.reCd === '03'){
@@ -62,6 +66,11 @@ export default class FrdReqList extends React.Component {
     }else if(result.reCd ==='02'){
       alert('친구 '+ynMsg+ ' 실패');
     }
+
+    this.setState({
+      firstCd : true
+    });
+
     this.frdReqList();
   }
 
@@ -77,6 +86,7 @@ export default class FrdReqList extends React.Component {
     }
     api.apiSend('put','/frd/frdYn',param,this.frdResCallback);
   }
+
   notClearCallback = (rs) =>{
     if(rs.reCd === '01'){
       console.log('친구 알람 클리어 성공');
@@ -114,7 +124,6 @@ export default class FrdReqList extends React.Component {
             style ={{
               width : '80%'
             }}
-            onShow = {e=>{this.notClear()}}
           >
         <form className="card shadow" onSubmit={this.handleSubmit}>
           <Card className="bg-secondary shadow border-0">

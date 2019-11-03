@@ -305,7 +305,7 @@ router.post('/loginCk',function(req, res){
                         // return res.status(500).send("알람 조회 실패 >> " + err)
                     }
                     if (result.length > 0) {
-                        console.log('★★★ 알람 목록 조회 성공 ★★★');
+                        console.log('★★★ 알람 목록 조회 성공 ★★★ \n',result.length);
                         let noticeList = {};
                         result[0].frdNotice.length> 0 ? noticeList.frdNotice = result[0].frdNotice[0].count : noticeList.frdNotice =0;
                         result[0].pstNotice.length> 0 ? noticeList.pstNotice = result[0].pstNotice[0].count : noticeList.pstNotice =0;
