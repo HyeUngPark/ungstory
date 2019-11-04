@@ -14,6 +14,7 @@ import {
 
 import LoginProfile from '../../views/auth/LoginProfile';
 import FrdReqList from '../../modals/frd/FrdReqList';
+import * as api from "api/api";
 
 class UserNavbar extends React.Component {
   state ={
@@ -41,15 +42,26 @@ class UserNavbar extends React.Component {
         this.sessionCheck();
     }
 }
-
-  // closes the collapse
-  noticeClick = (e, cd) => {
-    if(cd === 'f'){ // friend request popup
-
-    }else if(cd ==='m'){ // message popup
-
-    }else if(cd === 'n'){ // post, friend request notice popup
-
+  noticeClearCallback = (rs) => {
+    if(rs.reCd === '01'){
+      console.log('친구 알람 클리어 성공');
+    }else{
+      console.log('친구 알람 클리어 실패');
+    }
+    if(rs.noticeList){
+      this.setState({
+        noticeList : rs.noticeList
+      });
+    }
+  }
+  
+  noticeClear = () => {
+    // notice clear callback
+    if(localStorage.getItem('usrInfo')){
+      let param={
+        usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
+      };
+      api.apiSend('post','/not/getNoticeList',param,this.noticeClearCallback);
     }
   };
 
@@ -88,7 +100,7 @@ class UserNavbar extends React.Component {
                 style={{ display: (this.state.loginYn ? 'inherit' : 'none') }}
               >
               {/* 친구추가 알림 */}
-              <FormGroup className="mb-0 form-control-cursor" onClick={e=>this.noticeClick(e,1)}>
+              <FormGroup className="mb-0 form-control-cursor">
                 <InputGroup className="input-group-alternative">
                   <InputGroupAddon addonType="prepend">
                   <InputGroupText
@@ -96,7 +108,7 @@ class UserNavbar extends React.Component {
                           position: "relative"
                         }}
                       >
-                          <FrdReqList/>
+                          <FrdReqList callbackFromParent={this.noticeClear}/>
                             {this.state.noticeList && this.state.noticeList.frdNotice > 0 ?
                               <span className="form-control-notice"
                                     // value={index} 
@@ -117,7 +129,7 @@ class UserNavbar extends React.Component {
               &nbsp;&nbsp;&nbsp;
 
               {/* 메시지 알림 */}
-              <FormGroup className="mb-0 form-control-cursor" onClick={e=>this.noticeClick(e,2)}>
+              <FormGroup className="mb-0 form-control-cursor">
                 <InputGroup className="input-group-alternative">
                   <InputGroupAddon addonType="prepend">
                   <InputGroupText
@@ -152,7 +164,7 @@ class UserNavbar extends React.Component {
               &nbsp;&nbsp;&nbsp;
 
               {/* 게시글 알림 */}
-              <FormGroup className="mb-0 form-control-cursor" onClick={e=>this.noticeClick(e,3)} href="#">
+              <FormGroup className="mb-0 form-control-cursor" href="#">
                 <InputGroup className="input-group-alternative">
                   <InputGroupAddon addonType="prepend">
                   <InputGroupText

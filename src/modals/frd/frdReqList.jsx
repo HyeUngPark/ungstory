@@ -12,7 +12,8 @@ export default class FrdReqList extends React.Component {
       ,firstCd : false
     };
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.profilePwCheck = this.props.callbackFromParent;
+    this.noticeCallback = this.props.callbackFromParent;    
+
     this.frdReqList();
   }
   toggle = (e) => {
@@ -93,6 +94,7 @@ export default class FrdReqList extends React.Component {
     }else{
       console.log('친구 알람 클리어 실패');
     }
+    this.noticeCallback();
   }
 
   notClear = () =>{
