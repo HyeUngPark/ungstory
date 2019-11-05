@@ -18,7 +18,6 @@
         res.redirect('../index.html');
     });
 
-
     router.post('/post',function(req, res){
         let params = req.body;
         // 사용자 이름으로 id 검색 후 입력
@@ -104,62 +103,253 @@
     });
 
     router.post('/postList',function(req, res){
-      var params = req.body;
-      // 친구 게시물
 
-      // 내 게시물
-
-      // 전체공개 게시물
-       
-      schema.aggregate([
+    var params = req.body;
+    if(params.usrName !==''){ // 회원
+        schema.find({
+            wkCd : 'USR'
+            ,wkDtCd : 'USR'
+            ,"subSchema.usrName" : params.usrName
+        }
+        ,{
+            _id : 0    
+            ,"subSchema.usrFrds" :1
+        }, function(fErr, fResult) {
+            if (fErr) {
+                console.log('error \n', fErr);
+                return res.status(500).send("select error >> " + fErr)
+            }
+            let myFrds=[];
+            if (fResult.length > 0) {
+                myFrds = fResult[0].subSchema.usrFrds;
+            }
+            schema.aggregate([
+                {$facet:{    
+                    myPst : [
+                        {$match:{
+                            wkCd : 'PST'
+                            ,wkDtCd : 'PST'
+                            ,"subSchema.usrName" : params.usrName
+                            ,"subSchema.pstPubYn" : {$ne : '04'}
+                        }}
+                    ]
+                    ,allPst : [
+                        {$match:{
+                            wkCd : 'PST'
+                            ,wkDtCd : 'PST'
+                            ,"subSchema.pstPubYn" : '01'
+                        }}
+                    ]
+                    ,frdPst : [
+                        {$match:{
+                            wkCd : 'PST'
+                            ,wkDtCd : 'PST'
+                            ,"subSchema.usrName" : {$in:myFrds}
+                            ,"subSchema.pstPubYn" : '02'
+                        }}
+                    ]
+                }}
+                ,{$project: {
+                    activity:{
+                        $setUnion:['$myPst','$allPst','$frdPst']
+                    }
+                }}
+                ,{$unwind : 
+                    '$activity'
+                }
+                ,{$replaceRoot: { 
+                    newRoot: "$activity" 
+                }}
+                ,{$unwind:{
+                    path: "$subSchema.pstCmt",
+                    preserveNullAndEmptyArrays: true
+                }}
+                ,{$project:{
+                     "subSchema.pstCmt" : { 
+                         $cond : [{$ne: [ "$subSchema.pstCmt.pstCmtSep" , "04"]},"$subSchema.pstCmt","$unset"]
+                     }
+                     ,_id :1
+                     ,"wkCd" :  1
+                     ,"wkDtCd" : 1
+                     ,"fstWrDt" : 1
+                     ,"lstWrDt" : 1
+                     ,"subSchema.usrName" : 1
+                     ,"subSchema.usrId" : 1
+                     ,"subSchema.pstPts" : 1
+                     ,"subSchema.pstCt" : 1
+                     ,"subSchema.pstHt" : 1
+                     ,"subSchema.pstPubYn" : 1
+                     ,"subSchema.pstPk" : 1
+                     ,"subSchema.pstLike" : 1    
+                }}
+                ,{$group:{
+                     "_id" : "$_id"
+                     ,"wkCd" : {"$first":"$wkCd"}
+                     ,"wkDtCd" : {"$first":"$wkDtCd"}
+                     ,"fstWrDt" : {"$first":"$fstWrDt"}
+                     ,"lstWrDt" : {"$first":"$lstWrDt"}
+                     ,"usrName" : {"$first":"$subSchema.usrName"}
+                     ,"usrId" : {"$first":"$subSchema.usrId"}
+                     ,"pstPts" : {"$first":"$subSchema.pstPts"}
+                     ,"pstCt" : {"$first":"$subSchema.pstCt"}
+                     ,"pstHt" : {"$first":"$subSchema.pstHt"}
+                     ,"pstCmt" : {"$push":"$subSchema.pstCmt"}
+                     ,"pstPubYn" : {"$first":"$subSchema.pstPubYn"}
+                     ,"pstPk" : {"$first":"$subSchema.pstPk"}
+                     ,"pstLike" : {"$first":"$subSchema.pstLike"}
+                }}
+                ,{$sort:{
+                    lstWrDt : -1
+                }}
+            ],function(err, result) {
+                    if (err) {
+                        console.log('error \n', err);
+                        return res.status(500).send("select error >> " + err)
+                    }
+                    if (result.length > 0) {
+                        let postList = [];                
+                        for(var i=0; i<result.length; i++){
+                            var tempPhoto = [];
+                            if(result[i].pstPts 
+                                && result[i].pstPts.length >0 ){
+                                    for(var j=0; j<result[i].pstPts.length; j++){
+                                        let tp = {
+                                            // 'src': "require('"+result[i].subSchema.pstPts[j]+"')",
+                                            'src': result[i].pstPts[j],
+                                            'width': 1,
+                                            'height': 1 
+                                        }
+                                        tempPhoto.push(tp);
+                                    }
+                            }
+        
+                            let post ={
+                                pstPk : result[i].pstPk
+                                ,usrName : result[i].usrName
+                                ,wrDt : date.getWriteDate(result[i].lstWrDt)
+                                ,pstPts : tempPhoto
+                                ,pstCt : result[i].pstCt
+                                ,pstHt : result[i].pstHt
+                                ,pstCmt : result[i].pstCmt
+                                ,pstPubYn : result[i].pstPubYn
+                                ,pstLike : result[i].pstLike
+                            };
+        
+                            // 내 게시물
+                            if(params.usrName === result[i].usrName){
+                                post.myPst = true;
+                            }else{
+                                post.myPst = false;
+                            }
+        
+                            postList.push(post); 
+                        }
+                        /* 댓글 프로필 사진 조회 */
+                        let cmtUsrList = [];
+                        for(var j=0; j<postList.length; j++){
+                            if(postList[j].pstCmt.length>0){
+                                for(var k=0; k<postList[j].pstCmt.length; k++){
+                                    cmtUsrList.indexOf(postList[j].pstCmt[k].usrName)<0 ? 
+                                    cmtUsrList.push(postList[j].pstCmt[k].usrName) : '';
+                                }
+                            }
+                        }
+                        console.log('★★★★★',cmtUsrList.length,'명 프로필 사진 조회 시작 ★★★★★');
+                        schema.aggregate([
+                            {$match:{
+                                wkCd : 'USR',
+                                wkDtCd : 'USR',
+                                "subSchema.usrName" : {$in:cmtUsrList}
+                            }},
+                            {$project : {
+                                "subSchema.usrName" : 1
+                                ,"subSchema.usrPt" : 1
+                            }},
+                            {$group :{
+                                "_id" : "$_id"
+                                ,"usrName" : {"$first"  : "$subSchema.usrName"}
+                                ,"usrPt" : {"$first"  : "$subSchema.usrPt"}
+                            }}
+                        ],function(profileErr, profileResult){
+                            if (profileErr) {
+                                console.log('error \n', profileErr);
+                                return res.status(500).send("select error >> " + profileErr);
+                            }
+                            if (profileResult.length > 0) {
+                                for(var jj=0; jj<postList.length; jj++){
+                                    if(postList[jj].pstCmt.length>0){
+                                        for(var kk=0; kk<postList[jj].pstCmt.length; kk++){
+                                            for(var ii =0; ii<profileResult.length; ii++){
+                                                if(profileResult[ii].usrName === postList[jj].pstCmt[kk].usrName){
+                                                    postList[jj].pstCmt[kk].usrPt = profileResult[ii].usrPt;
+                                                    // console.log(profileResult[ii].usrName,' 이미지 등록\n');
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                            res.json({
+                                reCd : '01'
+                                ,pstList : postList
+                            });
+                        });
+                        
+                    }else{
+                        res.json({
+                            reCd : '02'
+                        });  
+                    }     
+            });
+        });
+    }else{ // 비회원
+    schema.aggregate([
         {$match:{
-            wkCd : 'PST',
-            wkDtCd : 'PST',
-            "subSchema.usrId" : 'phu8460@naver.com',
-            "subSchema.pstPubYn" : {"$ne": "04"}
-        }},
-        {$unwind : {
-            path: "$subSchema.pstCmt",
-            preserveNullAndEmptyArrays: true       
-        }},
-        {$project : {
-           "subSchema.pstCmt" : { 
-                $cond : [{$ne: [ "$subSchema.pstCmt.pstCmtSep" , "04"]},"$subSchema.pstCmt","$unset"]
-           }
-           ,_id :1
-           ,"wkCd" :  1
-           ,"wkDtCd" : 1
-           ,"fstWrDt" : 1
-           ,"lstWrDt" : 1
-           ,"subSchema.usrName" : 1
-           ,"subSchema.usrId" : 1
-           ,"subSchema.pstPts" : 1
-           ,"subSchema.pstCt" : 1
-           ,"subSchema.pstHt" : 1
-           ,"subSchema.pstPubYn" : 1
-           ,"subSchema.pstPk" : 1
-           ,"subSchema.pstLike" : 1
-        }},
-        {$sort : {
-            _id : 1
-            ,"subSchema.pstCmt.pstCmtGp" : 1
-        }},
-        {$group:{
-            "_id" : "$_id"
-            ,"wkCd" : {"$first":"$wkCd"}
-            ,"wkDtCd" : {"$first":"$wkDtCd"}
-            ,"fstWrDt" : {"$first":"$fstWrDt"}
-            ,"lstWrDt" : {"$first":"$lstWrDt"}
-            ,"usrName" : {"$first":"$subSchema.usrName"}
-            ,"usrId" : {"$first":"$subSchema.usrId"}
-            ,"pstPts" : {"$first":"$subSchema.pstPts"}
-            ,"pstCt" : {"$first":"$subSchema.pstCt"}
-            ,"pstHt" : {"$first":"$subSchema.pstHt"}
-            ,"pstCmt" : {"$push":"$subSchema.pstCmt"}
-            ,"pstPubYn" : {"$first":"$subSchema.pstPubYn"}
-            ,"pstPk" : {"$first":"$subSchema.pstPk"}
-            ,"pstLike" : {"$first":"$subSchema.pstLike"}
+            wkCd : 'PST'
+            ,wkDtCd : 'PST'
+            ,"subSchema.pstPubYn" : '01'
         }}
+        ,{$unwind:{
+            path: "$subSchema.pstCmt",
+            preserveNullAndEmptyArrays: true
+        }}
+        ,{$project:{
+             "subSchema.pstCmt" : { 
+                 $cond : [{$ne: [ "$subSchema.pstCmt.pstCmtSep" , "04"]},"$subSchema.pstCmt","$unset"]
+             }
+             ,_id :1
+             ,"wkCd" :  1
+             ,"wkDtCd" : 1
+             ,"fstWrDt" : 1
+             ,"lstWrDt" : 1
+             ,"subSchema.usrName" : 1
+             ,"subSchema.usrId" : 1
+             ,"subSchema.pstPts" : 1
+             ,"subSchema.pstCt" : 1
+             ,"subSchema.pstHt" : 1
+             ,"subSchema.pstPubYn" : 1
+             ,"subSchema.pstPk" : 1
+             ,"subSchema.pstLike" : 1    
+        }}
+        ,{$group:{
+             "_id" : "$_id"
+             ,"wkCd" : {"$first":"$wkCd"}
+             ,"wkDtCd" : {"$first":"$wkDtCd"}
+             ,"fstWrDt" : {"$first":"$fstWrDt"}
+             ,"lstWrDt" : {"$first":"$lstWrDt"}
+             ,"usrName" : {"$first":"$subSchema.usrName"}
+             ,"usrId" : {"$first":"$subSchema.usrId"}
+             ,"pstPts" : {"$first":"$subSchema.pstPts"}
+             ,"pstCt" : {"$first":"$subSchema.pstCt"}
+             ,"pstHt" : {"$first":"$subSchema.pstHt"}
+             ,"pstCmt" : {"$push":"$subSchema.pstCmt"}
+             ,"pstPubYn" : {"$first":"$subSchema.pstPubYn"}
+             ,"pstPk" : {"$first":"$subSchema.pstPk"}
+             ,"pstLike" : {"$first":"$subSchema.pstLike"}
+        }} 
+        ,{$sort:{
+            lstWrDt : -1
+        }} 
         ],function(err, result) {
             if (err) {
                 console.log('error \n', err);
@@ -182,7 +372,6 @@
                                 tempPhoto.push(tp);
                             }
                     }
-
                     let post ={
                         pstPk : result[i].pstPk
                         ,usrName : result[i].usrName
@@ -223,7 +412,7 @@
                     }},
                     {$project : {
                         "subSchema.usrName" : 1
-                       ,"subSchema.usrPt" : 1
+                        ,"subSchema.usrPt" : 1
                     }},
                     {$group :{
                         "_id" : "$_id"
@@ -254,15 +443,14 @@
                         ,pstList : postList
                     });
                 });
-
                 
             }else{
                 res.json({
                     reCd : '02'
                 });  
             }     
-    });
-        
+        });
+    }
 });
 
     router.post('/postCmtWt',function(req, res){

@@ -112,17 +112,17 @@ export default class PostWriteModal extends React.Component {
   valChange = (cd, e) =>{
     if(cd === 'p'){ // 공개여부
       switch(e.target.value){
-        case 1:
+        case '1':
           this.setState({
             pstPubYn : '01'
           });
           break;
-        case 2:
+        case '2':
           this.setState({
             pstPubYn : '02'
           });
           break;
-        case 3:
+        case '3':
           this.setState({
             pstPubYn : '03'
           });

@@ -513,7 +513,8 @@ class Index extends React.Component {
                                   style ={{width:"36px"
                                           ,height:"36px"
                                           }}
-                                    /> </Col>
+                                    /> 
+                              </Col>
                             : ''}
                         <Col lg="1">
                           <a
@@ -543,14 +544,16 @@ class Index extends React.Component {
                                     <div className="tab-pane fade show active" id="tabs-icons-text-1" role="tabpanel" aria-labelledby="tabs-icons-text-1-tab">
                                         <p className="description">
                                           {
-                                            (!comment.pstCmtUd) ?  ((comment.pstCmtSep === '03' || comment.pstCmtSep === '03R') ? '삭제된 댓글입니다.' : comment.pstCmtCt)  : 
-                                              <textarea 
-                                                className="form-control " 
-                                                rows="3" 
-                                                placeholder="수정할 댓글을 입력하세요" 
-                                                onChange = {e=>{this.commentUtChnage(e,postIdx, commentIdx)}}
-                                                value = {comment.updateComment}
-                                              />
+                                            (!comment.pstCmtUd) ? 
+                                                ((comment.pstCmtSep === '03' || comment.pstCmtSep === '03R') ? '삭제된 댓글입니다.' 
+                                                : comment.pstCmtCt)  
+                                                : <textarea 
+                                                    className="form-control " 
+                                                    rows="3" 
+                                                    placeholder="수정할 댓글을 입력하세요" 
+                                                    onChange = {e=>{this.commentUtChnage(e,postIdx, commentIdx)}}
+                                                    value = {comment.updateComment}
+                                                   />
                                           }
                                         </p>
                                     </div>
@@ -558,7 +561,10 @@ class Index extends React.Component {
                               </div>
                           </div>
                         </Col>
-                        {(comment.pstCmtUd && post.myPst) ? 
+                        {/* 내 댓글일 경우에만 수정/삭제 */}
+                        {(comment.pstCmtUd && 
+                        (localStorage.getItem('usrInfo')
+                          && JSON.parse(localStorage.getItem('usrInfo')).usrName === comment.usrName)) ? 
                           <Col lg="11">
                             <br />
                             <div className="col text-right avatar-padding-right-none">
@@ -585,7 +591,8 @@ class Index extends React.Component {
                         <br></br>
                         <div className="col text-right avatar-padding-right-none form-control-cursor">
                             {/* 내 댓글일 경우에만 수정/삭제 */}
-                            {(post.myPst) ? 
+                            {(localStorage.getItem('usrInfo')
+                            && JSON.parse(localStorage.getItem('usrInfo')).usrName === comment.usrName ) ? 
                               <span>
                               <button type="button" 
                                       className="btn-sm btn-info form-control-cursor"
