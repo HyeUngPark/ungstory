@@ -18,7 +18,8 @@ import {
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 
-import * as api from "api/api";
+import * as api from "utils/api";
+
 var passwordValidator = require('password-validator');
 
 class Register extends React.Component {
@@ -113,7 +114,6 @@ class Register extends React.Component {
         usrArg01 : !this.state.usrArg01
       });
     }else if(sep==='b'){
-      console.log(e);
       this.setState({
         usrBirth :e
       });

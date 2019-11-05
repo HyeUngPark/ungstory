@@ -13,7 +13,8 @@ import {
   DropdownToggle
 } from "reactstrap";
 
-import * as api from "api/api";
+import * as api from "utils/api";
+
 import Header from "components/Headers/Header.jsx";
 import PostModifyModal from '../modals/user/PostModifyModal';
 
@@ -34,7 +35,7 @@ class Index extends React.Component {
     if(result.reCd==="01"){
       postList = result.pstList;
     }else if(result.reCd ==='02'){
-      console.log('게시글 조회 실패');
+      // console.log('게시글 조회 실패');
     }
     this.setState({
       pstStSuCd : true
@@ -84,7 +85,7 @@ class Index extends React.Component {
 
   commentReply = (cd, postIdx, commentIdx) =>{
     let postList = this.state.postList;
-    console.log('commentReply () ',cd , "\n",postList);
+    // console.log('commentReply () ',cd , "\n",postList);
     if(postList){
       if(cd === 'v'){
         for(var i=0; i< postList[postIdx].pstCmt.length; i++){
@@ -161,7 +162,7 @@ class Index extends React.Component {
   }
   commentUpdate = (cd, postIdx, commentIdx) =>{
     let postList = this.state.postList;
-    console.log('commentUpdate () ',cd , "\n",postList);
+    // console.log('commentUpdate () ',cd , "\n",postList);
     if(postList){
       if(cd === 'v'){
         postList[postIdx].pstCmt[commentIdx].pstCmtUd = true;
@@ -296,12 +297,12 @@ class Index extends React.Component {
   }
   postLikeCallback = (result) =>{
     if(result.reCd === '01'){
-      console.log('좋아요 처리 성공');
+      // console.log('좋아요 처리 성공');
       let usrInfo = JSON.parse(localStorage.getItem('usrInfo'));
       usrInfo.usrLikePst = result.usrLikePst;
       localStorage.setItem('usrInfo',JSON.stringify(usrInfo));
     }else{
-      console.log('좋아요 처리 실패');
+      // console.log('좋아요 처리 실패');
     }
     this.getPostList();
   }

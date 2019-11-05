@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Modal, ModalBody,ModalHeader, Card , Row, Col} from 'reactstrap';
 
-import * as api from "api/api";
+import * as api from "utils/api";
 
 export default class PostImgList extends React.Component {
   constructor(props) {
@@ -38,13 +38,13 @@ export default class PostImgList extends React.Component {
         ,modal: !this.state.modal
       });
     }else if(result.reCd ==='02'){
-      console.log('내 사진목록 조회 실패');
+      // console.log('내 사진목록 조회 실패');
       this.setState({
         imgListCk : true
         ,modal: !this.state.modal
       });
     }else if(result.reCd ==='03'){
-      console.log('내 사진목록 0건');
+      // console.log('내 사진목록 0건');
       this.setState({
         imgListCk : true
         ,modal: !this.state.modal

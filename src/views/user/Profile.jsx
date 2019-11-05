@@ -15,7 +15,8 @@ import {
 } from "reactstrap";
 // core components
 import UserHeader from "components/Headers/UserHeader.jsx";
-import * as api from "api/api";
+import * as api from "utils/api";
+import * as popup from "utils/popup";
 import ProfileChange from "../../modals/auth/ProfileChange";
 import ProfileMsgChange from "../../modals/auth/ProfileMsgChange";
 var passwordValidator = require('password-validator');
@@ -47,7 +48,7 @@ class Profile extends React.Component {
   }
   getProfileCallback  = (result) =>{
     if(result.reCd === '01'){
-      console.log('프로필 조회 성공\n',result);
+      // console.log('프로필 조회 성공\n',result);
       let name = this.state.name;
       name.usrName = result.profileData.usrName;
       this.setState({
@@ -56,7 +57,7 @@ class Profile extends React.Component {
         ,name : name
       });
     }else{
-      console.log('프로필 조회 실패');
+      // console.log('프로필 조회 실패');
       this.setState({
         getProfile : true
       });
@@ -225,7 +226,8 @@ class Profile extends React.Component {
                 <Row className="justify-content-center">
                   <Col className="order-lg-2" lg="3">
                     <div className="card-profile-image">
-                      <a href="#pablo" onClick={e => e.preventDefault()}>
+                      <a href="javascript:void(0)" 
+                         onClick={e => popup.openImg(this.state.profileData.usrPt)}>
                         <img
                           alt="..."
                           className="rounded-circle"

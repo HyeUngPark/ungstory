@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Modal, ModalBody,ModalHeader, Card , Row, Col} from 'reactstrap';
 
-import * as api from "api/api";
+import * as api from "utils/api";
 
 export default class PwFindModal extends React.Component {
   constructor(props) {

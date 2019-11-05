@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Modal, ModalBody, FormGroup, Input, Card , Row, Col} from 'reactstrap';
 
-import * as api from "api/api";
+import * as api from "utils/api";
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 

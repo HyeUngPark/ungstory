@@ -17,7 +17,8 @@ import {
 } from "reactstrap";
 
 import PwFindModal from '../../modals/auth/PwFindModal';
-import * as api from "api/api";
+import * as api from "utils/api";
+
 class Login extends React.Component {
   state ={
     usrId : ''
@@ -44,14 +45,14 @@ class Login extends React.Component {
 
   enterKeyEvent =(e)=>{
     if(e.key==="Enter"){
-      console.log('Enter Key');
+      // console.log('Enter Key');
       this.login();
     }
   }
 
   loginCallback = (result) =>{
     if(result.usrToken && result.reCd==="01"){
-      console.log('login 성공 \n');
+      // console.log('login 성공 \n');
       let usrInfo = JSON.parse(localStorage.getItem('usrInfo'));
       usrInfo.usrToken = result.usrToken;
       usrInfo.usrName = result.usrInfo.usrName;
@@ -98,14 +99,14 @@ class Login extends React.Component {
   }
 
   modalOpen =(e)=>{
-    console.log("PwFind modalOpen()");
+    // console.log("PwFind modalOpen()");
     this.setState(prevState=>({
       isModalOpen:!prevState.isModalOpen
     }));
   }
   
   modalClose =(e)=>{
-    console.log("PwFind modalClose()");
+    // console.log("PwFind modalClose()");
     this.setState(prevState => ({
         isModalOpen: !prevState.isModalOpen
     }));

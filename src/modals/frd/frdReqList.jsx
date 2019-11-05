@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Modal, ModalBody,Table, Card , Media, Row, Col} from 'reactstrap';
 
-import * as api from "api/api";
+import * as api from "utils/api";
 
 export default class FrdReqList extends React.Component {
   constructor(props) {
@@ -31,14 +31,14 @@ export default class FrdReqList extends React.Component {
 
   frdReqListCallback = (result)=>{
     if(result.reCd==="01"){
-      console.log('친구 신청 목록 조회 성공');
+      // console.log('친구 신청 목록 조회 성공');
       this.setState({
         frdReqList : result.frdReqList
       });
     }else if(result.reCd ==='02'){
-      console.log('친구 신청 목록 조회 실패');
+      // console.log('친구 신청 목록 조회 실패');
     }else if(result.reCd === '03'){
-      console.log('친구 신청 목록 없음');
+      // console.log('친구 신청 목록 없음');
     }else{
       alert('서버오류');
     }
@@ -90,9 +90,9 @@ export default class FrdReqList extends React.Component {
 
   notClearCallback = (rs) =>{
     if(rs.reCd === '01'){
-      console.log('친구 알람 클리어 성공');
+      // console.log('친구 알람 클리어 성공');
     }else{
-      console.log('친구 알람 클리어 실패');
+      // console.log('친구 알람 클리어 실패');
     }
     this.noticeCallback();
   }

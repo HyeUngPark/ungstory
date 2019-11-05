@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Modal, ModalBody, Row, Col} from 'reactstrap';
 
-import * as api from "api/api";
+import * as api from "utils/api";
 
 export default class PostModifyModal extends React.Component {
   constructor(props) {
@@ -98,7 +98,7 @@ export default class PostModifyModal extends React.Component {
   }
 
   removeImg = (idx,e) =>{
-    console.log("removeImg >> \n",e.target,'\n',idx);
+    // console.log("removeImg >> \n",e.target,'\n',idx);
 
     if(e.target){
       // const idx =  e.target.attributes.value.value * 1;
@@ -111,7 +111,7 @@ export default class PostModifyModal extends React.Component {
   }
 
   imgView =(idx,e)=>{
-    console.log("imgView >> \n",e.target,'\n',idx);
+    // console.log("imgView >> \n",e.target,'\n',idx);
     
     if(e.target){
       // const idx =  e.target.attributes.value.value * 1;
@@ -124,7 +124,7 @@ export default class PostModifyModal extends React.Component {
 
   valChange = (cd, e) =>{
     if(cd === 'p'){ // 공개여부
-      console.log('공개여부+>>'+e.target.value);
+      // console.log('공개여부+>>'+e.target.value);
       this.setState({
         pstPubYn : e.target.value
       });

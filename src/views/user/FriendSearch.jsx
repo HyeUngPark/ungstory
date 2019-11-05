@@ -14,7 +14,7 @@ import {
 // core components
 import Header from "components/Headers/Header.jsx";
 import { confirmAlert } from 'react-confirm-alert'; // Import
-import * as api from "api/api";
+import * as api from "utils/api";
 
 class FriendSearch extends React.Component {
   constructor(props) {

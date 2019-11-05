@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Modal, ModalBody, Row, Col} from 'reactstrap';
 
-import * as api from "api/api";
+import * as api from "utils/api";
 
 export default class PostWriteModal extends React.Component {
   constructor(props) {
@@ -85,7 +85,7 @@ export default class PostWriteModal extends React.Component {
   }
 
   removeImg = (idx,e) =>{
-    console.log("removeImg >> \n",e.target,'\n',idx);
+    // console.log("removeImg >> \n",e.target,'\n',idx);
 
     if(e.target){
       // const idx =  e.target.attributes.value.value * 1;
@@ -98,7 +98,7 @@ export default class PostWriteModal extends React.Component {
   }
 
   imgView =(idx,e)=>{
-    console.log("imgView >> \n",e.target,'\n',idx);
+    // console.log("imgView >> \n",e.target,'\n',idx);
     
     if(e.target){
       // const idx =  e.target.attributes.value.value * 1;

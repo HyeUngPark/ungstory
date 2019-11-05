@@ -21,7 +21,7 @@ import {
 } from "reactstrap";
 
 import PostWriteModal from '../../modals/user/PostWriteModal';
-import * as api from "api/api";
+import * as api from "utils/api";
 
 class LoginProfile extends React.Component {
     constructor(props) {
@@ -101,14 +101,14 @@ class LoginProfile extends React.Component {
 
     logoutCallback = (result) =>{
         if(result.reCd==='01'){
-          console.log("로그아웃 성공");
+        //   console.log("로그아웃 성공");
           // local storage 파기
           localStorage.removeItem('usrInfo');
           window.location.reload();
 
         //   this.props.history.push('/');
         }else{
-          console.log('로그아웃 실패');
+        //   console.log('로그아웃 실패');
         }
     }
     

@@ -14,7 +14,7 @@ import {
 
 import LoginProfile from '../../views/auth/LoginProfile';
 import FrdReqList from '../../modals/frd/FrdReqList';
-import * as api from "api/api";
+import * as api from "utils/api";
 
 class UserNavbar extends React.Component {
   state ={
@@ -44,9 +44,9 @@ class UserNavbar extends React.Component {
 }
   noticeClearCallback = (rs) => {
     if(rs.reCd === '01'){
-      console.log('친구 알람 클리어 성공');
+      // console.log('친구 알람 클리어 성공');
     }else{
-      console.log('친구 알람 클리어 실패');
+      // console.log('친구 알람 클리어 실패');
     }
     if(rs.noticeList){
       this.setState({

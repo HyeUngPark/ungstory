@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button, Modal, ModalBody,ModalHeader, Card , Row, Col, Input} from 'reactstrap';
 
-import * as api from "api/api";
+import * as api from "utils/api";
 var passwordValidator = require('password-validator');
 
 export default class UsrProfileCheck extends React.Component {
