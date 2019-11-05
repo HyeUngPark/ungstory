@@ -14,6 +14,7 @@ import {
 } from "reactstrap";
 
 import * as api from "utils/api";
+import * as popup from "utils/popup";
 
 import Header from "components/Headers/Header.jsx";
 import PostModifyModal from '../modals/user/PostModifyModal';
@@ -323,7 +324,9 @@ class Index extends React.Component {
       alert('좋아요는 로그인 후 가능합니다.');
     }
   }
-
+  postImgOpen = (e)=>{
+    popup.openImg(e.currentTarget.currentSrc);
+  }
   componentDidMount(){
       if(!this.state.pstStSuCd){
           this.getPostList();
@@ -377,7 +380,10 @@ class Index extends React.Component {
                         </Col>
                       </Row>
                     </CardHeader>
-                    <Gallery photos={post.pstPts} />
+                    <Gallery 
+                      photos={post.pstPts} 
+                      onClick ={this.postImgOpen}
+                    />
                     <br />
                     {/* 게시글 내용 */}
                     <Col lg="12">
@@ -510,14 +516,19 @@ class Index extends React.Component {
                                     /> </Col>
                             : ''}
                         <Col lg="1">
-                          <span className="avatar avatar-sm rounded-circle">
+                          <a
+                              className="avatar avatar-sm"
+                              href="#pablo"
+                              id="tooltip806693074"
+                              onClick={e => popup.openImg(comment.usrPt)}>
                             <img
                               alt="..."
+                              className="rounded-circle"
                               src={(comment.usrPt &&comment.usrPt !=="") 
                               ? comment.usrPt
                               : require("assets/img/theme/no-profile-130x130.png")}
                             />
-                          </span>
+                          </a>
                         </Col>
                         <Col lg="8">
                             <a href="#">{comment.usrName}</a> &nbsp;
@@ -589,12 +600,12 @@ class Index extends React.Component {
                                 삭제 
                               </button>  &nbsp;
                               </span>: ''}
-                            <button type="button" 
-                                    className="btn-sm btn-info form-control-cursor"
-                                    onClick = {e=>{this.commentReply('v',postIdx, commentIdx)}}
-                            >
-                              답글
-                            </button>
+                              <button type="button" 
+                                      className="btn-sm btn-info form-control-cursor"
+                                      onClick = {e=>{this.commentReply('v',postIdx, commentIdx)}}
+                              >
+                                답글
+                              </button>
                         </div>
                           <br />
                         </Col>  
@@ -607,7 +618,10 @@ class Index extends React.Component {
                         <span className="avatar avatar-sm rounded-circle">
                           <img
                             alt="..."
-                            src={require("assets/img/theme/team-4-800x800.jpg")}
+                            src={(localStorage.getItem('usrInfo') 
+                            && JSON.parse(localStorage.getItem('usrInfo')).usrPt !== '')  
+                            ? JSON.parse(localStorage.getItem('usrInfo')).usrPt
+                            : require("assets/img/theme/no-profile-130x130.png")}
                           />
                         </span>
                       </Col>

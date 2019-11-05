@@ -14,7 +14,9 @@ import {
 // core components
 import Header from "components/Headers/Header.jsx";
 import { confirmAlert } from 'react-confirm-alert'; // Import
+
 import * as api from "utils/api";
+import * as popup from "utils/popup";
 
 class FriendSearch extends React.Component {
   constructor(props) {
@@ -170,7 +172,7 @@ class FriendSearch extends React.Component {
                             className="avatar avatar-sm"
                             href="#pablo"
                             id="tooltip806693074"
-                            onClick={e => e.preventDefault()}
+                            onClick={e => popup.openImg(search.usrPt)}>
                           >
                             <img
                               alt="..."
