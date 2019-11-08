@@ -561,7 +561,7 @@ class Index extends React.Component {
                               </div>
                           </div>
                         </Col>
-                        {/* 내 댓글일 경우에만 수정/삭제 */}
+                        {/* 내 댓글일 경우에만 수정 */}
                         {(comment.pstCmtUd && 
                         (localStorage.getItem('usrInfo')
                           && JSON.parse(localStorage.getItem('usrInfo')).usrName === comment.usrName)) ? 
@@ -590,23 +590,37 @@ class Index extends React.Component {
                         <Col lg="11">
                         <br></br>
                         <div className="col text-right avatar-padding-right-none form-control-cursor">
-                            {/* 내 댓글일 경우에만 수정/삭제 */}
-                            {(localStorage.getItem('usrInfo')
-                            && JSON.parse(localStorage.getItem('usrInfo')).usrName === comment.usrName ) ? 
+                            {/* 내 댓글일 경우 & 내 게시글일 경우 삭제 */}
+                            {( localStorage.getItem('usrInfo')
+                              && JSON.parse(localStorage.getItem('usrInfo')).usrName === comment.usrName )
+                              ? 
                               <span>
                               <button type="button" 
                                       className="btn-sm btn-info form-control-cursor"
                                       onClick ={e=>{this.commentUpdate('v',postIdx, commentIdx)}}
                               >
-                                수정  
+                                수정
                               </button> &nbsp;
                               <button type="button" 
                                       className="btn-sm btn-danger form-control-cursor"
                                       onClick={e=>{this.commentDeleteConfirm(postIdx, commentIdx)}}
                               >
                                 삭제 
-                              </button>  &nbsp;
-                              </span>: ''}
+                              </button> &nbsp;
+                              </span>
+                            : (localStorage.getItem('usrInfo')
+                              && JSON.parse(localStorage.getItem('usrInfo')).usrName === post.usrName )
+                            ? 
+                              <span>
+                                <button type="button" 
+                                  className="btn-sm btn-danger form-control-cursor"
+                                  onClick={e=>{this.commentDeleteConfirm(postIdx, commentIdx)}}
+                                >
+                                  삭제 
+                                </button> &nbsp;
+                              </span>
+                            : ''
+                          }
                               <button type="button" 
                                       className="btn-sm btn-info form-control-cursor"
                                       onClick = {e=>{this.commentReply('v',postIdx, commentIdx)}}
