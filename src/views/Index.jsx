@@ -18,6 +18,7 @@ import * as popup from "utils/popup";
 
 import Header from "components/Headers/Header.jsx";
 import PostModifyModal from '../modals/user/PostModifyModal';
+import FrdInfo from '../modals/frd/FrdInfo';
 
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
@@ -348,7 +349,11 @@ class Index extends React.Component {
                     <CardHeader className="border-0">
                       <Row className="align-items-center" lg="12">
                         <Col lg="6">
+                          {/* <a href="javascript:void(0)"
+                            onClick = {FrdInfo.toggle()}>
                             {post.usrName}
+                          </a> */}
+                          <FrdInfo frdName={post.usrName}/>
                         </Col>
                         <Col lg="6" className="text-right">
                             <span>
@@ -532,7 +537,8 @@ class Index extends React.Component {
                           </a>
                         </Col>
                         <Col lg="8">
-                            <a href="#">{comment.usrName}</a> &nbsp;
+                            <FrdInfo frdName={comment.usrName}/>
+                            &nbsp;
                             {comment.pstCmtWtDate}
                         </Col>
                       </Row>

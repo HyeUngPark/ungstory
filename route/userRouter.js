@@ -859,6 +859,7 @@
                               $size : {"$ifNull":["$subSchema.usrLikePst",[]]}
                         }
                         ,"subSchema.loginDate" : 1
+                        ,"subSchema.usrFrds" : 1
                     }},
                     {$lookup:{
                       from : "subSchema.pstCmt"
@@ -879,6 +880,7 @@
                         ,"pstCmt" : {"$push":"$subSchema.pstCmt"}
                         ,"usrLikePst" : {"$max":"$subSchema.usrLikePst"}
                         ,"loginDate" : {"$push":"$subSchema.loginDate"}
+                        ,"usrFrds" : {"$push":"$subSchema.usrFrds"}
                     }},
             ],function(aErr, aResult){
                 if (aErr) {
@@ -892,6 +894,7 @@
                         loginDate : aResult[0].loginDate.length >3 ? aResult[0].loginDate.slice(0,3) : aResult[0].loginDate
                         ,usrActive : aResult[0].usrLikePst + aResult[0].pstCmt.length
                         // ,pstCmt : aResult.pstCmt.length
+                        ,usrFrds : aResult[0].usrFrds.length
                         ,pstPts : aResult[0].pstPts.length
                         ,usrPt : aResult[0].usrPt
                         ,usrId : aResult[0].usrId

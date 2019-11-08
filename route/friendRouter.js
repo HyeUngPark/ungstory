@@ -343,7 +343,218 @@ router.put('/frdYn',function(req, res){
             });
         }
     });
+});
 
+router.post('/frdInfo',function(req, res){
+    var params = req.body;
+    if(params.usrName){ // 회원
+        schema.aggregate([
+            {$match : {
+                wkCd : 'USR'
+                ,wkDtCd : 'USR'
+                ,"subSchema.usrName" : params.usrName
+            }}
+            ,{$project:{
+                _id : 1
+               ,"subSchema.usrFrds" : 1
+            }}
+            ,{$group:{
+               _id : "$_id"
+               ,"myFrd" : {"$first":"$subSchema.usrFrds"}
+            }}
+        ],function(fError, fResult){
+            if (fError) {
+                console.log('error \n', fError);
+                return res.status(500).send("내 친구 목록 조회 실패 >> " + fError)
+            }
+            let myFrd = [];
+            if (fResult.length > 0) {
+                console.log('내 친구 목록 조회 성공');
+                myFrd = fResult[0].myFrd;
+            }
+            let myName = [];
+            myName.push(params.usrName);
+            schema.aggregate([
+                {$match : {
+                    "subSchema.usrName" : params.frdName
+                }}
+                ,{$project:{
+                    _id : 0,
+                    "subSchema.usrName" : 1
+                    ,"subSchema.usrPt" : 1
+                    ,"subSchema.usrFrds" : 1
+                    ,"subSchema.usrMsg" : 1
+                    ,"subSchema.pstPts" : 1
+                    ,"subSchema.pstPts" : {
+                         $cond : [
+                           {$and:[
+                               {$ne: ["$subSchema.pstPubYn" , "04"]}
+                           ]}//and
+                           ,"$subSchema.pstPts"
+                           ,"$unset"]
+                    }
+                    ,frdYn : 1
+                    ,withFrd : 1
+                    ,frdCount : 1
+                }}
+                ,{$unwind : {
+                    path: "$subSchema.pstPts",
+                    preserveNullAndEmptyArrays: true
+                }}
+                ,{$group:{
+                   _id : "$_id"
+                   ,"usrName" : {"$max":"$subSchema.usrName"}
+                   ,"usrPt" : {"$first":"$subSchema.usrPt"}
+                   ,"frdYn" : {"$sum" : "$frdYn"}
+                   ,"withFrd" : {"$sum" : "$withFrd"}
+                   ,"frdCount" : {"$sum" : "$frdCount"}
+                   ,"usrFrds" : {"$first":"$subSchema.usrFrds"}
+                   ,"pstPts" : {'$push' : "$subSchema.pstPts"}
+                   ,"usrMsg" : {'$max' : "$subSchema.usrMsg"}
+                }}    
+                ,{$addFields: {
+                    frdCount : {
+                        $size: "$usrFrds"
+                    },    
+                    withFrd : {
+                        $size:{
+                            $setIntersection:["$usrFrds",myFrd]
+                        }
+                    },
+                    frdYn : {
+                        $cond:
+                            [{$gt:[
+                                {$size:{
+                                    $setIntersection:["$usrFrds",myName]}
+                                }
+                                ,0]}
+                                ,true
+                                ,false
+                            ]
+                    }
+                }}
+                ,{$sort:{
+                   fstWrDt : -1     
+                }} 
+            ],function(iError, iResult){
+                if (iError) {
+                    console.log('error \n', iError);
+                    return res.status(500).send("내 친구 목록 조회 실패 >> " + fError)
+                }
+                if (iResult.length > 0) {
+                    console.log('내 친구 정보 조회 성공');
+                    var profileData = {
+                        usrName : iResult[0].usrName
+                        ,usrPt : iResult[0].usrPt
+                        ,frdYn : iResult[0].frdYn
+                        ,withFrd : iResult[0].withFrd
+                        ,frdCount :iResult[0].frdCount
+                        ,pstPts : iResult[0].pstPts.length
+                        ,usrMsg : iResult[0].usrMsg
+                    };
+                    res.json({
+                        reCd : '01'
+                        ,profileData : profileData
+                    });
+                }else{
+                    res.json({
+                        reCd : '02'
+                    });
+                }
+            });
+        });
+    }else{ // 비회원
+        let myName = [];
+        let myFrd = [];
+        schema.aggregate([
+            {$match : {
+                "subSchema.usrName" : params.frdName
+            }}
+            ,{$project:{
+                _id : 0,
+                "subSchema.usrName" : 1
+                ,"subSchema.usrPt" : 1
+                ,"subSchema.usrFrds" : 1
+                ,"subSchema.usrMsg" : 1
+                ,"subSchema.pstPts" : 1
+                ,"subSchema.pstPts" : {
+                     $cond : [
+                       {$and:[
+                           {$ne: ["$subSchema.pstPubYn" , "04"]}
+                       ]}//and
+                       ,"$subSchema.pstPts"
+                       ,"$unset"]
+                }
+                ,frdYn : 1
+                ,withFrd : 1
+                ,frdCount : 1
+            }}
+            ,{$unwind : {
+                path: "$subSchema.pstPts",
+                preserveNullAndEmptyArrays: true
+            }}
+            ,{$group:{
+               _id : "$_id"
+               ,"usrName" : {"$max":"$subSchema.usrName"}
+               ,"usrPt" : {"$first":"$subSchema.usrPt"}
+               ,"frdYn" : {"$sum" : "$frdYn"}
+               ,"withFrd" : {"$sum" : "$withFrd"}
+               ,"frdCount" : {"$sum" : "$frdCount"}
+               ,"usrFrds" : {"$first":"$subSchema.usrFrds"}
+               ,"pstPts" : {'$push' : "$subSchema.pstPts"}
+               ,"usrMsg" : {'$max' : "$subSchema.usrMsg"}
+            }}    
+            ,{$addFields: {
+                frdCount : {
+                    $size: "$usrFrds"
+                },    
+                withFrd : {                    
+                    $size:{
+                        $setIntersection:["$usrFrds",myFrd]
+                    }
+                },
+                frdYn : {
+                    $cond:
+                        [{$gt:[
+                            {$size:{
+                                $setIntersection:["$usrFrds",myName]}
+                            }
+                            ,0]}
+                            ,true
+                            ,false
+                        ]
+                }
+            }}
+            ,{$sort:{
+               fstWrDt : -1     
+            }} 
+        ],function(iError, iResult){
+            if (iError) {
+                console.log('error \n', iError);
+                return res.status(500).send("내 친구 목록 조회 실패 >> " + fError)
+            }
+            if (iResult.length > 0) {
+                console.log('내 친구 정보 조회 성공');
+                var profileData = {
+                    usrName : iResult[0].usrName
+                    ,usrPt : iResult[0].usrPt
+                    ,frdYn : false
+                    ,withFrd : 0
+                    ,frdCount :iResult[0].frdCount
+                    ,pstPts : iResult[0].pstPts.length
+                    ,usrMsg : iResult[0].usrMsg
+                };
+                res.json({
+                    reCd : '01'
+                    ,profileData : profileData
+                });
+            }else{
+                res.json({
+                    reCd : '02'
+                });
+            }
+        });
+    }
 });
 
 module.exports = router;
