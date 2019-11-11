@@ -144,7 +144,7 @@ class Sidebar extends React.Component {
           ) : null}
           {/* User */}
           <Nav className="align-items-center d-md-none">
-            <LoginProfile isMobile = "Y"/>
+            {/* <LoginProfile isMobile = "Y"/> */}
           {/* 
           
             <UncontrolledDropdown nav>

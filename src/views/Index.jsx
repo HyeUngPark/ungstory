@@ -328,6 +328,13 @@ class Index extends React.Component {
   postImgOpen = (e)=>{
     popup.openImg(e.currentTarget.currentSrc);
   }
+
+  goPage = (page) =>{
+    if(page){
+      this.props.history.push(page);
+    }
+  }
+
   componentDidMount(){
       if(!this.state.pstStSuCd){
           this.getPostList();
@@ -349,11 +356,7 @@ class Index extends React.Component {
                     <CardHeader className="border-0">
                       <Row className="align-items-center" lg="12">
                         <Col lg="6">
-                          {/* <a href="javascript:void(0)"
-                            onClick = {FrdInfo.toggle()}>
-                            {post.usrName}
-                          </a> */}
-                          <FrdInfo frdName={post.usrName}/>
+                          <FrdInfo callbackFromParent={this.goPage} frdName={post.usrName}/>
                         </Col>
                         <Col lg="6" className="text-right">
                             <span>
@@ -537,7 +540,7 @@ class Index extends React.Component {
                           </a>
                         </Col>
                         <Col lg="8">
-                            <FrdInfo frdName={comment.usrName}/>
+                            <FrdInfo callbackFromParent={this.goPage} frdName={comment.usrName}/>
                             &nbsp;
                             {comment.pstCmtWtDate}
                         </Col>

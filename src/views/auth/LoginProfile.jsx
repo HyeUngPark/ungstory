@@ -35,6 +35,7 @@ class LoginProfile extends React.Component {
             ,noticeList : []
         };
         this.getNotice = this.props.callbackFromParent;
+        this.sessionCheck();
     }
 
     toggle = (e) =>{
@@ -83,7 +84,7 @@ class LoginProfile extends React.Component {
             let usrInfo = JSON.parse(localStorage.getItem('usrInfo'));
             usrInfo.usrToken = result.usrToken;
             localStorage.setItem('usrInfo',JSON.stringify(usrInfo));
-            this.sessionCheck();
+            // this.sessionCheck();
         }else if(result.reCd === '04'){
             this.logout();
         }
@@ -120,11 +121,11 @@ class LoginProfile extends React.Component {
         api.apiSend('post','/auth/logout',param,this.logoutCallback);
     }
 
-    componentDidMount(){
-        if(!this.state.seesionCheck && localStorage.getItem('usrInfo')){
-            this.sessionCheck();
-        }
-    }
+    // componentDidMount(){
+    //     if(!this.state.seesionCheck && localStorage.getItem('usrInfo')){
+    //         this.sessionCheck();
+    //     }
+    // }
 
     render() {
         let loginButton, profile= null;

@@ -39,6 +39,9 @@ export default class FrdReqList extends React.Component {
       // console.log('친구 신청 목록 조회 실패');
     }else if(result.reCd === '03'){
       // console.log('친구 신청 목록 없음');
+      this.setState({
+        frdReqList : []
+      });
     }else{
       alert('서버오류');
     }

@@ -12,6 +12,9 @@ import {Button,
 import * as api from "utils/api";
 import * as popup from "utils/popup";
 
+import { confirmAlert } from 'react-confirm-alert'; // Import
+import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
+
 export default class FrdInfo extends React.Component {
   constructor(props) {
     super(props);
@@ -21,8 +24,7 @@ export default class FrdInfo extends React.Component {
       ,firstCd : false
     };
     this.handleSubmit = this.handleSubmit.bind(this);
-    // this.noticeCallback = this.props.callbackFromParent;    
-
+    this.goPage = this.props.callbackFromParent;    
     // this.frdInfo();
   }
   toggle = (e) => {
@@ -63,6 +65,55 @@ export default class FrdInfo extends React.Component {
     api.apiSend('post','/frd/frdInfo',param,this.frdInfoCallback);
   }
 
+  goPages = (page)=>{
+    if(page){
+      this.toggle();
+      this.goPage(page);
+    }
+  }
+ 
+  friendRequestCallback =(rs) =>{
+    if(rs.reCd === '01'){
+      alert('친구 요청 성공');
+    }else {
+      alert('친구 요청 실패');
+    }
+  }
+
+  frdRequest = ()=>{
+    let param={
+      frdReq : JSON.parse(localStorage.getItem('usrInfo')).usrName
+      ,frdRes : this.state.profileData.usrName
+    };
+    api.apiSend('post','/frd/friendRequest',param,this.friendRequestCallback);      
+  }
+
+  frdRequestConfirm = ()=>{
+    let msg = '';
+    let frdButton = {};
+    if(localStorage.getItem('usrInfo')){
+      msg = '정말 '+this.state.profileData.usrName+'님에게 친구 신청 하시겠습니까?';
+      frdButton.label = '친구 추가 하기';
+      frdButton.onClick = () => this.frdRequest();
+    }else{
+      msg = '로그인 후 가능합니다 로그인 하시겠습니까?';
+      frdButton.label = '로그인 하기';
+      frdButton.onClick = () => this.goPages('/auth/login');
+    }
+
+    confirmAlert({
+      title: '친구 추가',
+      message: msg,
+      buttons: [
+        frdButton,
+        {
+          label: '취소',
+          onClick: () => {}
+        }
+      ]
+    });
+  }
+
   render() {
     return (
         <div>
@@ -76,6 +127,7 @@ export default class FrdInfo extends React.Component {
           <Modal 
             isOpen={this.state.modal} 
             backdrop={false} 
+            zIndex = "90"
             onKeyUp={(e)=>{
               if(e.key === "Escape"){
                 this.cancel();
@@ -112,15 +164,39 @@ export default class FrdInfo extends React.Component {
                   </Row>
                   <CardHeader className="text-center border-0 pt-8 pt-md-4 pb-0 pb-md-4">
                     <div className="d-flex justify-content-between">
+                      {/* 스타일을 위해 넣은 안쓰는 버튼 */}
+                      <Button style={{
+                        'visibility':'hidden'
+                      }}>
+                      </Button>
+                      {/* 본인일 경우 */}
+                      {(localStorage.getItem('usrInfo')
+                      && JSON.parse(localStorage.getItem('usrInfo')).usrName === this.state.profileData.usrName)
+                      ?
                       <Button
                         className="float-right"
                         color="info"
                         href="javascript:void(0)"
-                        onClick={e=>{this.toggle()}}
+                        onClick={e=>{this.goPages('/user/user-profile')}}
+                        size="sm"
+                      >
+                        프로필 변경
+                      </Button>
+                      :
+                      // 친구가 아닌경우
+                      (!this.state.profileData.frdYn) ? 
+                      <Button
+                        className="float-right"
+                        color="info"
+                        href="javascript:void(0)"
+                        onClick={e=>{this.frdRequestConfirm()}}
                         size="sm"
                       >
                         친구 추가
                       </Button>
+                      :''
+                      // 친구인 경우
+                      }
                     </div>
                   </CardHeader>
                   <CardBody className="pt-0 pt-md-4">
