@@ -419,7 +419,6 @@ class Index extends React.Component {
                                               <font className = "form-control-cursor"
                                                     style={{"font-size" : "large"}}>
                                                 {localStorage.getItem('usrInfo')
-                                                  && JSON.parse(localStorage.getItem('usrInfo')).usrLikePst
                                                   && JSON.parse(localStorage.getItem('usrInfo')).usrLikePst.indexOf(post.pstPk)>-1
                                                   ? <span name="like" value="1">♥</span> : <span name="like" value="2">♡</span>
                                                 }

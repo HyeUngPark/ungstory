@@ -82,7 +82,7 @@ class UserNavbar extends React.Component {
             >
               {this.props.brandText}
             </Link>
-            <Form className="navbar-search navbar-search-dark form-inline mr-3 d-none d-md-flex ml-lg-auto">
+            <Form className="justify-content-center navbar-search navbar-search-dark form-inline mr-3 d-md-flex ml-lg-auto">
             {/* 검색 */}
               <FormGroup className="mb-0">
                 <InputGroup className="input-group-alternative">
@@ -95,7 +95,9 @@ class UserNavbar extends React.Component {
                 </InputGroup>
               </FormGroup>
               &nbsp;&nbsp;&nbsp;
-
+              </Form>
+              {/* d-none */}
+              <Form className="justify-content-center navbar-search navbar-search-dark form-inline mr-3 d-md-flex ml-lg-auto">
               <div
                 style={{ display: (this.state.loginYn ? 'inherit' : 'none') }}
               >

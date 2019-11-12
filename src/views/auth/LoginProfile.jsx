@@ -92,14 +92,16 @@ class LoginProfile extends React.Component {
   
     sessionCheck =()=>{
       // 세션 체크
-      var param={
-        usrToken : JSON.parse(localStorage.getItem('usrInfo')).usrToken
-        ,usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
-        ,autoLoginCd : JSON.parse(localStorage.getItem('usrInfo')).autoLoginCd
-      }
-      api.apiSend('post','/auth/loginCk',param,this.loginCkCallback);
+        if(localStorage.getItem('usrInfo')){
+            var param={
+                usrToken : JSON.parse(localStorage.getItem('usrInfo')).usrToken
+                ,usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
+                ,autoLoginCd : JSON.parse(localStorage.getItem('usrInfo')).autoLoginCd
+            }
+            api.apiSend('post','/auth/loginCk',param,this.loginCkCallback);
+        }
     }
-
+        
     logoutCallback = (result) =>{
         if(result.reCd==='01'){
         //   console.log("로그아웃 성공");
@@ -140,7 +142,7 @@ class LoginProfile extends React.Component {
                 </Link> 
             </>;
             profile = <>
-                <Nav className="align-items-center d-none d-md-flex" navbar>
+                <Nav className="align-items-centerd-md-flex" navbar>
                     <UncontrolledDropdown nav 
                     isOpen={this.state.dropdownOpen} toggle={this.toggle}
                     >
@@ -155,7 +157,7 @@ class LoginProfile extends React.Component {
                                 : require("assets/img/theme/no-profile-130x130.png")}
                             />
                             </span>
-                            <Media className="ml-2 d-none d-lg-block">
+                            <Media className="ml-2 d-lg-block">
                             <span className="mb-0 text-sm font-weight-bold">
                                 {this.state.usrName} 님
                             </span>

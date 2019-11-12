@@ -44,28 +44,6 @@ class Sidebar extends React.Component {
     this.activeRoute.bind(this);
     // this.onUnload = this.onUnload.bind(this); // if you need to bind callback to this
   }
-/*
-  onUnload(event) { // the method that will be used for both add and remove event
-    event.preventDefault();  
-    event.returnValue = "test";
-    console.log('self.top : ',window.screenTop);
-    console.log('(document.readyState : ', document.readyState);
-      if(localStorage.getItem('usrInfo')){
-        this.logout();
-      }
-  }
-  
-  componentDidMount() {
-    //  window.addEventListener("onunload", this.onUnload)
-     window.addEventListener("beforeunload", this.onUnload);
-  }
-
-  componentWillUnmount() {
-    // window.removeEventListener("onunload", this.onUnload)
-    window.removeEventListener("beforeunload", this.onUnload);
-  }
-
-*/
   // verifies if routeName is the one active (in browser input)
   activeRoute(routeName) {
     return this.props.location.pathname.indexOf(routeName) > -1 ? "active" : "";
@@ -145,40 +123,7 @@ class Sidebar extends React.Component {
           {/* User */}
           <Nav className="align-items-center d-md-none">
             {/* <LoginProfile isMobile = "Y"/> */}
-          {/* 
-          
             <UncontrolledDropdown nav>
-              <DropdownToggle nav className="nav-link-icon">
-                <i className="ni ni-bell-55" />
-              </DropdownToggle>
-              <DropdownMenu
-                aria-labelledby="navbar-default_dropdown_1"
-                className="dropdown-menu-arrow"
-                right
-              >
-                <DropdownItem>Action</DropdownItem>
-                <DropdownItem>Another action</DropdownItem>
-                <DropdownItem divider />
-                <DropdownItem>Something else here</DropdownItem>
-              </DropdownMenu>
-            </UncontrolledDropdown>
-          
-          */}
-            <UncontrolledDropdown nav>
-{/*
-            <DropdownToggle nav>
-                <Media className="align-items-center">
-                  <span className="avatar avatar-sm rounded-circle">
-                    <h1>여기!!</h1>
-                    <img
-                      alt="..."
-                      src={require("assets/img/theme/team-1-800x800.jpg")}
-                    />
-                  </span>
-                </Media>
-              </DropdownToggle> 
-            */}
-
               {/* 
                 Sidebar menu
               */}

@@ -164,19 +164,36 @@ router.get('/nameCheck', function(req, res) {
 router.post('/login', function(req, res) {
     var params = req.body;
 
-    schema.find({
-        wkCd: 'USR',
-        wkDtCd :'USR',
-        "subSchema.usrId": params.usrId,
-        "subSchema.usrPwd": encrypt.getEncrypt(params.usrPwd)
-    }, function(err, result) {
+    schema.aggregate([
+        {$match:{
+            wkCd: 'USR',
+            wkDtCd :'USR',
+            "subSchema.usrId": params.usrId,
+            "subSchema.usrPwd": encrypt.getEncrypt(params.usrPwd)
+        }},
+        {$project:{
+            "subSchema" : 1 
+        }},
+        {$unwind:{  
+            path: "$subSchema.usrLikePst",
+            preserveNullAndEmptyArrays: true
+        }},
+        {$group:{
+            _id : "$_id"
+            ,"usrCert" : {"$first":"$subSchema.usrCert"}
+            ,"usrId" : {"$first":"$subSchema.usrId"}
+            ,"usrName" : {"$max":"$subSchema.usrName"}
+            ,"usrPt" : {"$first":"$subSchema.usrPt"}
+            ,"usrLikePst" : {"$push" : "$subSchema.usrLikePst.pstPk"}
+        }}
+    ], function(err, result) {
         if (err) {
             console.log('error \n', err);
             return res.status(500).send("select error >> " + err)
         }
         console.log("★★★ login ★★★\n");
         if (result.length > 0) {
-            if(result[0].subSchema.usrCert === '00'){
+            if(result[0].usrCert === '00'){
                 // 미인증 아이디
                 console.log('★★★ 인증되지 않은 아이디 ★★★');
                 res.json({ "reCd": "03" });
@@ -184,7 +201,7 @@ router.post('/login', function(req, res) {
                 // 성공
                 // res.json({ "reCd": '01'});
                 let token = jwt.sign({
-                    usrId : result[0].subSchema.usrId
+                    usrId : result[0].usrId
                 }
                 ,process.env.tokenKey ,    // 비밀 키
                 {
@@ -207,7 +224,7 @@ router.post('/login', function(req, res) {
                 }
 
                 loginSchema.loginToken = token;
-                loginSchema.usrId = result[0].subSchema.usrId;
+                loginSchema.usrId = result[0].usrId;
                 loginSchema.connIp = ipAddress;
                 loginSchema.loginDate = date.getDate();
                 // 로그인 내역 추가
@@ -218,14 +235,14 @@ router.post('/login', function(req, res) {
                     ,lstWrDt: date.getDate() // 최종 작성일
                     ,subSchema: loginSchema
                 }).then((loginResult)=>{
-                    console.log("★★로그인 내역 등록 성공★★\n",loginResult);
+                    console.log("★★로그인 내역 등록 성공★★\n");
                     res.json({
                         "reCd" : '01',
                         "usrToken" : token,
                         "usrInfo" :{
-                            "usrName" : result[0].subSchema.usrName
-                            ,"usrPt" : result[0].subSchema.usrPt
-                            ,"usrLikePst" : result[0].subSchema.usrLikePst
+                            "usrName" : result[0].usrName
+                            ,"usrPt" : result[0].usrPt
+                            ,"usrLikePst" : result[0].usrLikePst
                         }
                     });       
                 }).catch((err)=>{
