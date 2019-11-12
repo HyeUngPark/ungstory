@@ -395,6 +395,7 @@ router.post('/frdInfo',function(req, res){
                     }
                     ,frdYn : 1
                     ,withFrd : 1
+                    ,withFrdCount : 1
                     ,frdCount : 1
                 }}
                 ,{$unwind : {
@@ -407,6 +408,7 @@ router.post('/frdInfo',function(req, res){
                    ,"usrPt" : {"$first":"$subSchema.usrPt"}
                    ,"frdYn" : {"$sum" : "$frdYn"}
                    ,"withFrd" : {"$sum" : "$withFrd"}
+                   ,"withFrdCount" : {"$sum" : "$withFrdCount"}
                    ,"frdCount" : {"$sum" : "$frdCount"}
                    ,"usrFrds" : {"$first":"$subSchema.usrFrds"}
                    ,"pstPts" : {'$push' : "$subSchema.pstPts"}
@@ -416,10 +418,13 @@ router.post('/frdInfo',function(req, res){
                     frdCount : {
                         $size: "$usrFrds"
                     },    
-                    withFrd : {
+                    withFrdCount : {
                         $size:{
                             $setIntersection:["$usrFrds",myFrd]
                         }
+                    },
+                    withFrd : {
+                        $setIntersection:["$usrFrds",myFrd]
                     },
                     frdYn : {
                         $cond:
@@ -442,16 +447,17 @@ router.post('/frdInfo',function(req, res){
                     return res.status(500).send("내 친구 목록 조회 실패 >> " + fError)
                 }
                 if (iResult.length > 0) {
-                    console.log('내 친구 정보 조회 성공');
                     var profileData = {
                         usrName : iResult[0].usrName
                         ,usrPt : iResult[0].usrPt
                         ,frdYn : iResult[0].frdYn
                         ,withFrd : iResult[0].withFrd
-                        ,frdCount :iResult[0].frdCount
+                        ,withFrdCount : (iResult[0].withFrdCount && iResult[0].withFrdCount >0) ? iResult[0].withFrdCount : 0
+                        ,frdCount : (iResult[0].frdCount && iResult[0].frdCount > 0) ? iResult[0].frdCount : 0
                         ,pstPts : iResult[0].pstPts.length
                         ,usrMsg : iResult[0].usrMsg
                     };
+                    console.log('친구 정보 조회 성공 \n');
                     res.json({
                         reCd : '01'
                         ,profileData : profileData
@@ -556,5 +562,184 @@ router.post('/frdInfo',function(req, res){
         });
     }
 });
+
+router.post('/frdPtView',function(req, res){
+    var params = req.body;
+    
+    if(params.frdReq === params.frdRes){ // 1. 본인(전체)
+        schema.aggregate([
+            {$match:{
+                wkCd : 'PST'
+                ,wkDtCd : 'PST'
+                ,"subSchema.usrName" : params.frdRes
+                ,"subSchema.pstPubYn" : {$ne : '04'}
+            }}
+            ,{$project:{
+                _id :1
+                ,"fstWrDt" : 1
+                ,"subSchema.pstPts" : 1
+                ,"subSchema.pstPk" : 1
+            }}
+            ,{$unwind:{
+                path: "$subSchema.pstPts",
+                preserveNullAndEmptyArrays: true
+            }}
+            ,{$group:{
+                "_id" : "$_id"
+                ,"fstWrDt" : {"$first":"$fstWrDt"}
+                ,"pstPts" : {"$push":"$subSchema.pstPts"}
+                ,"pstPk" : {"$first":"$subSchema.pstPk"}
+            }}
+            ,{$sort:{
+                fstWrDt : -1
+            }}
+        ],function(fErr, fRs){
+            if (fErr) {
+                console.log('error \n', fErr);
+                return res.status(500).send("유저 사진 목록 조회 실패 >> " + fErr)
+            }
+            if (fRs.length > 0) {
+                let frdPtList =[];
+                for(let i=0; i<fRs.length; i++){
+                    if(fRs[i].pstPts && fRs[i].pstPts.length>0){
+                        for(let j=0; j<fRs[i].pstPts.length; j++){
+                            let tempList ={
+                                fstWrDt : fRs[i].fstWrDt   
+                                ,pstPts : fRs[i].pstPts[j]
+                                ,pstPk : fRs[i].pstPk   
+                            }
+                            frdPtList.push(tempList);
+                        }
+                    }
+                }
+
+                res.json({
+                    reCd : '01'
+                    ,frdPtList : frdPtList
+                });
+            }else{
+                res.json({
+                    reCd : '03'
+                });
+            }
+        });
+    }else if(params.frdReq && params.frdYn){ // 2. 친구(전체공개, 친구공개)
+        schema.aggregate([
+            {$match:{
+                wkCd : 'PST'
+                ,wkDtCd : 'PST'
+                ,$and : [
+                    {"subSchema.usrName" : {$ne: params.frdRes}}, 
+                    {"subSchema.pstPubYn" : {$in: ['01','02']}} 
+                ]
+            }}
+            ,{$project:{
+                _id :1
+                ,"fstWrDt" : 1
+                ,"subSchema.pstPts" : 1
+                ,"subSchema.pstPk" : 1
+            }}
+            ,{$unwind:{
+                path: "$subSchema.pstPts",
+                preserveNullAndEmptyArrays: true
+            }}
+            ,{$group:{
+                "_id" : "$_id"
+                ,"fstWrDt" : {"$first":"$fstWrDt"}
+                ,"pstPts" : {"$push":"$subSchema.pstPts"}
+                ,"pstPk" : {"$first":"$subSchema.pstPk"}
+            }}
+            ,{$sort:{
+                fstWrDt : -1
+            }}
+        ],function(fErr, fRs){
+            if (fErr) {
+                console.log('error \n', fErr);
+                return res.status(500).send("유저 사진 목록 조회 실패 >> " + fErr)
+            }
+            if (fRs.length > 0) {
+                let frdPtList =[];
+                for(let i=0; i<fRs.length; i++){
+                    if(fRs[i].pstPts && fRs[i].pstPts.length>0){
+                        for(let j=0; j<fRs[i].pstPts.length; j++){
+                            let tempList ={
+                                fstWrDt : fRs[i].fstWrDt   
+                                ,pstPts : fRs[i].pstPts[j]
+                                ,pstPk : fRs[i].pstPk   
+                            }
+                            frdPtList.push(tempList);
+                        }
+                    }
+                }
+                res.json({
+                    reCd : '01'
+                    ,frdPtList : frdPtList
+                });
+            }else{
+                res.json({
+                    reCd : '03'
+                });
+            }
+        });
+    }else{ // 3. 비회원(전체공개 게시물만)
+        schema.aggregate([
+            {$match:{
+                wkCd : 'PST'
+                ,wkDtCd : 'PST'
+                ,"subSchema.usrName" : {$ne: params.frdRes} 
+                ,"subSchema.pstPubYn" : '01'
+            }}
+            ,{$project:{
+                _id :1
+                ,"fstWrDt" : 1
+                ,"subSchema.pstPts" : 1
+                ,"subSchema.pstPk" : 1
+            }}
+            ,{$unwind:{
+                path: "$subSchema.pstPts",
+                preserveNullAndEmptyArrays: true
+            }}
+            ,{$group:{
+                "_id" : "$_id"
+                ,"fstWrDt" : {"$first":"$fstWrDt"}
+                ,"pstPts" : {"$push":"$subSchema.pstPts"}
+                ,"pstPk" : {"$first":"$subSchema.pstPk"}
+            }}
+            ,{$sort:{
+                fstWrDt : -1
+            }}
+        ],function(fErr, fRs){
+            if (fErr) {
+                console.log('error \n', fErr);
+                return res.status(500).send("유저 사진 목록 조회 실패 >> " + fErr)
+            }
+            if (fRs.length > 0) {
+                let frdPtList =[];
+                for(let i=0; i<fRs.length; i++){
+                    if(fRs[i].pstPts && fRs[i].pstPts.length>0){
+                        for(let j=0; j<fRs[i].pstPts.length; j++){
+                            let tempList ={
+                                fstWrDt : fRs[i].fstWrDt   
+                                ,pstPts : fRs[i].pstPts[j]
+                                ,pstPk : fRs[i].pstPk   
+                            }
+                            frdPtList.push(tempList);
+                        }
+                    }
+                }
+                res.json({
+                    reCd : '01'
+                    ,frdPtList : frdPtList
+                });
+            }else{
+                res.json({
+                    reCd : '03'
+                });
+            }
+        });
+    }
+
+});
+
 
 module.exports = router;

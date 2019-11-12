@@ -7,7 +7,11 @@ import {Button,
         CardBody, 
         Row, 
         Col, 
-        Container} from 'reactstrap';
+        Dropdown,
+        DropdownToggle,
+        DropdownMenu,
+        DropdownItem,
+      } from 'reactstrap';
 
 import * as api from "utils/api";
 import * as popup from "utils/popup";
@@ -22,6 +26,9 @@ export default class FrdInfo extends React.Component {
       modal : false
       ,profileData : {}
       ,firstCd : false
+      ,withFrdDrop : false
+      ,frdPtDrop : false
+      ,frdPtList : []
     };
     this.handleSubmit = this.handleSubmit.bind(this);
     this.goPage = this.props.callbackFromParent;    
@@ -63,6 +70,18 @@ export default class FrdInfo extends React.Component {
       ,frdName : this.props.frdName
     };
     api.apiSend('post','/frd/frdInfo',param,this.frdInfoCallback);
+  }
+
+  refrdInfo =(frdName) =>{
+    if(frdName){
+      let param={
+        usrName : localStorage.getItem('usrInfo') 
+        ? JSON.parse(localStorage.getItem('usrInfo')).usrName
+        : ''
+        ,frdName : frdName
+      };
+      api.apiSend('post','/frd/frdInfo',param,this.frdInfoCallback);
+    }
   }
 
   goPages = (page)=>{
@@ -112,6 +131,27 @@ export default class FrdInfo extends React.Component {
         }
       ]
     });
+  }
+
+  frdPtViewCallback = (rs)=> {
+    if(rs.reCd==='01' && rs.frdPtList){
+      this.setState({
+        frdPtList : rs.frdPtList
+      });
+    }else if(rs.reCd ==='03'){
+      this.setState({
+        frdPtList : []
+      });
+    }
+  }
+
+  frdPtView = () => {
+    let param={
+      frdReq : localStorage.getItem('usrInfo') ? JSON.parse(localStorage.getItem('usrInfo')).usrName : ''
+      ,frdRes : this.state.profileData.usrName
+      ,frdYn :  this.state.profileData.frdYn
+    };
+    api.apiSend('post','/frd/frdPtView',param,this.frdPtViewCallback);       
   }
 
   render() {
@@ -208,12 +248,90 @@ export default class FrdInfo extends React.Component {
                             <span className="heading">{this.state.profileData?this.state.profileData.frdCount:''}</span>
                           </div>
                           <div>
-                            <span className="description">사진</span>
-                            <span className="heading">{this.state.profileData?this.state.profileData.pstPts:''}</span>
+                            <span className="description">사진</span><br/>
+                            <Dropdown 
+                                      onClick = {e=>{this.frdPtView()}}
+                                      isOpen={this.state.frdPtDrop} 
+                                      toggle={() => { this.setState({ frdPtDrop: !this.state.frdPtDrop }); }}>
+                            <DropdownToggle 
+                                    tag="span"
+                                    data-toggle="dropdown"
+                                    className="heading form-control-cursor"
+                                    >
+                              {
+                                this.state.profileData 
+                             && this.state.profileData.pstPts > 0
+                              ? this.state.profileData.pstPts:'0'
+                              }
+                            </DropdownToggle>
+                            <DropdownMenu>
+                              <DropdownItem onClick="javascript:void(0)">
+                              {
+                                (this.state.frdPtList
+                                && this.state.frdPtList.length>0)
+                                  ? this.state.frdPtList.map((pt, ptIdx)=>
+                                    (<li className="form-tag form-tag-li" key={ptIdx}>
+                                        <img src={pt.pstPts} 
+                                          style={{
+                                            width: "100px",
+                                            height: "100px",
+                                          }}
+                                          value={pt.pstPk} 
+                                        />
+                                    </li>) 
+                                  )
+                                  :'공개 된 사진이 없습니다.'
+                              }
+                                <Button 
+                                  color="danger"
+                                  onClick={() => { this.setState({ 
+                                                      frdPtDrop: false 
+                                                      ,frdPtList : []
+                                                    }); 
+                                                  }}>
+                                  닫기
+                                </Button>
+                              </DropdownItem>
+                            </DropdownMenu>
+                          </Dropdown>
                           </div>
                           <div>
-                            <span className="description">함께 아는 친구</span>
-                            <span className="heading">{this.state.profileData?this.state.profileData.withFrd:''}</span>
+                            <span className="description">함께 아는 친구</span><br/>
+                            {
+                              (localStorage.getItem('usrInfo')
+                              && JSON.parse(localStorage.getItem('usrInfo')).usrName === this.state.profileData.usrName)
+                              ? '본인'
+                              :  
+                            <Dropdown direction="right" isOpen={this.state.withFrdDrop} toggle={() => { this.setState({ withFrdDrop: !this.state.withFrdDrop }); }}>
+                            <DropdownToggle 
+                                    tag="span"
+                                    data-toggle="dropdown"
+                                    className="heading form-control-cursor"
+                                    >
+                              {this.state.profileData
+                                && this.state.profileData.withFrdCount > 0 
+                                ? this.state.profileData.withFrdCount
+                                : '0'
+                              }
+                            </DropdownToggle>
+                            <DropdownMenu>
+                              {(this.state.profileData.withFrd 
+                               && this.state.profileData.withFrd.length>0)
+                                ? this.state.profileData.withFrd.map((frd, frdIdx)=>{
+                                  return(
+                                    <DropdownItem>
+                                      <a href="javascript:void(0)"
+                                        onClick={e=>{this.refrdInfo(frd)}}>
+                                        {frd}
+                                      </a>
+                                    </DropdownItem>
+                                  )
+                                })
+                                :' 함께아는 친구 없음 '
+                              }
+                            </DropdownMenu>
+                          </Dropdown>
+                            }
                           </div>
                         </div>
                       </div>
