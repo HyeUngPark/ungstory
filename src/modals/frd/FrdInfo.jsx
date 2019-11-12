@@ -53,11 +53,13 @@ export default class FrdInfo extends React.Component {
       this.setState({
         profileData : result.profileData
         ,firstCd : true
+        ,frdPtList : []
       });
     }else{
       console.log('친구 정보 조회 실패');
       this.setState({
         firstCd : true
+        ,frdPtList : []
       });
     }
   }
@@ -282,6 +284,8 @@ export default class FrdInfo extends React.Component {
                                   )
                                   :'공개 된 사진이 없습니다.'
                               }
+                              <div className="text-center">
+                              <br/>
                                 <Button 
                                   color="danger"
                                   onClick={() => { this.setState({ 
@@ -291,6 +295,7 @@ export default class FrdInfo extends React.Component {
                                                   }}>
                                   닫기
                                 </Button>
+                              </div>
                               </DropdownItem>
                             </DropdownMenu>
                           </Dropdown>

@@ -567,6 +567,7 @@ router.post('/frdPtView',function(req, res){
     var params = req.body;
     
     if(params.frdReq === params.frdRes){ // 1. 본인(전체)
+        console.log('★★★ 본인 포스트 사진 조회 ★★★');
         schema.aggregate([
             {$match:{
                 wkCd : 'PST'
@@ -624,12 +625,13 @@ router.post('/frdPtView',function(req, res){
             }
         });
     }else if(params.frdReq && params.frdYn){ // 2. 친구(전체공개, 친구공개)
+        console.log('★★★ 친구 포스트 사진 조회 ★★★');
         schema.aggregate([
             {$match:{
                 wkCd : 'PST'
                 ,wkDtCd : 'PST'
                 ,$and : [
-                    {"subSchema.usrName" : {$ne: params.frdRes}}, 
+                    {"subSchema.usrName" : {$eq: params.frdRes}}, 
                     {"subSchema.pstPubYn" : {$in: ['01','02']}} 
                 ]
             }}
@@ -682,11 +684,12 @@ router.post('/frdPtView',function(req, res){
             }
         });
     }else{ // 3. 비회원(전체공개 게시물만)
+        console.log('★★★ 비회원 포스트 사진 조회 ★★★');
         schema.aggregate([
             {$match:{
                 wkCd : 'PST'
                 ,wkDtCd : 'PST'
-                ,"subSchema.usrName" : {$ne: params.frdRes} 
+                ,"subSchema.usrName" : {$eq: params.frdRes} 
                 ,"subSchema.pstPubYn" : '01'
             }}
             ,{$project:{
