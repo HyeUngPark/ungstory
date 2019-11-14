@@ -1316,5 +1316,90 @@
             }
 
         });
+router.post('/myPostList',function(req, res){
+    var params = req.body;
+    console.log('★★★ 내 포스팅 리스트 ★★★ \n',params);
+    schema.aggregate([
+        {$match:{
+            wkCd : 'PST'
+            ,wkDtCd : 'PST'
+            ,"subSchema.usrName" : params.usrName
+            ,"subSchema.pstPubYn" : {$ne : '04'}
+            , $and : [{"fstWrDt" : {$gte: new Date(params.beforeDate)}},
+                      {"fstWrDt" : {$lt: new Date(params.afterDate)}}]
+        }}
+        ,{$project:{
+            _id :1
+            ,"fstWrDt" : 1
+            ,"subSchema.pstPk" : 1
+            ,"subSchema.pstCt" : 1
+            ,"subSchema.pstLike" : 1
+            ,"subSchema.pstPubYn" : 1
+            ,"subSchema.pstPts" : 1
+            ,"subSchema.pstCmt" : { 
+                $size:{
+                    $cond : [{$ne: [ "$subSchema.pstCmt.pstCmtSep" , "04"]},"$subSchema.pstCmt","$unset"]
+                }
+            }
+            ,"subSchema.pstHt" : 1
+        }}
+        ,{$group:{
+            "_id" : "$_id"
+            ,"fstWrDt" : {"$first":"$fstWrDt"}
+            ,"pstCt" :  {"$first":"$subSchema.pstCt"}
+            ,"pstPk" : {"$first":"$subSchema.pstPk"}
+            ,"pstLike" : {"$first":"$subSchema.pstLike"}
+            ,"pstPubYn" : {"$first":"$subSchema.pstPubYn"}
+            ,"pstCmt" : {"$sum":"$subSchema.pstCmt"}
+            ,"pstHt" : {"$push":"$subSchema.pstHt"}
+            ,"pstPts" : {"$push":"$subSchema.pstPts"}
+        }}
+        ,{$unwind:{
+            path: "$subSchema.pstPts"
+            ,preserveNullAndEmptyArrays: true
+        }}
+        ,{$unwind:{
+            path: "$subSchema.pstHt",
+            preserveNullAndEmptyArrays: true
+        }}
+        ,{$unwind:{
+            path: "$subSchema.pstCmt",
+            preserveNullAndEmptyArrays: true
+        }} 
+        ,{$sort:{
+            fstWrDt : -1
+        }}  
+    ],function(err, result){
+        if (err) {
+            console.log('error \n', err);
+            return res.status(500).send("내 포스팅 리스트 조회 실패 >> " + err)
+        }
+        if (result.length > 0) {
+            let myPstList =[];
+            for(let i=0; i<result.length; i++){
+                let tmepList = {
+                    fstWrDt : result[i].fstWrDt
+                    ,pstCt : result[i].pstCt
+                    ,pstPk : result[i].pstPk
+                    ,pstLike : result[i].pstLike
+                    ,pstPubYn : result[i].pstPubYn
+                    ,pstCmt : result[i].pstCmt
+                    ,pstHt : result[i].pstHt[0].length>0? result[i].pstHt[0] : []
+                    ,pstPts : result[i].pstPts[0].length>0? result[i].pstPts[0] : []
+                };
+                myPstList.push(tmepList);
+            }
+            res.json({
+                reCd : '01'
+                ,myPstList : myPstList
+            });
+        }else{
+            console.log('조회 결과 없음');
+            res.json({
+                reCd : '03'
+            });
+        }
+    });
 
+});
 module.exports = router;

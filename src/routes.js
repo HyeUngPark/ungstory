@@ -2,6 +2,7 @@ import Index from "views/Index.jsx";
 import Profile from "views/user/Profile.jsx";
 import Tables from "views/user/Tables.jsx";
 import FriendSearch from "views/user/FriendSearch.jsx";
+import PostSearch from "views/user/PostSearch.jsx";
 import Icons from "views/user/Icons.jsx";
 
 import Register from "views/auth/Register.jsx";
@@ -62,6 +63,14 @@ var routes =[
       name: "User Profile",
       icon: "ni ni-single-02 text-yellow",
       component: Profile,
+      layout: "/user"
+    });
+  routes.push(
+    {
+      path: "/post-search",
+      name: "Post Search",
+      icon: "ni ni-archive-2",
+      component: PostSearch,
       layout: "/user"
     });
   }
