@@ -20,6 +20,11 @@ var date = {
             return Math.floor(moment.duration(now.diff(times)).asDays())+'일 전('+moment(time).format('YYYY-MM-DD HH:mm')+')';
         }
     }
+    ,dateFormat : function(date, format){
+        if(format==='YYYY/MM/DD'){
+            return moment(date).format('YYYY/MM/DD')
+        }
+    }
 
 }
 

@@ -1378,7 +1378,7 @@ router.post('/myPostList',function(req, res){
             let myPstList =[];
             for(let i=0; i<result.length; i++){
                 let tmepList = {
-                    fstWrDt : result[i].fstWrDt
+                    fstWrDt : date.dateFormat(result[i].fstWrDt,'YYYY/MM/DD')
                     ,pstCt : result[i].pstCt
                     ,pstPk : result[i].pstPk
                     ,pstLike : result[i].pstLike

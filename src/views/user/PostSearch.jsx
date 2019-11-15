@@ -29,23 +29,27 @@ class PostSearch extends React.Component {
       beforeDate : new Date()
       ,afterDate : new Date()
       ,searchList : []
+      ,firstCd : false
     };
   }
   postSearchCallback = (rs) => {
     if(rs.reCd === '01'){
-      console.log('조회 성공');
+      // console.log('조회 성공');
       this.setState({
         searchList : rs.myPstList
+        ,firstCd : true
       });
     }else if(rs.reCd === '03'){
-      console.log('조회 결과 없음');
+      // console.log('조회 결과 없음');
       this.setState({
         searchList:[]
+        ,firstCd : true
       });
     }else{
-      console.log('조회 실패');
+      // console.log('조회 실패');
       this.setState({
         searchList:[]
+        ,firstCd : true
       });
     }
   }
@@ -90,6 +94,10 @@ class PostSearch extends React.Component {
       beforeDate : bfDate
       ,afterDate : new Date()
     });
+  }
+
+  pstDetail = (pstPk)=>{
+    console.log(pstPk, ' 게시물 상세보기');
   }
   render() {
     return (
@@ -178,6 +186,8 @@ class PostSearch extends React.Component {
                       <th scope="col">해시태그</th>
                       <th scope="col">좋아요</th>
                       <th scope="col">댓글 수</th>
+                      <th scope="col">게시일</th>
+                      <th scope="col">상세보기</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -218,7 +228,7 @@ class PostSearch extends React.Component {
                         {pst.pstHt.length>0?
                           <div className="d-flex align-items-center">
                             <a href="javascirpt:void(0)">
-                              {pst.pstHt[0]}
+                              #{pst.pstHt[0]}
                             </a> &nbsp; 포함 {pst.pstHt.length}개
                           </div>
                         :
@@ -237,12 +247,33 @@ class PostSearch extends React.Component {
                           {pst.pstCmt}개
                         </div>
                       </td>
+                      <td>
+                        <div className="d-flex align-items-center">
+                          {pst.fstWrDt}
+                        </div>
+                      </td>
+                      <td>
+                        <Button 
+                          className="btn btn-info"
+                          onClick={e=>{this.pstDetail(pst.pstPk)}}
+                        >
+                          상세보기
+                        </Button>
+                      </td>
                     </tr>
                     )}) 
                     : 
                     <tr>
                       <th colSpan="5">
-                        조회된 결과가 없습니다.                    
+                        {!this.state.firstCd ? 
+                          <div className="d-flex align-items-center">
+                            날짜 설정 후 조회를 진행해주세요
+                          </div>
+                          :
+                          <div className="d-flex align-items-center">
+                            조회된 결과가 없습니다.                    
+                          </div>
+                        }
                       </th>
                     </tr>
                   }
