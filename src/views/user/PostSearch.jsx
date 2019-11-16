@@ -13,7 +13,6 @@ import {
 } from "reactstrap";
 // core components
 import Header from "components/Headers/Header.jsx";
-import { confirmAlert } from 'react-confirm-alert'; // Import
 
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
@@ -21,6 +20,8 @@ import "react-datepicker/dist/react-datepicker.css";
 import * as api from "utils/api";
 import * as popup from "utils/popup";
 import * as date from "utils/date";
+
+import PostDetailModal from '../../modals/user/PostDetailModal';
 
 class PostSearch extends React.Component {
   constructor(props) {
@@ -253,12 +254,7 @@ class PostSearch extends React.Component {
                         </div>
                       </td>
                       <td>
-                        <Button 
-                          className="btn btn-info"
-                          onClick={e=>{this.pstDetail(pst.pstPk)}}
-                        >
-                          상세보기
-                        </Button>
+                        <PostDetailModal pstPk={pst.pstPk}/>
                       </td>
                     </tr>
                     )}) 

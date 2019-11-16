@@ -1402,4 +1402,119 @@ router.post('/myPostList',function(req, res){
     });
 
 });
+
+router.post('/getPostInfo', function(req, res){
+    var params = req.body;
+
+    schema.aggregate([
+        {$match : {
+            wkCd : 'PST'
+            ,wkDtCd : 'PST'
+            ,"subSchema.pstPk" : params.pstPk
+        }}
+        ,{$project:{
+            "subSchema" : 1
+        }}
+        ,{$group:{
+            "_id" : "$_id"
+            ,"pstPk" : {"$first":"$subSchema.pstPk"}
+            ,"usrName" : {"$first":"$subSchema.usrName"}
+            ,"pstPts" : {"$first":"$subSchema.pstPts"}
+            ,"pstHt" : {"$first":"$subSchema.pstHt"}
+            ,"pstCt" : {"$first":"$subSchema.pstCt"}
+            ,"pstCmt" : {"$first":"$subSchema.pstCmt"}
+            ,"pstPubYn" : {"$first":"$subSchema.pstPubYn"}
+            ,"pstLike" : {"$first":"$subSchema.pstLike"}
+        }} 
+    ],function(err, result){
+        if (err) {
+            console.log('error \n', err);
+            return res.status(500).send("포스팅 상세 조회 목록 조회 실패 >> " + err)
+        }
+        if (result.length > 0) {
+            let pstInfo = result[0];
+             /* 포스팅,댓글 프로필 사진 조회 */
+             let cmtUsrList = [];
+             if(pstInfo.pstCmt.length>0){
+                for(var j=0; j<pstInfo.pstCmt.length; j++){
+                    cmtUsrList.indexOf(pstInfo.pstCmt[j].usrName)<0 ? 
+                    cmtUsrList.push(pstInfo.pstCmt[j].usrName) : '';
+                 }
+             }
+             console.log('★★★★★',cmtUsrList.length,'명 프로필 사진 조회 시작 ★★★★★');
+             schema.aggregate([
+                {$facet:{
+                    cmtUsrPt :[
+                        {$match:{
+                            wkCd : 'USR',
+                            wkDtCd : 'USR',
+                            "subSchema.usrName" : {$in:cmtUsrList}
+                        }},
+                        {$project : {
+                            "subSchema.usrName" : 1
+                            ,"subSchema.usrPt" : 1
+                        }},
+                        {$group :{
+                            "_id" : "$_id"
+                            ,"usrName" : {"$first"  : "$subSchema.usrName"}
+                            ,"usrPt" : {"$first"  : "$subSchema.usrPt"}
+                        }}
+                    ]
+                    ,pstUsrPt : [
+                        {$match:{
+                            wkCd : 'USR',
+                            wkDtCd : 'USR',
+                            "subSchema.usrName" : pstInfo.usrName
+                        }},
+                        {$project : {
+                            "subSchema.usrName" : 1
+                            ,"subSchema.usrPt" : 1
+                        }},
+                        {$group :{
+                            "_id" : "$_id"
+                            ,"usrName" : {"$first"  : "$subSchema.usrName"}
+                            ,"usrPt" : {"$first"  : "$subSchema.usrPt"}
+                        }}
+                    ]
+                }}
+             ],function(profileErr, profileResult){
+                 if (profileErr) {
+                     console.log('error \n', profileErr);
+                     return res.status(500).send("select error >> " + profileErr);
+                 }
+                 if (profileResult.length > 0){
+                    // 포스팅 작성자 이미지
+                    pstInfo.usrPt = profileResult[0].pstUsrPt[0].usrPt;
+    
+                     // 댓글 이미지
+                     if(profileResult[0].cmtUsrPt.length>0){
+                        let cmtList = pstInfo.pstCmt;
+                        for(let jj=0; jj<profileResult[0].cmtUsrPt.length; jj++){
+                            for (kk=0; kk<cmtList.length; kk++){
+                                if(profileResult[0].cmtUsrPt[jj].usrName===cmtList[kk].usrName ){
+                                    cmtList[kk].usrPt = profileResult[0].cmtUsrPt[jj].usrPt;
+                                }
+                            }
+                        }
+                        pstInfo.pstCmt = cmtList;
+                     }
+                     res.json({
+                        reCd : '01'
+                        ,postInfo : pstInfo
+                    });
+                 }else{
+                    res.json({
+                        reCd : '02'
+                    });
+                 }
+            });
+        }else{
+            res.json({
+                reCd : '02'
+            });
+        }
+    });
+
+});
+
 module.exports = router;
