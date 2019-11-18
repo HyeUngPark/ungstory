@@ -19,11 +19,13 @@ import * as popup from "utils/popup";
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 
+import PostDetailModal from '..//user/PostDetailModal';
+
 export default class FrdInfo extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      modal : false
+      frdInfoModal : false
       ,profileData : {}
       ,firstCd : false
       ,withFrdDrop : false
@@ -39,7 +41,7 @@ export default class FrdInfo extends React.Component {
       this.frdInfo();
     }
     this.setState({
-      modal: !this.state.modal
+      frdInfoModal: !this.state.frdInfoModal
     });
   }
 
@@ -167,9 +169,9 @@ export default class FrdInfo extends React.Component {
             {this.props.frdName}
           </a>
           <Modal 
-            isOpen={this.state.modal} 
+            isOpen={this.state.frdInfoModal} 
             backdrop={false} 
-            zIndex = "90"
+            zIndex = "80"
             onKeyUp={(e)=>{
               if(e.key === "Escape"){
                 this.cancel();
@@ -183,10 +185,8 @@ export default class FrdInfo extends React.Component {
           <Card className="bg-secondary shadow border-0">
             <h5 className="display-4">&nbsp;친구 정보</h5>
             <ModalBody>
-{/*               <Container className="mt--7" fluid>
- */}        <Row className="justify-content-center"> 
-{/*               <Col className="order-xl-2 mb-5 mb-xl-0" xl="4">
- */}          <Col>      
+            <Row className="justify-content-center"> 
+              <Col>      
                 <Card className="card-profile shadow">
                   <Row className="justify-content-center">
                     <Col className="order-lg-2" lg="3">
@@ -236,8 +236,16 @@ export default class FrdInfo extends React.Component {
                       >
                         친구 추가
                       </Button>
-                      :''
-                      // 친구인 경우
+                      :<Button
+                          // 친구인 경우
+                          className="float-right"
+                          color="info"
+                          href="javascript:void(0)"
+                          // onClick={e=>{this.frdRequestConfirm()}}
+                          size="sm"
+                        >
+                          친구
+                        </Button>
                       }
                     </div>
                   </CardHeader>
@@ -252,13 +260,13 @@ export default class FrdInfo extends React.Component {
                           <div>
                             <span className="description">사진</span><br/>
                             <Dropdown 
-                                      onClick = {e=>{this.frdPtView()}}
                                       isOpen={this.state.frdPtDrop} 
                                       toggle={() => { this.setState({ frdPtDrop: !this.state.frdPtDrop }); }}>
                             <DropdownToggle 
                                     tag="span"
                                     data-toggle="dropdown"
                                     className="heading form-control-cursor"
+                                    onClick = {e=>{this.frdPtView()}}
                                     >
                               {
                                 this.state.profileData 
@@ -267,23 +275,36 @@ export default class FrdInfo extends React.Component {
                               }
                             </DropdownToggle>
                             <DropdownMenu>
-                              <DropdownItem onClick="javascript:void(0)">
+                              <div className="dropdown-item">
                               {
                                 (this.state.frdPtList
                                 && this.state.frdPtList.length>0)
                                   ? this.state.frdPtList.map((pt, ptIdx)=>
                                     (<li className="form-tag form-tag-li" key={ptIdx}>
-                                        <img src={pt.pstPts} 
-                                          style={{
-                                            width: "100px",
-                                            height: "100px",
-                                          }}
-                                          value={pt.pstPk} 
-                                        />
+                                        <span
+                                          // style = {{'display' : 'none'}}
+                                        >
+                                          <PostDetailModal 
+                                            id = {"pstDetailModal"+ptIdx}
+                                            pstPk={pt.pstPk}
+                                          />
+                                        </span>
+                                        <ldbel
+                                          htmlFor={"pstDetailModal"+ptIdx}
+                                        >
+                                          <img src={pt.pstPts} 
+                                            style={{
+                                              width: "100px",
+                                              height: "100px",
+                                            }}
+                                            className="form-control-cursor"
+                                            />
+                                        </ldbel>
                                     </li>) 
                                   )
                                   :'공개 된 사진이 없습니다.'
-                              }
+                                }
+                              </div>
                               <div className="text-center">
                               <br/>
                                 <Button 
@@ -296,7 +317,6 @@ export default class FrdInfo extends React.Component {
                                   닫기
                                 </Button>
                               </div>
-                              </DropdownItem>
                             </DropdownMenu>
                           </Dropdown>
                           </div>

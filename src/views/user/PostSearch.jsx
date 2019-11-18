@@ -97,9 +97,6 @@ class PostSearch extends React.Component {
     });
   }
 
-  pstDetail = (pstPk)=>{
-    console.log(pstPk, ' 게시물 상세보기');
-  }
   render() {
     return (
       <>

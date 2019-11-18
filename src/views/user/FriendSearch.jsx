@@ -8,7 +8,6 @@ import {
   Table,
   Container,
   Row,
-  Button,
   Col,
 } from "reactstrap";
 // core components
@@ -17,6 +16,8 @@ import { confirmAlert } from 'react-confirm-alert'; // Import
 
 import * as api from "utils/api";
 import * as popup from "utils/popup";
+
+import FrdInfo from '../../modals/frd/FrdInfo';
 
 class FriendSearch extends React.Component {
   constructor(props) {
@@ -111,6 +112,13 @@ class FriendSearch extends React.Component {
       alert('검색할 닉네임을 입력해주세요');
     }
   }
+
+  goPage = (page) =>{
+    if(page){
+      this.props.history.push(page);
+    }
+  }
+  
   render() {
     return (
       <>
@@ -172,7 +180,7 @@ class FriendSearch extends React.Component {
                             className="avatar avatar-sm"
                             href="#pablo"
                             id="tooltip806693074"
-                            onClick={e => popup.openImg(search.usrPt)}>
+                            onClick={e => popup.openImg(search.usrPt)}
                           >
                             <img
                               alt="..."
@@ -183,12 +191,12 @@ class FriendSearch extends React.Component {
                                 : require("assets/img/theme/no-profile-130x130.png"))}
                             />
                           </a>
-                            &nbsp;
-                          <Media>
+                        &nbsp;&nbsp;
+                        <Media>
                             <span className="mb-0 text-sm">
-                              {search.usrName}
+                              <FrdInfo callbackFromParent={this.goPage} frdName={search.usrName}/>
                             </span>
-                          </Media>
+                        </Media>
                         </Media>
                       </th>
                       <td>
