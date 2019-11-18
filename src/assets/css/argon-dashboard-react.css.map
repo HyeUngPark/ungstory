@@ -3,6 +3,7 @@
 	"file": "argon-dashboard-react.css",
 	"sources": [
 		"../scss/argon-dashboard-react.scss",
+		"../scss/my.scss",
 		"../scss/custom/_functions.scss",
 		"../scss/bootstrap/_functions.scss",
 		"../scss/custom/_variables.scss",
