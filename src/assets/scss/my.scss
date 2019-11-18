@@ -1,3 +1,5 @@
+// form
+
 .form-control-cursor{
     cursor: pointer;
 }
@@ -13,4 +15,26 @@
 }
 .form-padding-right-0 {
     padding-left: 0em;
+}
+.form-tag-del-15{
+    font-size : 15px !important ;
+}
+
+.form-tag-del-btn {
+    font-size: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-left: 3px;
+    color: #777;
+    padding-left: 0px;
+}
+
+.form-input-left-margin{
+    margin-left: 15px;
+}
+
+// modal
+.modal-scroll {
+    max-height : 'calc(100vh - 210px)';
+    overflow-y : 'auto';
 }

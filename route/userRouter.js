@@ -182,6 +182,9 @@
                      ,"subSchema.pstPk" : 1
                      ,"subSchema.pstLike" : 1    
                 }}
+                ,{$sort:{
+                    "subSchema.pstCmt.pstCmtGp" : 1
+                }}
                 ,{$group:{
                      "_id" : "$_id"
                      ,"wkCd" : {"$first":"$wkCd"}
@@ -1412,8 +1415,30 @@ router.post('/getPostInfo', function(req, res){
             ,wkDtCd : 'PST'
             ,"subSchema.pstPk" : params.pstPk
         }}
+        ,{$unwind : {
+            path: "$subSchema.pstCmt",
+            preserveNullAndEmptyArrays: true
+        }}
         ,{$project:{
-            "subSchema" : 1
+            "subSchema.pstCmt" : { 
+                 $cond : [{$ne: [ "$subSchema.pstCmt.pstCmtSep" , "04"]},"$subSchema.pstCmt","$unset"]
+             }
+             ,_id :1
+             ,"wkCd" :  1
+             ,"wkDtCd" : 1
+             ,"fstWrDt" : 1
+             ,"lstWrDt" : 1
+             ,"subSchema.usrName" : 1
+             ,"subSchema.usrId" : 1
+             ,"subSchema.pstPts" : 1
+             ,"subSchema.pstCt" : 1
+             ,"subSchema.pstHt" : 1
+             ,"subSchema.pstPubYn" : 1
+             ,"subSchema.pstPk" : 1
+             ,"subSchema.pstLike" : 1
+        }}
+        ,{$sort:{
+            "subSchema.pstCmt.pstCmtGp" : 1
         }}
         ,{$group:{
             "_id" : "$_id"
@@ -1422,7 +1447,7 @@ router.post('/getPostInfo', function(req, res){
             ,"pstPts" : {"$first":"$subSchema.pstPts"}
             ,"pstHt" : {"$first":"$subSchema.pstHt"}
             ,"pstCt" : {"$first":"$subSchema.pstCt"}
-            ,"pstCmt" : {"$first":"$subSchema.pstCmt"}
+            ,"pstCmt" : {"$push":"$subSchema.pstCmt"}
             ,"pstPubYn" : {"$first":"$subSchema.pstPubYn"}
             ,"pstLike" : {"$first":"$subSchema.pstLike"}
         }} 
@@ -1432,7 +1457,18 @@ router.post('/getPostInfo', function(req, res){
             return res.status(500).send("포스팅 상세 조회 목록 조회 실패 >> " + err)
         }
         if (result.length > 0) {
+          // 내 게시물
+          
             let pstInfo = result[0];
+            
+            pstInfo.wrDt = date.getWriteDate(pstInfo.lstWrDt);
+            pstInfo.detailCd = true;
+
+            if(params.usrName === pstInfo.usrName){
+                pstInfo.myPst = true;
+            }else{
+                pstInfo.myPst = false;
+            }
              /* 포스팅,댓글 프로필 사진 조회 */
              let cmtUsrList = [];
              if(pstInfo.pstCmt.length>0){

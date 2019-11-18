@@ -252,7 +252,7 @@ class Index extends React.Component {
   postMg =(cd, postIdx) =>{
     if(cd === 'd'){
       confirmAlert({
-        title: '댓글 삭제 확인',
+        title: '포스트 삭제 확인',
         message: '정말 포스트를 삭제하시겠습니까?',
         buttons: [
           {

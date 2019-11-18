@@ -11,7 +11,11 @@ export default class PostModifyModal extends React.Component {
     
     if(post.pstPts){
       for(let i=0; i<post.pstPts.length; i++){
-        tempPts.push(post.pstPts[i].src);
+        if(post.detailCd){
+          tempPts.push(post.pstPts[i]);
+        }else{
+          tempPts.push(post.pstPts[i].src);
+        }
       }
     }
     if(post.pstHt){
@@ -109,18 +113,6 @@ export default class PostModifyModal extends React.Component {
       });
     }
   }
-
-  imgView =(idx,e)=>{
-    // console.log("imgView >> \n",e.target,'\n',idx);
-    
-    if(e.target){
-      // const idx =  e.target.attributes.value.value * 1;
-      const list = this.state.tempImgs;
-      if (idx > -1){
-        window.open('about:blank',list[idx]);
-      }
-    }
-  };
 
   valChange = (cd, e) =>{
     if(cd === 'p'){ // 공개여부
