@@ -822,69 +822,95 @@
             }
             if (result.length > 0) {
                 var usrId = result[0].subSchema.usrId;
+                var usrName = params.usrName;
                 schema.aggregate([
-                    {$match:{
-                      "subSchema.usrId" : usrId
-                    }},
-                    {$unwind : {
-                          path: "$subSchema.pstCmt",
-                          preserveNullAndEmptyArrays: true
-                    }},
-                    {$unwind : {
-                          path: "$subSchema.pstPts",
-                          preserveNullAndEmptyArrays: true
-                    }},
-                    {$project : {
-                        "_id" : 0
-                        ,"subSchema.usrName" : 1
-                        ,"subSchema.usrId" : 1
-                        ,"subSchema.usrPt" :1
-                        ,"subSchema.usrMsg" : 1
-                        ,"subSchema.pstPts" : {
-                                 $cond : [
-                                   {$and:[
-                                       {$ne: ["$subSchema.pstPubYn" , "04"]}
-                                   ]}//and
-                                   ,"$subSchema.pstPts"
-                                   ,"$unset"]
-                         }
-                        ,"subSchema.pstCmt" : { 
-                                       $cond : [
-                                           {$and:[
-                                               {$ne: ["$subSchema.pstCmt.pstCmtSep" , "04"]}
-                                              ,{$eq: ["$subSchema.pstCmt.usrName","$subSchema.usrName"]}
-              
-                                           ]}//and
-                                           ,"$subSchema.pstCmt"
-                                           ,"$unset"]
-                          }// pstCmt
-                        ,"subSchema.usrLikePst" : {
-                              $size : {"$ifNull":["$subSchema.usrLikePst",[]]}
-                        }
-                        ,"subSchema.loginDate" : 1
-                        ,"subSchema.usrFrds" : 1
-                    }},
-                    {$lookup:{
-                      from : "subSchema.pstCmt"
-                      ,localField : 'usrName'
-                      ,foreignField : 'subSchema.usrName'
-                      ,as : 'pstCmt'
-                    }},
-                    {$sort : {
-                        "subSchema.loginDate" : -1
-                    }},
-                    {$group:{
-                        "_id" : "$_id"
-                        ,"usrName" : {"$max":"$subSchema.usrName"}
-                        ,"usrId" : {"$first":"$subSchema.usrId"}
-                        ,"usrMsg" : {"$max":"$subSchema.usrMsg"}
-                        ,"pstPts" : {"$push":"$subSchema.pstPts"}
-                        ,"usrPt" : {"$max":"$subSchema.usrPt"}
-                        ,"pstCmt" : {"$push":"$subSchema.pstCmt"}
-                        ,"usrLikePst" : {"$max":"$subSchema.usrLikePst"}
-                        ,"loginDate" : {"$push":"$subSchema.loginDate"}
-                        ,"usrFrds" : {"$push":"$subSchema.usrFrds"}
-                    }},
+                    {$facet:{
+                        usrInfo :[
+                            {$match:{
+                                wkCd : 'USR',
+                                "subSchema.usrId" : usrId
+                            }},
+                            {$unwind : {
+                                path: "$subSchema.usrFrds",
+                                preserveNullAndEmptyArrays: true
+                            }},
+                            {$project : {
+                                "_id" : 0
+                                ,"subSchema.usrName" : 1
+                                ,"subSchema.usrId" : 1
+                                ,"subSchema.usrPt" :1
+                                ,"subSchema.usrMsg" : 1
+                                ,"subSchema.usrLikePst" : {
+                                  $size : {"$ifNull":["$subSchema.usrLikePst",[]]}
+                                }
+                                ,"subSchema.usrFrds" : 1
+                                ,"subSchema.loginDate" : 1
+                            }},
+                            {$sort:{
+                                "subSchema.loginDate" : -1
+                            }},
+                            {$group :{
+                                "_id" : "$_id"
+                                ,"usrName" : {"$first":"$subSchema.usrName"}
+                                ,"usrId" : {"$first":"$subSchema.usrId"}
+                                ,"usrMsg" : {"$first":"$subSchema.usrMsg"}
+                                ,"usrPt" : {"$max":"$subSchema.usrPt"}
+                                ,"usrLikePst" : {"$max":"$subSchema.usrLikePst"}
+                                ,"usrFrds" : {"$push":"$subSchema.usrFrds"}
+                                ,"loginDate" : {"$push":"$subSchema.loginDate"}
+                            }}
+                            
+                        ]
+                        ,pstInfo : [
+                            {$match:{
+                                wkCd : 'PST',
+                                wkDtCd : 'PST',
+                                "subSchema.pstPubYn" : {$ne : '04'},
+                                "subSchema.usrName" : usrName
+                            }}
+                            ,{$unwind : {
+                                path: "$subSchema.pstPts",
+                                preserveNullAndEmptyArrays: true
+                            }}
+                            ,{$project:{
+                                _id : 0
+                                ,"subSchema.usrName" : 1
+                                ,"subSchema.pstPts" : 1
+                            }}
+                            ,{$group :{
+                                "_id" : "$_id"
+                                ,"usrName" : {"$first":"$subSchema.usrName"}
+                                ,"pstPts" : {"$push":"$subSchema.pstPts"}
+                            }}
+                        ]
+                        ,cmtInfo : [
+                            {$match:{
+                                wkCd : 'PST',
+                                wkDtCd : 'PST',
+                                "subSchema.pstPubYn" : {$ne : '04'},
+                                "subSchema.pstCmt.$.pstCmtSep" : {$ne : '04'}
+                            }}
+                            ,{$unwind : {
+                                path: "$subSchema.pstCmt",
+                                preserveNullAndEmptyArrays: true
+                            }}
+                            ,{$project:{
+                                _id : 0
+                                ,"subSchema.usrName" : 1
+                                ,"subSchema.pstCmt" : { 
+                                    $cond : [
+                                       {$eq: ["$subSchema.pstCmt.usrName", usrName]}
+                                        ,1
+                                        ,0]
+                                }// pstCmt
+                            }}
+                            ,{$group :{
+                                "_id" : "$_id"
+                                ,"usrName" : {"$first":"$subSchema.usrName"}
+                                ,"pstCmt" : {"$sum":"$subSchema.pstCmt"}
+                            }}   
+                        ]
+                    }}
             ],function(aErr, aResult){
                 if (aErr) {
                     console.log('error \n', aErr);
@@ -892,17 +918,17 @@
                 }
                 // console.log(result);
                 if (aResult.length > 0) {
-                    // console.log("★★★getProfile data★★★\n",aResult);
+                    console.log("★★★getProfile data★★★\n",aResult);
                     var profileData = {
-                        loginDate : aResult[0].loginDate.length >3 ? aResult[0].loginDate.slice(0,3) : aResult[0].loginDate
-                        ,usrActive : aResult[0].usrLikePst + aResult[0].pstCmt.length
+                        loginDate : aResult[0].usrInfo[0].loginDate.length >3 ? aResult[0].usrInfo[0].loginDate.slice(0,3) : aResult[0].usrInfo[0].loginDate
+                        ,usrActive : aResult[0].usrInfo[0].usrLikePst + aResult[0].cmtInfo[0].pstCmt
                         // ,pstCmt : aResult.pstCmt.length
-                        ,usrFrds : aResult[0].usrFrds.length
-                        ,pstPts : aResult[0].pstPts.length
-                        ,usrPt : aResult[0].usrPt
-                        ,usrId : aResult[0].usrId
-                        ,usrName :aResult[0].usrName
-                        ,usrMsg : aResult[0].usrMsg
+                        ,usrFrds : aResult[0].usrInfo[0].usrFrds.length
+                        ,pstPts : aResult[0].pstInfo[0].pstPts.length
+                        ,usrPt : aResult[0].usrInfo[0].usrPt
+                        ,usrId : aResult[0].usrInfo[0].usrId
+                        ,usrName :aResult[0].usrInfo[0].usrName
+                        ,usrMsg : aResult[0].usrInfo[0].usrMsg
                     };
                     res.json({
                         reCd : '01'

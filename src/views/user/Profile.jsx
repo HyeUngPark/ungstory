@@ -66,6 +66,7 @@ class Profile extends React.Component {
   getProfile =() =>{
     let param = {
       usrToken : JSON.parse(localStorage.getItem('usrInfo')).usrToken
+      ,usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
     };
     api.apiSend('post','getProfile',param,this.getProfileCallback);
   }
@@ -267,7 +268,7 @@ class Profile extends React.Component {
                         </div>
                         <div>
                           <span className="description">활동(댓글, 좋아요)</span>
-                          <span className="heading">{this.state.profileData.pstPts}</span>
+                          <span className="heading">{this.state.profileData.usrActive}</span>
                         </div>
                       </div>
                     </div>
