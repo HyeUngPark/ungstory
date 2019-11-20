@@ -34,6 +34,8 @@ export default class FrdInfo extends React.Component {
     };
     this.handleSubmit = this.handleSubmit.bind(this);
     this.goPage = this.props.callbackFromParent;    
+    this.imgClick = React.createRef();
+    this.imgDrop = React.createRef();
     // this.frdInfo();
   }
   toggle = (e) => {
@@ -158,6 +160,10 @@ export default class FrdInfo extends React.Component {
     api.apiSend('post','/frd/frdPtView',param,this.frdPtViewCallback);       
   }
 
+  openPost =(e, pstPk) =>{
+    this.imgClick.current.props.pstPk = pstPk;
+    this.imgClick.current.toggle();
+  }
   render() {
     return (
         <div>
@@ -170,7 +176,7 @@ export default class FrdInfo extends React.Component {
           </a>
           <Modal 
             isOpen={this.state.frdInfoModal} 
-            backdrop={false} 
+            backdrop="static" 
             zIndex = "80"
             onKeyUp={(e)=>{
               if(e.key === "Escape"){
@@ -259,66 +265,73 @@ export default class FrdInfo extends React.Component {
                           </div>
                           <div>
                             <span className="description">사진</span><br/>
-                            <Dropdown 
-                                      isOpen={this.state.frdPtDrop} 
-                                      toggle={() => { this.setState({ frdPtDrop: !this.state.frdPtDrop }); }}>
-                            <DropdownToggle 
-                                    tag="span"
-                                    data-toggle="dropdown"
-                                    className="heading form-control-cursor"
-                                    onClick = {e=>{this.frdPtView()}}
-                                    >
-                              {
-                                this.state.profileData 
-                             && this.state.profileData.pstPts > 0
-                              ? this.state.profileData.pstPts:'0'
-                              }
-                            </DropdownToggle>
-                            <DropdownMenu>
-                              <div className="dropdown-item">
-                              {
-                                (this.state.frdPtList
-                                && this.state.frdPtList.length>0)
-                                  ? this.state.frdPtList.map((pt, ptIdx)=>
-                                    (<li className="form-tag form-tag-li" key={ptIdx}>
-                                        <span
-                                          // style = {{'display' : 'none'}}
-                                        >
+                            <div ref = {this.imgDrop}>
+                              <Dropdown 
+                                        isOpen={this.state.frdPtDrop} 
+                                        name = "pstPtDrop"
+                                        toggle={(e) => { 
+                                          if(this.state.frdPtDrop && 
+                                            (e.target === this.imgDrop.current
+                                               || !this.imgDrop.current.contains(e.target)
+                                              )){
+                                              return;
+                                          }
+                                          this.setState({ frdPtDrop: !this.state.frdPtDrop }); 
+                                        }}
+                              >
+                              <DropdownToggle 
+                                        tag="span"
+                                        data-toggle="dropdown"
+                                        className="heading form-control-cursor"
+                                        onClick = {e=>{this.frdPtView()}}
+                                >
+                                {
+                                  this.state.profileData && this.state.profileData.pstPts > 0 ?
+                                  this.state.profileData.pstPts
+                                  :'0'
+                                }
+                              </DropdownToggle>
+                              <DropdownMenu>
+                                <div className="dropdown-item">
+                                {
+                                  (this.state.frdPtList
+                                  && this.state.frdPtList.length>0)
+                                    ? this.state.frdPtList.map((pt, ptIdx)=>
+                                      (<li className="form-tag form-tag-li" key={ptIdx}>
                                           <PostDetailModal 
-                                            id = {"pstDetailModal"+ptIdx}
+                                            ref={this.imgClick}
                                             pstPk={pt.pstPk}
+                                            style={false}
                                           />
-                                        </span>
-                                        <ldbel
-                                          htmlFor={"pstDetailModal"+ptIdx}
-                                        >
-                                          <img src={pt.pstPts} 
+                                          <img 
+                                            onClick={e=>{this.openPost(e, pt.pstPk)}}
+                                            src={pt.pstPts} 
+                                            className="form-control-cursor"
                                             style={{
                                               width: "100px",
                                               height: "100px",
                                             }}
-                                            className="form-control-cursor"
-                                            />
-                                        </ldbel>
-                                    </li>) 
-                                  )
-                                  :'공개 된 사진이 없습니다.'
-                                }
-                              </div>
-                              <div className="text-center">
-                              <br/>
-                                <Button 
-                                  color="danger"
-                                  onClick={() => { this.setState({ 
-                                                      frdPtDrop: false 
-                                                      ,frdPtList : []
-                                                    }); 
-                                                  }}>
-                                  닫기
-                                </Button>
-                              </div>
-                            </DropdownMenu>
-                          </Dropdown>
+                                          />
+                                      </li>) 
+                                    )
+                                    :'공개 된 사진이 없습니다.'
+                                  }
+                                </div>
+                                <div className="text-center">
+                                <br/>
+                                  <Button 
+                                    color="danger"
+                                    onClick={() => { this.setState({ 
+                                                        frdPtDrop: false 
+                                                        ,frdPtList : []
+                                                      }); 
+                                                    }}>
+                                    닫기
+                                  </Button>
+                                </div>
+                              </DropdownMenu>
+                            </Dropdown>
+                            </div>
                           </div>
                           <div>
                             <span className="description">함께 아는 친구</span><br/>

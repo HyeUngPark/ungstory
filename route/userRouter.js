@@ -1461,7 +1461,7 @@ router.post('/getPostInfo', function(req, res){
           
             let pstInfo = result[0];
             
-            pstInfo.wrDt = date.getWriteDate(pstInfo.lstWrDt);
+            pstInfo.wrDt = date.getWriteDate(pstInfo.fstWrDt);
             pstInfo.detailCd = true;
 
             if(params.usrName === pstInfo.usrName){

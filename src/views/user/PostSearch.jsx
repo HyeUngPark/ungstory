@@ -251,7 +251,10 @@ class PostSearch extends React.Component {
                         </div>
                       </td>
                       <td>
-                        <PostDetailModal pstPk={pst.pstPk}/>
+                        <PostDetailModal 
+                          pstPk={pst.pstPk}
+                          style={true}
+                        />
                       </td>
                     </tr>
                     )}) 

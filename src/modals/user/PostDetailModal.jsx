@@ -30,12 +30,14 @@ export default class PostDetailModal extends React.Component {
       ,postInfo : {}
       ,firstCd : false
       ,replyComment : ''
+      ,defaultStyle : !this.props.style ? {'display':'none'}: {'display':''}
     };
     this.handleSubmit = this.handleSubmit.bind(this);
+    
     // this.modalClose = this.props.callbackFromParent;
   }
   toggle = (e) => {
-    if(!this.state.firstCd){
+    if(!Object.getOwnPropertyNames(this.state.postInfo).length > 0){
       this.getPostInfo();
     }
     this.setState({
@@ -57,14 +59,13 @@ export default class PostDetailModal extends React.Component {
         ,firstCd : true
       });
     }
-    console.log(result.postInfo.pstCmt.length);
   }
 
   getPostInfo = () => {
     if(this.props.pstPk){
       let param ={
         pstPk : this.props.pstPk
-        ,usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
+        ,usrName : localStorage.getItem('usrInfo') ? JSON.parse(localStorage.getItem('usrInfo')).usrName : ''
       };
       api.apiSend('post','getPostInfo',param,this.getPostInfoCallback);
     }
@@ -75,6 +76,9 @@ export default class PostDetailModal extends React.Component {
   }
 
   cancel=()=>{
+    this.setState({
+      postInfo : {}
+    });
     this.toggle();
   }
 
@@ -109,7 +113,7 @@ export default class PostDetailModal extends React.Component {
 
   commentWrite = () => {
     let postInfo = this.state.postInfo;
-    if(postInfo.wrComment === ''){
+    if(!postInfo.wrComment || postInfo.wrComment === ''){
       alert('댓글 내용을 입력해주세요.');
       return;
     }else{
@@ -157,6 +161,11 @@ export default class PostDetailModal extends React.Component {
           ,replyComment : ''
         });
       }else if(cd === 'e'){
+        if(this.state.replyComment === ''){
+          alert('답글을 입력해주세요.');
+          return;
+        }
+
         let param = {
           usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
           ,pstPk : this.props.pstPk
@@ -337,21 +346,24 @@ export default class PostDetailModal extends React.Component {
   render() {
     return (
         <div>
-          <Button 
+          <div 
             className="btn btn-info"
             onClick={e=>{this.toggle()}}
+            style={this.state.defaultStyle}
           >
             상세보기
-          </Button>
+          </div>
 
           <Modal 
             isOpen={this.state.modal} 
             zIndex = "90"
-            backdrop={false} onKeyUp={(e)=>{
+            backdrop="static" 
+            onKeyUp={(e)=>{
               if(e.key === "Escape"){
                 this.cancel();
               }
             }}
+            // shouldCloseOnOverlayClick={false}
           >
             {
               !Object.getOwnPropertyNames(this.state.postInfo).length > 0? 
@@ -613,7 +625,7 @@ export default class PostDetailModal extends React.Component {
                           rows="3" 
                           placeholder="댓글을 입력하세요" 
                           onChange = {e=>{this.commentChnage(e)}}
-                          value = {this.state.postInfo.pstCmt.wrComment}
+                          value = {this.state.postInfo.wrComment}
                           ref={(textarea) => { this.textarea = textarea; }}
                         >
                         </textarea>
