@@ -618,7 +618,7 @@ export default class PostDetailModal extends React.Component {
                           />
                         </span>
                       </Col>
-                      <Col lg="9" className="form-padding-left-1 form-padding-right-0"> 
+                      <Col lg="9" className="form-padding-left-2 form-padding-right-0"> 
                         <textarea 
                           className="form-control " 
                           id="exampleFormControlTextarea1" 
@@ -683,7 +683,7 @@ export default class PostDetailModal extends React.Component {
                         </Col>
                       </Row>
                       <Row className = "align-items-center avatar-padding">
-                        <Col lg="11" className="form-padding-left-1 form-padding-right-0">
+                        <Col lg="11" className="form-padding-left-2 form-padding-right-0">
                           <div className="card shadow">
                             <div className="card-body">
                                 <div className="tab-content" id="updateContents">

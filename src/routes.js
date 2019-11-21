@@ -3,6 +3,7 @@ import Profile from "views/user/Profile.jsx";
 import Tables from "views/user/Tables.jsx";
 import FriendSearch from "views/user/FriendSearch.jsx";
 import PostSearch from "views/user/PostSearch.jsx";
+import ActiveSearch from "views/user/ActiveSearch.jsx";
 import Icons from "views/user/Icons.jsx";
 
 import Register from "views/auth/Register.jsx";
@@ -71,6 +72,14 @@ var routes =[
       name: "Post Search",
       icon: "ni ni-archive-2",
       component: PostSearch,
+      layout: "/user"
+    });
+  routes.push(
+    {
+      path: "/active-search",
+      name: "Active Search",
+      icon: "ni ni-like-2 text-blue",
+      component: ActiveSearch,
       layout: "/user"
     });
   }
