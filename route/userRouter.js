@@ -1468,6 +1468,8 @@ router.post('/getPostInfo', function(req, res){
         }}
         ,{$group:{
             "_id" : "$_id"
+            ,"fstWrDt" : {"$first":"$fstWrDt"}
+            ,"lstWrDt" : {"$first":"$lstWrDt"}
             ,"pstPk" : {"$first":"$subSchema.pstPk"}
             ,"usrName" : {"$first":"$subSchema.usrName"}
             ,"pstPts" : {"$first":"$subSchema.pstPts"}
