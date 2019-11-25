@@ -37,7 +37,8 @@ class ActiveSearch extends React.Component {
     this.state = { 
       beforeDate : new Date()
       ,afterDate : new Date()
-      ,searchList : []
+      ,likeList : []
+      ,cmtList : []
       ,firstCd : false
       ,tab : {
         tab1 : 'active nav-link'
@@ -46,28 +47,31 @@ class ActiveSearch extends React.Component {
       }
     };
   }
-  postSearchCallback = (rs) => {
+  activeSearchCallback = (rs) => {
     if(rs.reCd === '01'){
-      // console.log('조회 성공');
+      console.log('조회 성공');
       this.setState({
-        searchList : rs.myPstList
+        cmtList : rs.activeResult.cmtList
+        ,likeList : rs.activeResult.likeList
         ,firstCd : true
       });
     }else if(rs.reCd === '03'){
-      // console.log('조회 결과 없음');
+      console.log('조회 결과 없음');
       this.setState({
-        searchList:[]
+        cmtList : []
+        ,likeList : []
         ,firstCd : true
       });
     }else{
-      // console.log('조회 실패');
+      console.log('조회 실패');
       this.setState({
-        searchList:[]
+        cmtList : []
+        ,likeList : []
         ,firstCd : true
       });
     }
   }
-  postSearch =()=>{
+  activeSearch =()=>{
     let today = new Date();
     if(this.state.beforeDate > this.state.afterDate){
       alert('날짜 선택이 잘못되었습니다. 시작날짜를 더 이전날짜로 변경해주세요.');
@@ -86,7 +90,7 @@ class ActiveSearch extends React.Component {
         ,beforeDate : this.state.beforeDate
         ,afterDate : this.state.afterDate
       };
-      api.apiSend('post','myPostList',param,this.postSearchCallback);
+      api.apiSend('post','getActiveList',param,this.activeSearchCallback);
     }
   }
 
@@ -175,7 +179,7 @@ class ActiveSearch extends React.Component {
                             color="primary" 
                             className="btn btn-primary form-input-left-margin" 
                             value="조회"
-                            onClick={e=>{this.postSearch()}}
+                            onClick={e=>{this.activeSearch()}}
                       />
                       &nbsp;&nbsp;&nbsp;&nbsp;
                       <a 
@@ -226,6 +230,7 @@ class ActiveSearch extends React.Component {
                   </Nav>
                   <br/>
                   <TabContent activeTab={this.state.tab.activeTab}>
+                    {/* 1) 좋아요 */}
                     <TabPane tabId="1">
                      <Table className="align-items-center table-flush table-font" responsive>
                         <thead className="thead-light justify-content-center">
@@ -233,26 +238,27 @@ class ActiveSearch extends React.Component {
                             <th scope="col">사진</th>
                             <th scope="col">포스팅 내용</th>
                             <th scope="col">해시태그</th>
+                            <th scope="col">좋아요 한 날짜</th>
                             <th scope="col">상세보기</th>
                           </tr>
                         </thead>
                         <tbody>
                         { 
-                          this.state.searchList.length>0 ? 
-                          this.state.searchList.map((pst, pstIdx)=>{
+                          this.state.likeList && this.state.likeList.length>0 ? 
+                          this.state.likeList.map((pst, pstIdx)=>{
                         return(
                           <tr>
                             <th scope="row">
-                              {pst.pstPts.length>0 ?
+                              {pst.pstPts && pst.pstPts.length>0 ?
                                 <li className="form-tag form-tag-li">
                                   <Media className="align-items-center">
                                     <a
                                       // className="avatar avatar-sm"
                                       href="javascript:void(0)"
-                                      id="tooltip806693070"
-                                      onClick={e => popup.openImg(pst.pstPts[0])}
+                                      // id="tooltip806693070"
+                                      onClick={e => popup.openImg(pst.pstPts[0][0])}
                                     >
-                                      <img src={pst.pstPts[0]} 
+                                      <img src={pst.pstPts[0][0]} 
                                         style={{
                                           width: "100px",
                                           height: "100px",
@@ -282,6 +288,9 @@ class ActiveSearch extends React.Component {
                                 해시태그 없음
                               </div>
                             } 
+                            </td>
+                            <td>
+                              {pst.pstLikeDt}
                             </td>
                             <td>
                               <PostDetailModal 
@@ -309,6 +318,7 @@ class ActiveSearch extends React.Component {
                         </tbody>
                       </Table>
                     </TabPane>
+                    {/* 2) 댓글 */}
                     <TabPane tabId="2">
                     <Table className="align-items-center table-flush table-font" responsive>
                         <thead className="thead-light justify-content-center">
@@ -323,84 +333,88 @@ class ActiveSearch extends React.Component {
                         </thead>
                         <tbody>
                         { 
-                          this.state.searchList.length>0 ? 
-                          this.state.searchList.map((pst, pstIdx)=>{
-                        return(
-                          <tr>
-                            <th scope="row">
-                              {pst.pstPts.length>0 ?
-                                <li className="form-tag form-tag-li">
-                                  <Media className="align-items-center">
-                                    <a
-                                      // className="avatar avatar-sm"
-                                      href="javascript:void(0)"
-                                      id="tooltip806693070"
-                                      onClick={e => popup.openImg(pst.pstPts[0])}
-                                    >
-                                      <img src={pst.pstPts[0]} 
-                                        style={{
-                                          width: "100px",
-                                          height: "100px",
-                                        }}
-                                        // value={pt.pstPk} 
+                          this.state.cmtList && this.state.cmtList.length>0 ? 
+                          this.state.cmtList.map((pst, pstIdx)=>{
+                            return(
+                            (pst.pstCmt && pst.pstCmt.length>0)? 
+                              pst.pstCmt.map((cmt, cmtIdx) =>{
+                                return(
+                                  <tr>
+                                    <th scope="row">
+                                      {pst.pstPts.length>0 ?
+                                        <li className="form-tag form-tag-li">
+                                          <Media className="align-items-center">
+                                            <a
+                                              // className="avatar avatar-sm"
+                                              href="javascript:void(0)"
+                                              // id="tooltip806693070"
+                                              onClick={e => popup.openImg(pst.pstPts[0])}
+                                            >
+                                              <img src={pst.pstPts[0]} 
+                                                style={{
+                                                  width: "100px",
+                                                  height: "100px",
+                                                }}
+                                                // value={pt.pstPk} 
+                                              />
+                                            </a>
+                                          </Media> 포함 {pst.pstPts.length}개
+                                      </li>
+                                      : '포스팅된 사진이 없습니다.'
+                                    }
+                                    </th>
+                                    <td>
+                                      <div className="d-flex align-items-center">
+                                        {pst.pstCt}
+                                      </div>
+                                    </td>
+                                    <td>
+                                      {pst.pstHt.length>0?
+                                        <div className="d-flex align-items-center">
+                                          <a href="javascirpt:void(0)">
+                                            #{pst.pstHt[0]}
+                                          </a> &nbsp; 포함 {pst.pstHt.length}개
+                                        </div>
+                                      :
+                                      <div className="d-flex align-items-center">
+                                        해시태그 없음
+                                      </div>
+                                    } 
+                                    </td>
+                                    <td>
+                                      <div className="d-flex align-items-center">
+                                        {cmt.pstCmtCt}
+                                      </div>
+                                    </td>
+                                    <td>
+                                      <div className="d-flex align-items-center">
+                                        {cmt.pstCmtWtDate ? cmt.pstCmtWtDate.substring(0,10).replace('\-','\/').replace('\-','\/') : ''}
+                                      </div>
+                                    </td>
+                                    <td>
+                                      <PostDetailModal 
+                                        pstPk={pst.pstPk}
+                                        style={true}
                                       />
-                                    </a>
-                                  </Media> 포함 {pst.pstPts.length}개
-                              </li>
-                              : '포스팅된 사진이 없습니다.'
-                            }
-                            </th>
-                            <td>
-                              <div className="d-flex align-items-center">
-                                {pst.pstCt}
-                              </div>
-                            </td>
-                            <td>
-                              {pst.pstHt.length>0?
-                                <div className="d-flex align-items-center">
-                                  <a href="javascirpt:void(0)">
-                                    #{pst.pstHt[0]}
-                                  </a> &nbsp; 포함 {pst.pstHt.length}개
-                                </div>
-                              :
-                              <div className="d-flex align-items-center">
-                                해시태그 없음
-                              </div>
-                            } 
-                            </td>
-                            <td>
-                              <div className="d-flex align-items-center">
-                                댓글내용
-                              </div>
-                            </td>
-                            <td>
-                              <div className="d-flex align-items-center">
-                                {pst.fstWrDt}
-                              </div>
-                            </td>
-                            <td>
-                              <PostDetailModal 
-                                pstPk={pst.pstPk}
-                                style={true}
-                              />
-                            </td>
-                          </tr>
-                          )}) 
-                          : 
-                          <tr>
+                                    </td>
+                                  </tr>
+                                )}) 
+                                : ''
+                              )}) 
+                            : <tr>
                             <th colSpan="5">
                               {!this.state.firstCd ? 
                                 <div className="d-flex align-items-center">
                                   날짜 설정 후 조회를 진행해주세요
                                 </div>
-                                :
+                              :
                                 <div className="d-flex align-items-center">
                                   조회된 결과가 없습니다.                    
                                 </div>
                               }
-                            </th>
-                          </tr>
-                        }
+                          </th>
+                        </tr>
+                          }
                         </tbody>
                       </Table>
                     </TabPane>
