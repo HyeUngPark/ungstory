@@ -25,6 +25,14 @@ var date = {
             return moment(date).format('YYYY/MM/DD')
         }
     }
+    ,clearDate : function(date,cd){
+        if(cd ==='t'){
+            console.log(moment(date).add(1, 'days').format('YYYY-MM-DD')+" 00:00:00");
+            return moment(date).add(1, 'days').format('YYYY-MM-DD')+" 00:00:00";
+        }else{
+            return moment(date).format('YYYY-MM-DD')+" 00:00:00";
+        }
+    }
 
 }
 

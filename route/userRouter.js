@@ -1583,7 +1583,24 @@ router.post('/getPostInfo', function(req, res){
 
 router.post('/getActiveList', function(req, res){
     var params = req.body;
-
+    var likeList = [];
+    if(params.beforeDate === params.afterDate){
+        let temps = params;
+        temps.beforeDate = date.clearDate(params.beforeDate);
+        temps.afterDate= date.clearDate(params.afterDate,'t'); 
+        params = temps;
+    }else{
+        let temps = params;
+        temps.beforeDate = date.clearDate(params.beforeDate);
+        temps.afterDate = date.clearDate(params.afterDate,'t'); 
+        params = temps;
+    }
+    console.log('★★★조회 날짜\nbefore >> '
+        ,params.beforeDate,
+        '\nafter >> '
+        ,params.afterDate,'★★★'
+    );
+    
     // 1. 좋아요 리스트 조회
     schema.aggregate([
         {$match:{
@@ -1594,7 +1611,18 @@ router.post('/getActiveList', function(req, res){
         ,{$project:{
             _id : 0
             ,"subSchema.usrName" : 1
-            ,"subSchema.usrLikePst" :1
+            ,"subSchema.usrLikePst" : {
+                $filter: {
+                    input: "$subSchema.usrLikePst",
+                    as: "pst",
+                    cond: { 
+                        $and: [
+                            { $gte: [ {$toDate : "$$pst.pstLikeDt"}, {$toDate:params.beforeDate} ]},
+                            { $lte: [ {$toDate : "$$pst.pstLikeDt"}, {$toDate:params.afterDate}]}
+                        ]
+                    }
+                }
+            }
         }}
         ,{$group:{
             _id : "$_id"
@@ -1607,16 +1635,16 @@ router.post('/getActiveList', function(req, res){
             return res.status(500).send("post like error >> " + likeError);
         }
         if (likeResult.length > 0){
-            console.log('★★★좋아요 한 포스팅 목록 조회 성공★★★');
+            likeList= likeResult[0].usrLikePst;
             var pstLikeList = [];
-            if(likeResult[0].usrLikePst.length>0){
-                for(let i=0; i<likeResult[0].usrLikePst.length; i++){
-                    if(!pstLikeList.indexOf(likeResult[0].usrLikePst[i].pstPk)> -1){
-                        pstLikeList.push(likeResult[0].usrLikePst[i].pstPk);
+            if(likeList.length>0){
+                for(let i=0; i<likeList.length; i++){
+                    if(!pstLikeList.indexOf(likeList[i].pstPk)> -1){
+                        pstLikeList.push(likeList[i].pstPk);
                     }
                 }
             }
-
+            console.log('조회 할 좋아요 한 포스트 > ',pstLikeList);
              // 2.활동내역 조회
             schema.aggregate([
                 {$facet:{
@@ -1629,12 +1657,13 @@ router.post('/getActiveList', function(req, res){
                             ,"subSchema.pstCmt" : {
                                 $gt : [{$size : "subSchema.pstCmt"},0]
                             }
-                            , $and : [{"fstWrDt" : {$gte: new Date(params.beforeDate)}}
-                                     ,{"fstWrDt" : {$lt: new Date(params.afterDate)}}]
                         }}
                         ,{$unwind:{
                             path: "$subSchema.pstCmt",
                             preserveNullAndEmptyArrays: true
+                        }}
+                        ,{$sort:{
+                            "subSchema.pstCmt.pstCmtWtDate" : -1
                         }}
                         ,{$project:{
                             _id :1
@@ -1643,27 +1672,46 @@ router.post('/getActiveList', function(req, res){
                             ,"subSchema.pstCt" : 1
                             ,"subSchema.pstLike" : 1
                             ,"subSchema.pstPts" : 1
+                            ,"subSchema.pstPubYn" : 1
                             ,"subSchema.pstCmt" : { 
                                 $cond : [
                                    {$and :[
                                         {$ne: [ "$subSchema.pstCmt.pstCmtSep" , "04"]}
                                         ,{$eq: [ "$subSchema.pstCmt.usrName" , params.usrName]}
-                                        ]}
-                                ,"$subSchema.pstCmt"
-                                ,"$unset"]
+                                    ]}
+                                ,
+                                {$cond:[
+                                    {$gt : [ {$size :
+                                    {$filter: {
+                                            input: ["$subSchema.pstCmt"],
+                                            as: "cmt",
+                                            cond: { 
+                                                $and: [
+                                                    { $gte: [ {$toDate : "$$cmt.pstCmtWtDate"}, {$toDate:params.beforeDate}] },
+                                                    { $lte: [ {$toDate : "$$cmt.pstCmtWtDate"}, {$toDate:params.afterDate}] }
+                                                ]
+                                            }
+                                        }}}
+                                    ,0]}//gt
+                                   ,"$subSchema.pstCmt"
+                                   ,'$unset']
+                                }
+                                ,"$unset"]   
                             }
                             ,"subSchema.pstHt" : 1
                         }}
+                        ,{$unwind:{
+                            path: "$returnCmt",
+                            preserveNullAndEmptyArrays: true
+                        }}
                         ,{$group:{
                             "_id" : "$_id"
-                            ,"fstWrDt" : {"$first":"$fstWrDt"}
+                            ,"pstCmt" : {"$push":"$subSchema.pstCmt"}
                             ,"pstCt" :  {"$first":"$subSchema.pstCt"}
                             ,"pstPk" : {"$first":"$subSchema.pstPk"}
                             ,"pstLike" : {"$first":"$subSchema.pstLike"}
-                            ,"pstCmt" : {"$push":"$subSchema.pstCmt"}
                             ,"pstHt" : {"$first":"$subSchema.pstHt"}
                             ,"pstPts" : {"$first":"$subSchema.pstPts"}
-            
                         }}
                         ,{$unwind:{
                             path: "$subSchema.pstHt",
@@ -1673,20 +1721,17 @@ router.post('/getActiveList', function(req, res){
                             path: "$subSchema.pstPts"
                             ,preserveNullAndEmptyArrays: true
                         }}
-                        ,{$sort:{
-                            "subSchema.pstCmt.pstCmtWtDate" : -1
-                            ,fstWrDt : -1
-                        }}  
                     ]
                     ,likeList : [
                         {$match:{
                             wkCd : 'PST'
                             ,wkDtCd : 'PST'
-                            ,"subSchema.pstCmt.usrName" : params.usrName
-                            ,"subSchema.pstCmt.pstPubYn" : {$ne : '04'}
+                            ,"subSchema.pstPubYn" : {$ne : '04'}
                             ,"subSchema.pstPk" : {$in : pstLikeList}
-                            , $and : [{"fstWrDt" : {$gte: new Date(params.beforeDate)}}
-                                      ,{"fstWrDt" : {$lt: new Date(params.afterDate)}}]
+                        }}
+                        ,{$unwind:{
+                            path: "$subSchema.pstPts"
+                            ,preserveNullAndEmptyArrays: true
                         }}
                         ,{$project:{
                             _id :1
@@ -1695,6 +1740,7 @@ router.post('/getActiveList', function(req, res){
                             ,"subSchema.pstCt" : 1
                             ,"subSchema.pstLike" : 1
                             ,"subSchema.pstPts" : 1
+                            ,"subSchema.pstPubYn" : 1
                             ,"subSchema.pstCmt" : { 
                                 $size:{
                                     $cond : [{$ne: [ "$subSchema.pstCmt.pstCmtSep" , "04"]},"$subSchema.pstCmt","$unset"]
@@ -1713,10 +1759,6 @@ router.post('/getActiveList', function(req, res){
                             ,"pstHt" : {"$first":"$subSchema.pstHt"}
                             ,"pstPts" : {"$push":"$subSchema.pstPts"}
                         }}
-                        ,{$unwind:{
-                            path: "$subSchema.pstPts"
-                            ,preserveNullAndEmptyArrays: true
-                        }}
                         
                         ,{$unwind:{
                             path: "$subSchema.pstCmt",
@@ -1734,19 +1776,19 @@ router.post('/getActiveList', function(req, res){
                     return res.status(500).send("select error >> " + activeError);
                 }
                 if (activeResult.length > 0){
-                    console.log('★★★좋아요, 댓글 목록 조회 성공★★★');
-                    if(likeResult[0].usrLikePst.length>0){
-                        for(let i=0; i<likeResult[0].usrLikePst.length; i++){
+                    console.log('★★★좋아요, 댓글 목록 조회 성공★★★',activeResult[0].likeList.length);
+                    if(likeList.length>0){
+                        for(let i=0; i<likeList.length; i++){
                             for(let j=0; j<activeResult[0].likeList.length; j++){
-                                if(likeResult[0].usrLikePst[i].pstPk === activeResult[0].likeList[j].pstPk){
-                                    temp = activeResult[0].likeList[j];
-                                    temp.pstLikeDt = date.dateFormat(likeResult[0].usrLikePst[i].pstLikeDt,'YYYY/MM/DD');
-                                    activeResult[0].likeList[j] = temp;
+                                if(likeList[i].pstPk === activeResult[0].likeList[j].pstPk){
+                                    let likeTemp = activeResult[0].likeList[j];
+                                    likeTemp.pstLikeDt = date.dateFormat(likeList[i].pstLikeDt,'YYYY/MM/DD');
+                                    activeResult[0].likeList[j] = likeTemp;
+                                    j!==activeResult[0].likeList.length?j=activeResult[0].likeList.length : '';
                                 }
                             }
                         }
                     }
-
                     res.json({
                         reCd : '01'
                         ,activeResult : activeResult[0]
