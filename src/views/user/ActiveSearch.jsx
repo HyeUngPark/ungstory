@@ -256,9 +256,9 @@ class ActiveSearch extends React.Component {
                                       // className="avatar avatar-sm"
                                       href="javascript:void(0)"
                                       // id="tooltip806693070"
-                                      onClick={e => popup.openImg(pst.pstPts[0][0])}
+                                      onClick={e => popup.openImg(pst.pstPts[0])}
                                     >
-                                      <img src={pst.pstPts[0][0]} 
+                                      <img src={pst.pstPts[0]} 
                                         style={{
                                           width: "100px",
                                           height: "100px",
@@ -334,23 +334,20 @@ class ActiveSearch extends React.Component {
                         <tbody>
                         { 
                           this.state.cmtList && this.state.cmtList.length>0 ? 
-                          this.state.cmtList.map((pst, pstIdx)=>{
+                          this.state.cmtList.map((cmt, pstIdx)=>{
                             return(
-                            (pst.pstCmt && pst.pstCmt.length>0)? 
-                              pst.pstCmt.map((cmt, cmtIdx) =>{
-                                return(
                                   <tr>
                                     <th scope="row">
-                                      {pst.pstPts.length>0 ?
+                                      {cmt.pstPts.length>0 ?
                                         <li className="form-tag form-tag-li">
                                           <Media className="align-items-center">
                                             <a
                                               // className="avatar avatar-sm"
                                               href="javascript:void(0)"
                                               // id="tooltip806693070"
-                                              onClick={e => popup.openImg(pst.pstPts[0])}
+                                              onClick={e => popup.openImg(cmt.pstPts[0])}
                                             >
-                                              <img src={pst.pstPts[0]} 
+                                              <img src={cmt.pstPts[0]} 
                                                 style={{
                                                   width: "100px",
                                                   height: "100px",
@@ -358,22 +355,22 @@ class ActiveSearch extends React.Component {
                                                 // value={pt.pstPk} 
                                               />
                                             </a>
-                                          </Media> 포함 {pst.pstPts.length}개
+                                          </Media> 포함 {cmt.pstPts.length}개
                                       </li>
                                       : '포스팅된 사진이 없습니다.'
                                     }
                                     </th>
                                     <td>
                                       <div className="d-flex align-items-center">
-                                        {pst.pstCt}
+                                        {cmt.pstCt}
                                       </div>
                                     </td>
                                     <td>
-                                      {pst.pstHt.length>0?
+                                      {cmt.pstHt.length>0?
                                         <div className="d-flex align-items-center">
                                           <a href="javascirpt:void(0)">
-                                            #{pst.pstHt[0]}
-                                          </a> &nbsp; 포함 {pst.pstHt.length}개
+                                            #{cmt.pstHt[0]}
+                                          </a> &nbsp; 포함 {cmt.pstHt.length}개
                                         </div>
                                       :
                                       <div className="d-flex align-items-center">
@@ -388,18 +385,16 @@ class ActiveSearch extends React.Component {
                                     </td>
                                     <td>
                                       <div className="d-flex align-items-center">
-                                        {cmt.pstCmtWtDate ? cmt.pstCmtWtDate.substring(0,10).replace('\-','\/').replace('\-','\/') : ''}
+                                        {cmt.pstCmtWtDate}
                                       </div>
                                     </td>
                                     <td>
                                       <PostDetailModal 
-                                        pstPk={pst.pstPk}
+                                        pstPk={cmt.pstPk}
                                         style={true}
                                       />
                                     </td>
                                   </tr>
-                                )}) 
-                                : ''
                               )}) 
                             : <tr>
                             <th colSpan="5">

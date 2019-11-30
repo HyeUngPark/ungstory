@@ -1595,11 +1595,11 @@ router.post('/getActiveList', function(req, res){
         temps.afterDate = date.clearDate(params.afterDate,'t'); 
         params = temps;
     }
-    console.log('★★★조회 날짜\nbefore >> '
-        ,params.beforeDate,
-        '\nafter >> '
-        ,params.afterDate,'★★★'
-    );
+    // console.log('★★★조회 날짜\nbefore >> '
+    //     ,params.beforeDate,
+    //     '\nafter >> '
+    //     ,params.afterDate,'★★★'
+    // );
     
     // 1. 좋아요 리스트 조회
     schema.aggregate([
@@ -1644,7 +1644,7 @@ router.post('/getActiveList', function(req, res){
                     }
                 }
             }
-            console.log('조회 할 좋아요 한 포스트 > ',pstLikeList);
+            // console.log('조회 할 좋아요 한 포스트 > ',pstLikeList);
              // 2.활동내역 조회
             schema.aggregate([
                 {$facet:{
@@ -1759,15 +1759,10 @@ router.post('/getActiveList', function(req, res){
                             ,"pstHt" : {"$first":"$subSchema.pstHt"}
                             ,"pstPts" : {"$push":"$subSchema.pstPts"}
                         }}
-                        
                         ,{$unwind:{
                             path: "$subSchema.pstCmt",
                             preserveNullAndEmptyArrays: true
                         }} 
-                        ,{$sort:{
-                            "subSchema.pstCmt.pstCmtWtDate" : -1
-                            ,fstWrDt : -1
-                        }}  
                     ]
                 }}
             ],function(activeError, activeResult){
@@ -1789,6 +1784,35 @@ router.post('/getActiveList', function(req, res){
                             }
                         }
                     }
+                    activeResult[0].likeList.sort(function (a, b) { 
+                        a = new Date(a.pstLikeDt);
+                        b = new Date(b.pstLikeDt);
+                        return a>b ? -1 : a<b ? 1 : 0;
+                    });
+                    
+                    var commentList = [];
+                    if(activeResult[0].cmtList && activeResult[0].cmtList.length>0){
+                        for(let ii=0; ii<activeResult[0].cmtList.length; ii++){
+                            for(let jj=0; jj<activeResult[0].cmtList[ii].pstCmt.length; jj++){
+                                let cmtTemp = {
+                                    pstPts : activeResult[0].cmtList[ii].pstPts
+                                    ,pstCt : activeResult[0].cmtList[ii].pstCt
+                                    ,pstHt : activeResult[0].cmtList[ii].pstHt
+                                    ,pstPk : activeResult[0].cmtList[ii].pstPk
+                                    ,pstCmtCt : activeResult[0].cmtList[ii].pstCmt[jj].pstCmtCt
+                                    ,pstCmtWtDate :(activeResult[0].cmtList[ii].pstCmt[jj].pstCmtWtDate).substring(0,10).replace('\-','\/').replace('\-','\/')
+                                };
+                                commentList.push(cmtTemp);
+                            }
+                        }
+                        
+                    }
+                    commentList.sort(function (a, b) { 
+                        a = new Date(a.pstCmtWtDate);
+                        b = new Date(b.pstCmtWtDate);
+                        return a>b ? -1 : a<b ? 1 : 0;
+                    });
+                    activeResult[0].cmtList = commentList;
                     res.json({
                         reCd : '01'
                         ,activeResult : activeResult[0]
