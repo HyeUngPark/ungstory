@@ -14,6 +14,7 @@ import {
 
 import LoginProfile from '../../views/auth/LoginProfile';
 import FrdReqList from '../../modals/frd/FrdReqList';
+import MsgList from '../../modals/msg/MsgList';
 import * as api from "utils/api";
 
 class UserNavbar extends React.Component {
@@ -134,32 +135,26 @@ class UserNavbar extends React.Component {
               <FormGroup className="mb-0 form-control-cursor">
                 <InputGroup className="input-group-alternative">
                   <InputGroupAddon addonType="prepend">
-                  <InputGroupText
+                    <InputGroupText
                         style={{
                           position: "relative"
                         }}
-                      >
-                          <a href="javascript:void(0)" 
-                            className="form-control-cursor"
-                          //  onClick={e=>{this.imgView(index,e)}}
-                          >
-                          <i className=" ni ni-chat-round"></i>
-                          &nbsp;
-                          </a>
-                            {this.state.noticeList && this.state.noticeList.msgNotice > 0 ?
-                              <span className="form-control-notice"
-                                    // value={index} 
-                                    style ={{
-                                      position:'absolute',
-                                      right:'0px',
-                                      top:'0px',
-                                    }}
-                              >
-                                {this.state.noticeList.msgNotice}
-                              </span>
-                            : ''
-                            }
-                        </InputGroupText>
+                    >
+                      <MsgList />
+                          {this.state.noticeList && this.state.noticeList.msgNotice > 0 ?
+                            <span className="form-control-notice"
+                                  // value={index} 
+                                  style ={{
+                                    position:'absolute',
+                                    right:'0px',
+                                    top:'0px',
+                                  }}
+                            >
+                              {this.state.noticeList.msgNotice}
+                            </span>
+                          : ''
+                          }
+                      </InputGroupText>
                     </InputGroupAddon>
                 </InputGroup>
               </FormGroup>

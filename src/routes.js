@@ -4,6 +4,7 @@ import Tables from "views/user/Tables.jsx";
 import FriendSearch from "views/user/FriendSearch.jsx";
 import PostSearch from "views/user/PostSearch.jsx";
 import ActiveSearch from "views/user/ActiveSearch.jsx";
+import MsgSend from "views/user/MsgSend.jsx";
 import Icons from "views/user/Icons.jsx";
 
 import Register from "views/auth/Register.jsx";
@@ -80,6 +81,14 @@ var routes =[
       name: "Active Search",
       icon: "ni ni-like-2 text-blue",
       component: ActiveSearch,
+      layout: "/user"
+    });
+  routes.push(
+    {
+      path: "/Msg Send",
+      name: "Msg Send",
+      icon: "ni ni-chat-round",
+      component: MsgSend,
       layout: "/user"
     });
   }

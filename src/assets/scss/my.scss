@@ -40,9 +40,15 @@
     position: absolute !important;
 }
 
+.border-none{
+    border: 0px;
+}
+
 
 // modal
 .modal-scroll {
     max-height : 'calc(100vh - 210px)';
     overflow-y : 'auto';
 }
+
+

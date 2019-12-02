@@ -166,7 +166,7 @@ export default class FrdInfo extends React.Component {
   }
   render() {
     return (
-        <div>
+        <span>
             <a 
                 className= "form-control-cursor"
                 href="javascript:void(0)"
@@ -403,7 +403,7 @@ export default class FrdInfo extends React.Component {
       </Card>
       </form>
     </Modal>
-  </div>
+  </span>
       
     );
   }
