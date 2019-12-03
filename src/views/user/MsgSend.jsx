@@ -20,6 +20,10 @@ import * as popup from "utils/popup";
 
 import FrdInfo from '../../modals/frd/FrdInfo';
 
+import socketIoClient from 'socket.io-client';
+
+var socket;
+
 class MsgSend extends React.Component {
   constructor(props) {
     super(props);
@@ -87,6 +91,7 @@ class MsgSend extends React.Component {
   dropClear = () =>{
     this.setState({
       searchList : []
+      ,searchName : ''
     });
     this.dropToggle();
   }
@@ -105,8 +110,33 @@ class MsgSend extends React.Component {
 
   msgSend = () =>{
     // 메시지 전송 => 전송 후 메시지 받아오기
-    console.log('메시지 전송 \n',this.state.wrMsg);
+    // const socket = socketIoClient(window.location.origin);
+    socket.emit('chat message'
+                ,JSON.parse(localStorage.getItem('usrInfo')).usrName
+                  +"###"
+                  + this.state.selectInfo.usrName
+                  +"###"
+                  +this.state.wrMsg
+                );
+    this.setState({
+      wrMsg : ''
+    });
   }
+
+  componentDidMount(){
+    socket = socketIoClient(window.location.origin);
+    socket.emit('usrName',JSON.parse(localStorage.getItem('usrInfo')).usrName);
+    socket.on('reMsg', data=>{
+      console.log(data);
+      // socket.emit('chat message','클라이언트 소켓 테스트');
+    });
+  }
+
+  componentWillUnmount(){
+    socket.off('chat message');
+    socket.off('reMsg');
+  }
+
   render() {
     return (
       <>
@@ -129,6 +159,12 @@ class MsgSend extends React.Component {
                               // style={{width:"50%"}} 
                               value={this.state.searchName}
                               onChange={e=>{this.friendSearch(e)}}
+                              onKeyPress={e=>{
+                                if(e.key === 'Enter' && 
+                                this.state.searchList.length>0){
+                                  this.selectFrd(0);
+                                }
+                              }}
                       />
                       <Dropdown isOpen={(!this.state.searchCd
                                   && this.state.searchList.length>0

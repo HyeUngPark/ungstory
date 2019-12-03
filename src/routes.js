@@ -85,7 +85,7 @@ var routes =[
     });
   routes.push(
     {
-      path: "/Msg Send",
+      path: "/msg-send",
       name: "Msg Send",
       icon: "ni ni-chat-round",
       component: MsgSend,
