@@ -281,7 +281,7 @@ class MsgSend extends React.Component {
                     <Row className="text-center justify-content-center align-items-center">
                       <hr/>
                         <Col lg="1"/>
-                        <Col lg="2" className="">
+                        <Col lg="2" className="text-right">
                           <span className="avatar avatar-sm rounded-circle">
                             <img
                               alt="..."
