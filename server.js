@@ -24,6 +24,7 @@ var userRouter = require('./route/userRouter');
 var authRouter = require('./route/authRouter');
 var frdRouter = require('./route/friendRouter');
 var notRouter = require('./route/noticeRouter');
+var msgRouter = require('./route/messageRouter');
 
 var bodyParser = require('body-parser');
 var session = require('express-session');
@@ -65,29 +66,37 @@ io.on('connection', (socket) => {
     console.log('★★★ user ',usrName,'connected ★★★\n');
     let usrInfo = {
       usrName : usrName
-      ,usrSoId : socket.id
+      ,socketId : socket.id
     };
     usrList.push(usrInfo);
   });
   socket.on('chat message', (msg) => {
     console.log(msg);
     let msgInfo = msg.split('###');
+    
+    // msgInfo[0] 발신자
+    // msgInfo[1] 수신자
+    // msgInfo[2] 메시지
 
-    // if(msgInfo[1]===usrName){
-    if(true){
-      // 유저 접속 여부 확인
-      // 메시지 실시간 전송
-
-      io.emit('reMsg',msgInfo[2]);
-
-      // 디비 저장
-    }else{
-      // 디비 저장
-      
+    // 유저 접속 여부 확인
+    for(let i=0; i<usrList.length; i++){
+      if(usrList[i].usrName === msgInfo[1]){
+        // 메시지 실시간 전송
+        io.sockets.to(usrList[i].socketId).emit('reMsg',msgInfo[2]);
+      }
     }
+    // 디비 저장
+    msgRouter.msgSend(msgInfo);
   });
   socket.on('disconnect', () => {
     console.log('★★★ user disconnected ★★★');
+    const itemToFind = usrList.find(function(item) {
+      return item.socketId === socket.id
+    });
+    const idx = usrList.indexOf(itemToFind) 
+    if (idx > -1){
+      usrList.splice(idx, 1);
+    } 
   });
 });
 

@@ -10,6 +10,7 @@ import {
   Dropdown,
   DropdownToggle,
   DropdownMenu,
+  Alert,
 } from "reactstrap";
 // core components
 
@@ -34,6 +35,7 @@ class MsgSend extends React.Component {
       ,selectCd : false 
       ,wrMsg : ''
       ,selectInfo : {}
+      ,msgList : []
     }
   }
   friendSearchCallback =(rs) =>{
@@ -127,7 +129,7 @@ class MsgSend extends React.Component {
     socket = socketIoClient(window.location.origin);
     socket.emit('usrName',JSON.parse(localStorage.getItem('usrInfo')).usrName);
     socket.on('reMsg', data=>{
-      console.log(data);
+      console.log("나한테 온 메시지 \n",data);
       // socket.emit('chat message','클라이언트 소켓 테스트');
     });
   }
@@ -248,9 +250,34 @@ class MsgSend extends React.Component {
                         <span>
                             <FrdInfo frdName={this.state.selectInfo.usrName}/>
                         </span>
-                        <hr/>
                       </Col>
                     </Row>
+                  <div>
+                    <hr/>
+                    <Row className="">
+                      <Col lg="12">
+                        <div className="chat-recv float-left chat-left-margin">
+                          상대 메시지
+                          <hr className="chat-hr"/>
+                          <div className="text-right">
+                            2019.12.05 20:30
+                          </div>
+                        </div>
+                      </Col>
+                    </Row>
+                    <Row className="chat-msg">
+                      <Col lg="12">
+                        <div className="chat-send float-right chat-right-margin">
+                          내 메시지
+                          <hr className="chat-hr"/>
+                          <div className="text-right">
+                            2019.12.05 20:30
+                          </div>
+                        </div>
+                      </Col>
+                    </Row>
+                    <hr/>
+                  </div>
                     <Row className="text-center justify-content-center align-items-center">
                       <hr/>
                         <Col lg="1"/>

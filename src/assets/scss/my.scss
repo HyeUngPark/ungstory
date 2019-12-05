@@ -45,6 +45,39 @@
 }
 
 
+// chat
+
+.chat-left-margin {
+    margin-left: 15px !important
+}
+.chat-right-margin {
+    margin-right: 15px !important
+}
+.chat-recv{
+    max-width: 48%;
+    color: #fff;
+    background-color: #7889e8;
+    border-color: #7889e8; 
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: 0.375rem;
+}
+.chat-send{
+    max-width: 48%;
+    margin-right: 3px;
+    color: #fff;
+    background-color: #fc7c5f;
+    border-color: #fc7c5f;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: 0.375rem;
+}
+.chat-hr{
+    margin-top: 1rem !important;
+    margin-bottom: 1rem !important;
+}
 // modal
 .modal-scroll {
     max-height : 'calc(100vh - 210px)';
