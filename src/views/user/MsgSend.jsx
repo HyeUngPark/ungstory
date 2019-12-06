@@ -10,7 +10,6 @@ import {
   Dropdown,
   DropdownToggle,
   DropdownMenu,
-  Alert,
 } from "reactstrap";
 // core components
 
@@ -76,6 +75,22 @@ class MsgSend extends React.Component {
       this.dropClear();
     }
   }
+  selectFrdCallback = (rs)=>{
+    if(rs.reCd==='01'){
+      // 메시지 조회 성공
+      this.setState({
+        msgList : rs.msgList
+      });
+    }else if(rs.reCd ==='03'){
+      // 주고받은 메시지 없음
+      this.setState({
+        msgList : []
+      });
+    }else{
+      // 메시지 조회 실패
+    }
+  }
+
   selectFrd=(frdIdx)=>{
     console.log(frdIdx,'번째 친구 선택');
     // 해당하는 친구 메시지 조회
@@ -88,6 +103,13 @@ class MsgSend extends React.Component {
       ,selectInfo : select
     });
     this.dropClear();
+
+    let param={
+      usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
+      ,searchName : select.usrName
+    };
+    // api.apiSend('post','/msg/msgSearch',param,this.selectFrdCallback);      
+
   }
 
   dropClear = () =>{

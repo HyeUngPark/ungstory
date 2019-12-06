@@ -1,5 +1,6 @@
 var schema =({
-    usrInfo : []
+    msgSend : {}
+    ,msgRecv : {}
     ,msgConent : ''
     ,msgDate : ''
 });

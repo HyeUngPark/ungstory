@@ -15,16 +15,10 @@ env.config();
 
 router.msgSend = (msgInfo) =>{
     // msg 저장
-    let usrList =[];
-    usrList.push({
-        usrName : msgInfo[0]
-        ,delDate : ''
-    });
-    usrList.push({
-        usrName : msgInfo[1]
-        ,delDate : ''
-    });
-    msgSchema.usrInfo = usrList;
+    msgSchema.msgSend.usrName = msgInfo[0];
+    msgSchema.msgSend.delDate = '';
+    msgSchema.msgRecv.usrName = msgInfo[1];
+    msgSchema.msgRecv.delDate = '';
     msgSchema.msgConent = msgInfo[2];
     msgSchema.msgDate = date.getDate();
     schema.create({
@@ -64,4 +58,10 @@ router.msgSend = (msgInfo) =>{
         return '02';
     });
 }
+
+router.post('/msgSearch',function(req, res){
+    var params = req.body;
+    
+
+});
 module.exports = router;
