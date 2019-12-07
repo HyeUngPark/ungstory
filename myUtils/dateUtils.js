@@ -23,6 +23,8 @@ var date = {
     ,dateFormat : function(date, format){
         if(format==='YYYY/MM/DD'){
             return moment(date).format('YYYY/MM/DD')
+        }else if(format === 'YYYY-MM-DD hh:mm:ss'){
+            return moment(date).format('YYYY-MM-DD HH:mm:ss');
         }
     }
     ,clearDate : function(date,cd){

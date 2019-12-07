@@ -118,7 +118,7 @@ class MsgSend extends React.Component {
     }
   }
 
-  selectFrdCallback = (rs)=>{
+  msgSearchCallback =(rs) =>{
     if(rs.reCd==='01'){
       // 메시지 조회 성공
       this.setState({
@@ -131,9 +131,11 @@ class MsgSend extends React.Component {
       });
     }else{
       // 메시지 조회 실패
+      this.setState({
+        msgList : []
+      });
     }
   }
-
   selectFrd=(frdIdx)=>{
     console.log(frdIdx,'번째 친구 선택');
     // 해당하는 친구 메시지 조회
@@ -151,7 +153,7 @@ class MsgSend extends React.Component {
       usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
       ,searchName : select.usrName
     };
-    // api.apiSend('post','/msg/msgSearch',param,this.selectFrdCallback);      
+    api.apiSend('post','/msg/msgSearch',param,this.msgSearchCallback);      
 
   }
 
@@ -202,6 +204,15 @@ class MsgSend extends React.Component {
     socket.emit('usrName',JSON.parse(localStorage.getItem('usrInfo')).usrName);
     socket.on('reMsg', data=>{
       console.log("나한테 온 메시지 \n",data);
+      let reMsg ={
+        msgConent : data[2]
+        ,msgDate : data[3]
+      };
+      let msgList = this.state.msgList;
+      msgList.push(reMsg);
+      this.setState({
+        msgList : msgList
+      });
       // socket.emit('chat message','클라이언트 소켓 테스트');
     });
   }
@@ -325,29 +336,41 @@ class MsgSend extends React.Component {
                       </Col>
                     </Row>
                   <div>
-                    <hr/>
-                    <Row className="">
-                      <Col lg="12">
-                        <div className="chat-recv float-left chat-left-margin">
-                          상대 메시지
-                          <hr className="chat-hr"/>
-                          <div className="text-right">
-                            2019.12.05 20:30
-                          </div>
+                  <hr/>
+                  {this.state.msgList && this.state.msgList.length>0 ?
+                    this.state.msgList.map((msg, msgIdx)=>{
+                      return(
+                      <div> 
+                        {msg.msgRecv === JSON.parse(localStorage.getItem('usrInfo')).usrName ?
+                          <Row className="">
+                            <Col lg="12">
+                              <div className="chat-recv float-left chat-left-margin">
+                                {msg.msgConent}
+                                <hr className="chat-hr"/>
+                                <div className="text-right">
+                                  {msg.msgDate}
+                                </div>
+                              </div>
+                            </Col>
+                          </Row> : ''
+                        }
+                        {msg.msgSend === JSON.parse(localStorage.getItem('usrInfo')).usrName ?
+                          <Row className="chat-msg">
+                            <Col lg="12">
+                              <div className="chat-send float-right chat-right-margin">
+                                {msg.msgConent}
+                                <hr className="chat-hr"/>
+                                <div className="text-right">
+                                  {msg.msgDate}
+                                </div>
+                              </div>
+                            </Col>
+                          </Row>:''
+                        }
                         </div>
-                      </Col>
-                    </Row>
-                    <Row className="chat-msg">
-                      <Col lg="12">
-                        <div className="chat-send float-right chat-right-margin">
-                          내 메시지
-                          <hr className="chat-hr"/>
-                          <div className="text-right">
-                            2019.12.05 20:30
-                          </div>
-                        </div>
-                      </Col>
-                    </Row>
+                      )})
+                    :''
+                  }
                     <hr/>
                   </div>
                     <Row className="text-center justify-content-center align-items-center">

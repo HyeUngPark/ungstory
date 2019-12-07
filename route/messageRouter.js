@@ -7,6 +7,7 @@ var router = express.Router();
 
 var schema = require('../schema/commonSchema');
 var msgSchema = require('../schema/messageSchema');
+var msgStateSchema = require('../schema/messageStateSchema');
 
 var date = require('../myUtils/dateUtils');
 
@@ -15,12 +16,13 @@ env.config();
 
 router.msgSend = (msgInfo) =>{
     // msg 저장
-    msgSchema.msgSend.usrName = msgInfo[0];
-    msgSchema.msgSend.delDate = '';
-    msgSchema.msgRecv.usrName = msgInfo[1];
-    msgSchema.msgRecv.delDate = '';
-    msgSchema.msgConent = msgInfo[2];
-    msgSchema.msgDate = date.getDate();
+    var msgSend = msgInfo[0];
+    var msgRecv = msgInfo[1];
+    var msgConent = msgInfo[2];
+
+    msgSchema.msgSend = msgSend;
+    msgSchema.msgRecv = msgRecv;
+    msgSchema.msgConent = msgConent;
     schema.create({
         wkCd: 'MSG'
         ,wkDtCd : "MSG"
@@ -29,6 +31,59 @@ router.msgSend = (msgInfo) =>{
         ,subSchema: msgSchema
     }).then((result)=>{
         console.log("★★ msg send save success ★★\n");
+        // 메시지 상태가 존재하지 않을 경우 발신자 수신자 상태추가
+
+        schema.find({
+            wkCd:'MSG'
+            ,wkDtCd:'STA'
+            ,'subSchema.usrName': msgSend
+            ,'subSchema.msgPartner': msgRecv
+        },function(fErr, fResult){
+            if (fErr) {
+                console.log('error \n', err);
+                return res.status(500).send("mewssage state select error >> " + err)
+            }
+
+            if (fResult.length === 0) {
+                var msgStateSchema1 = {};
+                var msgStateSchema2 = {};
+                //1. 발신자
+                msgStateSchema.usrName = msgSend;
+                msgStateSchema.msgPartner = msgRecv;
+                msgStateSchema.msgDelDate = '';
+                msgStateSchema1 = JSON.parse(JSON.stringify(msgStateSchema));
+                //2. 수신자
+                msgStateSchema.usrName = msgRecv;
+                msgStateSchema.msgPartner = msgSend;
+                msgStateSchema.msgDelDate = '';
+                msgStateSchema2 = JSON.parse(JSON.stringify(msgStateSchema));
+                schema.insertMany([
+                {
+                    wkCd: 'MSG'
+                    ,wkDtCd : "STA"
+                    ,fstWrDt: date.getDate() // 최초 작성일
+                    ,lstWrDt: date.getDate() // 최종 작성일
+                    ,subSchema: msgStateSchema1
+                }
+                ,{
+                    wkCd: 'MSG'
+                    ,wkDtCd : "STA"
+                    ,fstWrDt: date.getDate() // 최초 작성일
+                    ,lstWrDt: date.getDate() // 최종 작성일
+                    ,subSchema: msgStateSchema2
+                }
+                ]).then((result)=>{
+                    console.log("★★★ msg state save success ★★★\n",result);
+                    return '01';
+                }).catch((err)=>{
+                    console.log("★★★ msg state save fail ★★★\n",err);
+                    return '02';
+                });
+            }else{
+                return '01';
+            }
+        });
+        
         /*
         ntSchema.noticeCt = '친구 요청';
         ntSchema.usrName = params.frdRes;
@@ -52,7 +107,6 @@ router.msgSend = (msgInfo) =>{
             });
         });
         */
-        return '01';
     }).catch((err)=>{
         console.log("★★★ msg send save fail ★★★\n",err);
         return '02';
@@ -61,7 +115,55 @@ router.msgSend = (msgInfo) =>{
 
 router.post('/msgSearch',function(req, res){
     var params = req.body;
-    
-
+    schema.aggregate([
+        {$match : {
+            wkCd : 'MSG'
+            ,wkDtCd : 'MSG'
+            ,$or:[
+                {"subSchema.msgSend" : params.usrName}
+                ,{"subSchema.msgRecv" : params.usrName}
+            ]
+        }}
+        ,{$project:{
+            _id : 1
+            ,"subSchema.usrFrds" : 1
+            ,"subSchema.msgSend" : 1
+            ,"subSchema.msgRecv" : 1
+            ,"subSchema.msgConent" : 1
+            ,"subSchema.msgDate" : 1
+            ,"fstWrDt" :1
+        }}
+        ,{$group:{
+            _id : "$_id"
+            ,"msgSend" : {"$first":"$subSchema.msgSend"}
+            ,"msgRecv" : {"$first":"$subSchema.msgRecv"}
+            ,"msgConent" : {"$first":"$subSchema.msgConent"}
+            ,"msgDate" : {"$max":"$fstWrDt"}
+        }}
+        ,{$sort:{
+            'msgDate' : 1
+        }}
+    ],function(err, result){
+        if (err) {
+            console.log('error \n', err);
+            return res.status(500).send("내 포스팅 리스트 조회 실패 >> " + err)
+        }
+        if (result.length > 0) {
+            for(let i=0; i<result.length; i++){
+                let temp=result[i];
+                temp.msgDate = date.dateFormat(result[i].msgDate,'YYYY-MM-DD hh:mm:ss');
+                result[i] = temp;
+            }
+            res.json({
+                reCd : '01'
+                ,msgList : result
+            }); 
+        }else{
+            // 메시지 없음
+            res.json({
+                reCd : '03'
+            });
+        }
+    });
 });
 module.exports = router;

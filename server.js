@@ -7,6 +7,7 @@ var serveStatic = require('serve-static');
 var path = require('path');
 var port = process.env.PORT || 5000;
 var db = require('./mongo');
+var date = require('./myUtils/dateUtils');
 
 // mongoose local debugging setting
 app.use(function(req,res,next){
@@ -58,6 +59,7 @@ app.use('/auth', authRouter);
 app.use('/user', userRouter);
 app.use('/frd', frdRouter);
 app.use('/not', notRouter);
+app.use('/msg', msgRouter);
 
 var usrList =[];
 
@@ -82,7 +84,9 @@ io.on('connection', (socket) => {
     for(let i=0; i<usrList.length; i++){
       if(usrList[i].usrName === msgInfo[1]){
         // 메시지 실시간 전송
-        io.sockets.to(usrList[i].socketId).emit('reMsg',msgInfo[2]);
+        let now = date.getDate();
+        msgInfo.push(date.dateFormat(now,'YYYY-MM-DD hh:mm:ss'));
+        io.sockets.to(usrList[i].socketId).emit('reMsg',msgInfo);
       }
     }
     // 디비 저장

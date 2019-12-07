@@ -1,8 +1,7 @@
 var schema =({
-    msgSend : {}
-    ,msgRecv : {}
+    msgSend : ''
+    ,msgRecv : ''
     ,msgConent : ''
-    ,msgDate : ''
 });
 
 module.exports = schema;
