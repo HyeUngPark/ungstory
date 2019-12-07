@@ -16,93 +16,160 @@ env.config();
 
 router.post('/frendSearch',function(req, res){
     var params = req.body;
-    schema.aggregate([
-        {$match : {
-            wkCd : 'USR'
-            ,wkDtCd : 'USR'
-            ,"subSchema.usrName" : params.usrName
-        }}
-        ,{$project:{
-            _id : 1
-           ,"subSchema.usrFrds" : 1
-        }}
-        ,{$group:{
-           _id : "$_id"
-           ,"myFrd" : {"$first":"$subSchema.usrFrds"}
-        }}
-    ],function(fError, fResult){
-        if (fError) {
-            console.log('error \n', fError);
-            return res.status(500).send("내 친구 목록 조회 실패 >> " + fError)
-        }
-        let matchQuery = ".*"+params.searchName+".*";
-        let myFrd = fResult[0].myFrd;
-        let myName = [];
-        myName.push(params.usrName);
-
-        if (fResult.length > 0) {
-            schema.aggregate([
-                {$match : {
-                    wkCd : 'USR'
-                    ,wkDtCd : 'USR'
-                    ,"subSchema.usrName" :  {$regex:matchQuery}
-                }}
-                ,{$project:{
-                    _id : 1,
-                    "subSchema.usrName" : 1
-                    ,"subSchema.usrPt" : 1
-                    ,"subSchema.usrFrds" : 1
-                    ,frdYn : 1
-                    ,withFrd : 1
-                }}
-                ,{$group:{
-                   _id : "$_id"
-                   ,"usrName" : {"$max":"$subSchema.usrName"}
-                   ,"usrPt" : {"$first":"$subSchema.usrPt"}
-                   ,"frdYn" : {"$sum" : "$frdYn"}
-                   ,"withFrd" : {"$sum" : "$withFrd"}
-                   ,"usrFrds" : {"$first":"$subSchema.usrFrds"}
-                }}
-                ,{$addFields: {
-                    withFrd : {
-                        $size:{
-                            $setIntersection:["$usrFrds",myFrd]
+    if(params.searchCd === 'MY'){
+        // 1.내 친구 목록 조회
+        schema.aggregate([
+            {$match : {
+                wkCd : 'USR'
+                ,wkDtCd : 'USR'
+                ,"subSchema.usrName" : params.usrName
+            }}
+            ,{$project:{
+                _id : 1
+                ,"subSchema.usrFrds" : 1
+            }}
+            ,{$group:{
+                _id : "$_id"
+                ,"myFrd" : {"$first":"$subSchema.usrFrds"}
+            }}
+        ],function(fError, fResult){
+            if (fError) {
+                console.log('error \n', fError);
+                return res.status(500).send("내 친구 목록 조회 실패 >> " + fError)
+            }
+            if (fResult.length > 0) {
+                console.log('★★★ 메시지 작성 내 친구 조회 1차 성공 ★★★');
+                let myFrd = fResult[0].myFrd;
+                schema.aggregate([
+                    {$match:{
+                        wkCd:'USR'
+                        ,wkDtCd:'USR'
+                        ,"subSchema.usrName" : {
+                            $in  : myFrd
                         }
+                    }}
+                    ,{$project:{
+                       _id : 1
+                       ,"subSchema.usrPt" : 1
+                       ,"subSchema.usrName" : 1
+                    }}
+                    ,{$group:{
+                        _id : "$_id"
+                        ,"usrPt" : {$first : "$subSchema.usrPt"}
+                        ,"usrName" : {$first : "$subSchema.usrName"}
+                    }}
+                    ,{$sort:{
+                        "usrName" : 1
+                    }}
+                ],function(pError, pResult){
+                    if (fError) {
+                        console.log('error \n', pError);
+                        return res.status(500).send("내 친구 프로필 조회 실패 >> " + fError)
                     }
-                    ,frdYn : {
-                        $cond:
-                            [{$gt:[
-                                {$size:{
-                                    $setIntersection:["$usrFrds",myName]}
-                                }
-                                ,0]}
-                                ,true
-                                ,false
-                            ]
+                    if (pResult.length > 0) {
+                        console.log('★★★메시지 작성 내 친구 조회 최종 성공★★★');
+                        res.json({
+                            reCd : '01'
+                            ,myFrd : pResult
+                        });
                     }
-                }}
-                ,{$sort:{
-                    "withFrd" : -1
-                    ,"frdYn" : -1
-                }}
-            ],function(err, result) {
-                if (err) {
-                    console.log('error \n', err);
-                    return res.status(500).send("친구 검색 실패 >> " + err)
-                }
-                if (result.length > 0) {
-                    res.json({
-                        reCd : '01'
-                        ,frdList : result 
-                    });
-                }else{
-                    res.json({
-                        reCd : '02'
-                    });
-                }
-            });
-        }
-    });
+                });
+            }else{
+                // 친구 없음
+                res.json({
+                    reCd : '03'
+                });
+            }
+        });
+    }else{
+        schema.aggregate([
+            {$match : {
+                wkCd : 'USR'
+                ,wkDtCd : 'USR'
+                ,"subSchema.usrName" : params.usrName
+            }}
+            ,{$project:{
+                _id : 1
+            ,"subSchema.usrFrds" : 1
+            }}
+            ,{$group:{
+            _id : "$_id"
+            ,"myFrd" : {"$first":"$subSchema.usrFrds"}
+            }}
+        ],function(fError, fResult){
+            if (fError) {
+                console.log('error \n', fError);
+                return res.status(500).send("내 친구 목록 조회 실패 >> " + fError)
+            }
+            let matchQuery = ".*"+params.searchName+".*";
+            let myFrd = fResult[0].myFrd;
+            let myName = [];
+            myName.push(params.usrName);
+
+            if (fResult.length > 0) {
+                schema.aggregate([
+                    {$match : {
+                        wkCd : 'USR'
+                        ,wkDtCd : 'USR'
+                        ,"subSchema.usrName" :  {$regex:matchQuery}
+                    }}
+                    ,{$project:{
+                        _id : 1,
+                        "subSchema.usrName" : 1
+                        ,"subSchema.usrPt" : 1
+                        ,"subSchema.usrFrds" : 1
+                        ,frdYn : 1
+                        ,withFrd : 1
+                    }}
+                    ,{$group:{
+                    _id : "$_id"
+                    ,"usrName" : {"$max":"$subSchema.usrName"}
+                    ,"usrPt" : {"$first":"$subSchema.usrPt"}
+                    ,"frdYn" : {"$sum" : "$frdYn"}
+                    ,"withFrd" : {"$sum" : "$withFrd"}
+                    ,"usrFrds" : {"$first":"$subSchema.usrFrds"}
+                    }}
+                    ,{$addFields: {
+                        withFrd : {
+                            $size:{
+                                $setIntersection:["$usrFrds",myFrd]
+                            }
+                        }
+                        ,frdYn : {
+                            $cond:
+                                [{$gt:[
+                                    {$size:{
+                                        $setIntersection:["$usrFrds",myName]}
+                                    }
+                                    ,0]}
+                                    ,true
+                                    ,false
+                                ]
+                        }
+                    }}
+                    ,{$sort:{
+                        "withFrd" : -1
+                        ,"frdYn" : -1
+                    }}
+                ],function(err, result) {
+                    if (err) {
+                        console.log('error \n', err);
+                        return res.status(500).send("친구 검색 실패 >> " + err)
+                    }
+                    if (result.length > 0) {
+                        res.json({
+                            reCd : '01'
+                            ,frdList : result 
+                        });
+                    }else{
+                        res.json({
+                            reCd : '02'
+                        });
+                    }
+                });
+            }
+        });
+    }
 });            
 
 router.post('/friendRequest',function(req,res){

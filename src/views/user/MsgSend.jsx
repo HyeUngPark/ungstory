@@ -35,46 +35,89 @@ class MsgSend extends React.Component {
       ,wrMsg : ''
       ,selectInfo : {}
       ,msgList : []
+      ,myFrdList : []
+    }
+    this.myFrdSelect();
+  }
+
+  myFrdSelectCallback =(rs)=>{
+    if(rs.reCd ==='01'){
+      // 내친구 조회 성공
+      this.setState({
+        myFrdList : rs.myFrd
+      });
+    }else if(rs.reCd === '03'){
+      // 친구 없음
+      this.setState({
+        myFrdList : []
+      });
+    }else{
+      // 조회 실패
+      this.setState({
+        myFrdList : []
+      });
     }
   }
-  friendSearchCallback =(rs) =>{
-    if(rs.reCd === '01'){
-      this.setState({
-        searchList : rs.frdList
-        ,searchCd : true
-      });
-      this.dropToggle();
-    }else{
-      this.setState({
-        searchCd : false
-      });
-    }
+
+  myFrdSelect = ()=>{
+    let param={
+      usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
+      ,searchCd : 'MY'
+    };
+    api.apiSend('post','/frd/frendSearch',param,this.myFrdSelectCallback);      
   }
 
   friendSearch =(e)=>{
-    let searchName = e.target.value;
-
+    var searchName = e.target.value;
     this.setState({
-        searchName : searchName
+      searchName : searchName
     });
-    
     var special_pattern = /[`~!@#$%^&*|\\\'\";:\/?]/gi;
-    
-    if(special_pattern.test(searchName) === true ){
+    let special = special_pattern.test(searchName);
+    if(special){
       alert('특수문자는 사용할 수 없습니다.');
       return;
-    }
-
-    if(searchName !== ''){
-      let param={
-        usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
-        ,searchName : searchName
-      };
-      api.apiSend('post','/frd/frendSearch',param,this.friendSearchCallback);      
+    }else if(searchName !== ''){
+      var searchList =[];
+      var namePattern = new RegExp(searchName);
+      var myFrd = this.state.myFrdList;
+      var firstIdxs = [];
+      if(myFrd.length>0){
+        for(let i=0; i<myFrd.length; i++){
+          if(myFrd[i].usrName.startsWith(searchName)
+          || myFrd[i].usrName === searchName 
+          ){
+            searchList.push(myFrd[i]);
+            firstIdxs.push(i);
+          }
+        }
+        for(let j=0; j<myFrd.length; j++){
+          let search = namePattern.test(myFrd[j].usrName);
+          if(firstIdxs.indexOf(j) < 0 && search){
+            searchList.push(myFrd[j]);
+          }
+        }
+        if(searchList.length >0){
+          this.setState({
+            searchList : searchList
+          });
+          this.dropOpen();
+        }else{
+          this.setState({
+            searchList : searchList
+            ,searchCd : false
+          });
+          // this.dropClear();
+        }
+      }
     }else{
-      this.dropClear();
+      this.setState({
+        searchList : []
+        ,searchCd : false
+      });
     }
   }
+
   selectFrdCallback = (rs)=>{
     if(rs.reCd==='01'){
       // 메시지 조회 성공
@@ -116,14 +159,21 @@ class MsgSend extends React.Component {
     this.setState({
       searchList : []
       ,searchName : ''
+      ,searchCd : false
     });
-    this.dropToggle();
+    // this.dropToggle();
   }
 
   dropToggle = ()=>{
     this.setState({
       searchCd : !this.state.searchCd
     })
+  }
+
+  dropOpen =() =>{
+    this.setState({
+      searchCd : true
+    });
   }
 
   msgChnage = (e) =>{
@@ -190,7 +240,7 @@ class MsgSend extends React.Component {
                                 }
                               }}
                       />
-                      <Dropdown isOpen={(!this.state.searchCd
+                      <Dropdown isOpen={(this.state.searchCd
                                   && this.state.searchList.length>0
                                   )}
                                   toggle={e=>this.dropToggle()}
@@ -199,7 +249,7 @@ class MsgSend extends React.Component {
                           <DropdownToggle 
                               tag="span"
                               data-toggle="dropdown"
-                              aria-expanded={(!this.state.searchCd
+                              aria-expanded={(this.state.searchCd
                                   && this.state.searchList.length>0
                                   )}
                           >
