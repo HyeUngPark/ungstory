@@ -17,6 +17,7 @@ import Header from "components/Headers/Header.jsx";
 
 import * as api from "utils/api";
 import * as popup from "utils/popup";
+import * as date from "utils/date";
 
 import FrdInfo from '../../modals/frd/FrdInfo';
 
@@ -194,8 +195,16 @@ class MsgSend extends React.Component {
                   +"###"
                   +this.state.wrMsg
                 );
+    var msgList = this.state.msgList;
+    let sendMsg ={
+      msgSend : JSON.parse(localStorage.getItem('usrInfo')).usrName
+      ,msgConent : this.state.wrMsg
+      ,msgDate : date.getDate('yyyy-MM-dd hh:mm:ss')
+    };
+    msgList.push(sendMsg);
     this.setState({
       wrMsg : ''
+      ,msgList : msgList
     });
   }
 
@@ -205,7 +214,8 @@ class MsgSend extends React.Component {
     socket.on('reMsg', data=>{
       console.log("나한테 온 메시지 \n",data);
       let reMsg ={
-        msgConent : data[2]
+        msgRecv : data[1]
+        ,msgConent : data[2]
         ,msgDate : data[3]
       };
       let msgList = this.state.msgList;

@@ -11,4 +11,19 @@ export function getBeforeDate(cd) {
     }
 }
  
-
+export function getDate(format, d){
+    var date = d ? d : new Date();
+    var year = date.getFullYear();              
+    var month = (1 + date.getMonth());          
+    month = month >= 10 ? month : '0' + month;  
+    var day = date.getDate();                   
+    day = day >= 10 ? day : '0' + day;          
+    var hour = date.getHours();
+    hour = hour >= 10 ? hour : '0' + hour;        
+    var min = date.getMinutes();
+    min = min >= 10 ? min : '0' + min;        
+    var sec = date.getSeconds();
+    sec = sec >= 10 ? sec : '0' + sec;        
+ 
+    return  year+'-'+month+'-'+day+" "+hour+":"+min+":"+sec;
+}
