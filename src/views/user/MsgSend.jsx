@@ -37,6 +37,7 @@ class MsgSend extends React.Component {
       ,selectInfo : {}
       ,msgList : []
       ,myFrdList : []
+      ,msgMemList : []
     }
     this.myFrdSelect();
   }
@@ -137,18 +138,50 @@ class MsgSend extends React.Component {
       });
     }
   }
-  selectFrd=(frdIdx)=>{
-    console.log(frdIdx,'번째 친구 선택');
+  selectFrd=(frdIdx, selectName)=>{
     // 해당하는 친구 메시지 조회
-    let select ={
-      usrName : this.state.searchList[frdIdx].usrName
-      ,usrPt : this.state.searchList[frdIdx].usrPt
-    };
+    var select ={};
+    var searchList = this.state.searchList;
+    var frdList = this.state.myFrdList;
+    if(frdIdx >-1){
+      select.usrName = searchList[frdIdx].usrName;
+      select.usrPt = searchList[frdIdx].usrPt;
+      this.dropClear();
+    }else{
+      const itemToFind = frdList.find(function(item) {
+        return item.usrName === selectName
+      });
+      const idx = frdList.indexOf(itemToFind) 
+      if (idx > -1){
+        select.usrName = frdList[idx].usrName;
+        select.usrPt = frdList[idx].usrPt;
+      } 
+    }
+
+    let memList = this.state.msgMemList;
+    const itemToFind = memList.find(function(item) {
+      return item.usrName === select.usrName
+    });
+    const idx = memList.indexOf(itemToFind) 
+    if (idx < 0){
+      let temp={
+        usrName : select.usrName
+        ,msgNot : 0
+      }
+      memList.push(temp);
+    }else{
+      let temp={
+        usrName : memList[idx].usrName
+        ,msgNot : 0
+      }
+      memList[idx] = temp;
+    } 
     this.setState({
       selectCd : true
       ,selectInfo : select
+      ,msgMemList : memList
+      ,msgList : []
     });
-    this.dropClear();
 
     let param={
       usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
@@ -212,17 +245,35 @@ class MsgSend extends React.Component {
     socket = socketIoClient(window.location.origin);
     socket.emit('usrName',JSON.parse(localStorage.getItem('usrInfo')).usrName);
     socket.on('reMsg', data=>{
-      console.log("나한테 온 메시지 \n",data);
-      let reMsg ={
-        msgRecv : data[1]
-        ,msgConent : data[2]
-        ,msgDate : data[3]
-      };
-      let msgList = this.state.msgList;
-      msgList.push(reMsg);
-      this.setState({
-        msgList : msgList
-      });
+      // console.log("나한테 온 메시지 \n",data);
+      if(this.state.selectInfo.usrName === data[0]){
+        let reMsg ={
+          msgRecv : data[1]
+          ,msgConent : data[2]
+          ,msgDate : data[3]
+        };
+        let msgList = this.state.msgList;
+        msgList.push(reMsg);
+        this.setState({
+          msgList : msgList
+        });
+      }else{
+        let memList = this.state.msgMemList;
+        const itemToFind = memList.find(function(item) {
+          return item.usrName === data[0]
+        });
+        const idx = memList.indexOf(itemToFind) 
+        if (idx > -1){
+          let temp ={
+            usrName : memList[idx].usrName
+            ,msgNot : memList[idx].msgNot+1
+          };
+          memList[idx]=temp;
+        } 
+        this.setState({
+          msgMemList : memList
+        });
+      }
       // socket.emit('chat message','클라이언트 소켓 테스트');
     });
   }
@@ -322,6 +373,41 @@ class MsgSend extends React.Component {
                   </Col>
                 </Row>
                 </div>
+                {
+                  this.state.msgMemList.length > 0 ? 
+                  <Row>
+                    <Col lg="12">
+                      <span>&nbsp;대화한 상대 : </span>
+                      {this.state.msgMemList.map((mem, memIdx)=>{
+                        return(
+                          <span>
+                            <a href="javascript:void(0)"
+                               style={{
+                                  position: "relative"
+                               }}
+                               onClick={e=>{this.selectFrd(-1, mem.usrName)}}
+                            >{mem.usrName}
+                              {mem.msgNot > 0? 
+                                <span className="form-control-notice"
+                                        // value={index} 
+                                        style ={{
+                                          position:'absolute',
+                                          right:'-5px',
+                                          top:'-5px',
+                                        }}
+                                  >
+                                  {mem.msgNot}
+                                </span>
+                                :''
+                              }
+                            </a>&nbsp;&nbsp;
+                          </span>
+                        )})
+                      }
+                    </Col>
+                  </Row>
+                  :''
+                }
                 {this.state.selectCd ?
                   <div>
                     <Row className="">
@@ -379,7 +465,12 @@ class MsgSend extends React.Component {
                         }
                         </div>
                       )})
-                    :''
+                    :
+                    <Row className="justify-center text-center">
+                      <Col lg="12">
+                        주고받은 메시지가 없습니다.
+                      </Col>
+                    </Row>
                   }
                     <hr/>
                   </div>

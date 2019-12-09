@@ -120,8 +120,14 @@ router.post('/msgSearch',function(req, res){
             wkCd : 'MSG'
             ,wkDtCd : 'MSG'
             ,$or:[
-                {"subSchema.msgSend" : params.usrName}
-                ,{"subSchema.msgRecv" : params.usrName}
+                {$and:[
+                    {"subSchema.msgSend" : params.usrName}
+                    ,{"subSchema.msgRecv" : params.searchName}
+                ]}
+                ,{$and:[
+                    {"subSchema.msgRecv" : params.usrName}
+                    ,{"subSchema.msgSend" : params.searchName}
+                ]}
             ]
         }}
         ,{$project:{
