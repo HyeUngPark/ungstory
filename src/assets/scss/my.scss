@@ -43,7 +43,9 @@
 .border-none{
     border: 0px;
 }
-
+.form-input-margin{
+    margin-top : -0.4rem !important;
+}
 
 // chat
 
@@ -84,4 +86,7 @@
     overflow-y : 'auto';
 }
 
-
+.modal-center {
+    display: flex !important;
+    align-items: center !important;
+}
