@@ -81,13 +81,19 @@ io.on('connection', (socket) => {
     // msgInfo[2] 메시지
 
     // 유저 접속 여부 확인
+    var usrConCd ;
     for(let i=0; i<usrList.length; i++){
       if(usrList[i].usrName === msgInfo[1]){
         // 메시지 실시간 전송
         let now = date.getDate();
         msgInfo.push(date.dateFormat(now,'YYYY-MM-DD hh:mm:ss'));
-        io.sockets.to(usrList[i].socketId).emit('reMsg',msgInfo);
+        usrConCd = io.sockets.to(usrList[i].socketId).emit('reMsg',msgInfo);
       }
+    }
+
+    if(!usrConCd){
+      // 소켓 접속중이 아니면 알람등록
+      notRouter.msgNotAdd(msgInfo);
     }
     // 디비 저장
     msgRouter.msgSend(msgInfo);

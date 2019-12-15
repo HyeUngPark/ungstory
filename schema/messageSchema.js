@@ -1,7 +1,7 @@
 var schema =({
     msgSend : ''
     ,msgRecv : ''
-    ,msgConent : ''
+    ,msgContent : ''
 });
 
 module.exports = schema;

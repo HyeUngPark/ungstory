@@ -13,6 +13,28 @@ var date = require('../myUtils/dateUtils');
 var env = require('dotenv');
 env.config();
 
+router.msgNotAdd = (msgInfo) =>{
+    ntSchema.usrName = msgInfo[1];
+    ntSchema.noticeCt = msgInfo[0];
+    ntSchema.readYn=false;
+
+    schema.create({
+        wkCd: 'NOT'
+        ,wkDtCd : "MSG"
+        ,fstWrDt: date.getDate() // 최초 작성일
+        ,lstWrDt: date.getDate() // 최종 작성일
+        ,subSchema: ntSchema
+    }).then((result)=>{
+        console.log("★★ msgNotAdd success ★★\n",result);
+        return 01;
+        
+    }).catch((err)=>{
+        console.log("★★ msgNotAdd fail ★★\n",err);
+        return 02;
+    }); 
+
+};
+
 router.put('/frdNotClear',function(req,res){
     var params = req.body;
     // 0. 클릭 시점 친구 알림 0으로 변경

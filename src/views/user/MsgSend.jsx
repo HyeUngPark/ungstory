@@ -231,7 +231,7 @@ class MsgSend extends React.Component {
     var msgList = this.state.msgList;
     let sendMsg ={
       msgSend : JSON.parse(localStorage.getItem('usrInfo')).usrName
-      ,msgConent : this.state.wrMsg
+      ,msgContent : this.state.wrMsg
       ,msgDate : date.getDate('yyyy-MM-dd hh:mm:ss')
     };
     msgList.push(sendMsg);
@@ -249,7 +249,7 @@ class MsgSend extends React.Component {
       if(this.state.selectInfo.usrName === data[0]){
         let reMsg ={
           msgRecv : data[1]
-          ,msgConent : data[2]
+          ,msgContent : data[2]
           ,msgDate : data[3]
         };
         let msgList = this.state.msgList;
@@ -441,7 +441,7 @@ class MsgSend extends React.Component {
                           <Row className="">
                             <Col lg="12">
                               <div className="chat-recv float-left chat-left-margin">
-                                {msg.msgConent}
+                                {msg.msgContent}
                                 <hr className="chat-hr"/>
                                 <div className="text-right">
                                   {msg.msgDate}
@@ -454,7 +454,7 @@ class MsgSend extends React.Component {
                           <Row className="chat-msg">
                             <Col lg="12">
                               <div className="chat-send float-right chat-right-margin">
-                                {msg.msgConent}
+                                {msg.msgContent}
                                 <hr className="chat-hr"/>
                                 <div className="text-right">
                                   {msg.msgDate}

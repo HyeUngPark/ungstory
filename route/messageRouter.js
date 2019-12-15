@@ -18,11 +18,11 @@ router.msgSend = (msgInfo) =>{
     // msg 저장
     var msgSend = msgInfo[0];
     var msgRecv = msgInfo[1];
-    var msgConent = msgInfo[2];
+    var msgContent = msgInfo[2];
 
     msgSchema.msgSend = msgSend;
     msgSchema.msgRecv = msgRecv;
-    msgSchema.msgConent = msgConent;
+    msgSchema.msgContent = msgContent;
     schema.create({
         wkCd: 'MSG'
         ,wkDtCd : "MSG"
@@ -135,7 +135,7 @@ router.post('/msgSearch',function(req, res){
             ,"subSchema.usrFrds" : 1
             ,"subSchema.msgSend" : 1
             ,"subSchema.msgRecv" : 1
-            ,"subSchema.msgConent" : 1
+            ,"subSchema.msgContent" : 1
             ,"subSchema.msgDate" : 1
             ,"fstWrDt" :1
         }}
@@ -143,7 +143,7 @@ router.post('/msgSearch',function(req, res){
             _id : "$_id"
             ,"msgSend" : {"$first":"$subSchema.msgSend"}
             ,"msgRecv" : {"$first":"$subSchema.msgRecv"}
-            ,"msgConent" : {"$first":"$subSchema.msgConent"}
+            ,"msgContent" : {"$first":"$subSchema.msgContent"}
             ,"msgDate" : {"$max":"$fstWrDt"}
         }}
         ,{$sort:{
@@ -172,4 +172,173 @@ router.post('/msgSearch',function(req, res){
         }
     });
 });
+
+router.post('/msgList',function(req,res){
+    var params = req.body;
+    schema.aggregate([
+        {$match:{
+            wkCd:'MSG'
+            ,wkDtCd:'STA'
+            ,'subSchema.usrName' : params.usrName
+        }}
+        ,{$project:{
+            _id : 1,
+            'subSchema.msgPartner' : 1
+            ,'subSchema.msgDelDate' : {
+                $cond : [
+                    {$or : [
+                        {$eq : ['$subSchema.msgDelDate' , '']}
+                        ,{$lte : [
+                            {$toDate : '$subSchema.msgDelDate'}
+                            ,date.getDate()
+                        ]}
+                    ]}
+                    ,"$subSchema.msgDelDate"
+                    ,"$unset"
+                ]
+            }
+        }}
+        ,{$group:{
+            _id : '$_id',
+            'msgPartner' : {'$first' : '$subSchema.msgPartner'}
+            ,'msgDelDate' : {'$first' : '$subSchema.msgDelDate'}
+        }}
+    ],function(stErr, stResult){
+        if (stErr) {
+            console.log('error \n', stErr);
+            return res.status(500).send("메시지 리스트 조회 실패 >> " + err)
+        }
+        if (stResult.length > 0) {
+            var msgPartner =[];
+            for(let i=0; i<stResult.length; i++){
+                msgPartner.push(stResult[i].msgPartner);
+            }
+
+            schema.aggregate([
+                {$facet:{
+                    usrInfo : [
+                        {$match:{
+                            wkCd : 'USR'
+                            ,wkDtCd : 'USR'
+                            ,'subSchema.usrName' : {$in:msgPartner}
+                        }}
+                        ,{$project:{
+                            _id : 1
+                            ,'subSchema.usrName' : 1
+                            ,'subSchema.usrPt' : 1
+                        }}
+                        ,{$group:{
+                            _id : "$_id"
+                            ,'usrName' : {'$first':'$subSchema.usrName'}
+                            ,'usrPt' : {'$first':'$subSchema.usrPt'}
+                        }}
+                    ]
+                    ,msgList : [
+                        {$match:{
+                            wkCd : 'MSG'
+                            ,wkDtCd : 'MSG'
+                            ,"subSchema.msgRecv" : params.usrName
+                            ,"subSchema.msgSend" : {$in : msgPartner}
+                        }}
+                        ,{$project:{
+                            _id : 1
+                            ,"subSchema.msgSend" :1
+                            ,"subSchema.msgContent" :1
+                            ,"fstWrDt" :1
+                        }}
+                        ,{$sort:{
+                            'fstWrDt' : -1
+                        }}
+                        ,{$group:{
+                            _id : "$subSchema.msgSend"
+                            ,'msgDate' : {'$first' : '$fstWrDt'}
+                            ,'msgContent' : {'$first' : '$subSchema.msgContent'}
+                        }}
+                    ]
+                    ,msgNot : [
+                        {$match:{
+                            wkCd : 'NOT'
+                            ,wkDtCd : 'MSG'
+                            ,"subSchema.usrName" : params.usrName
+                            ,"subSchema.noticeCt" : {$in : msgPartner}
+                            ,"subSchema.readYn" : false
+                        }}
+                        ,{$project:{
+                            _id : 1
+                            ,"fstWrDt" :1
+                            ,'subSchema.noticeCt' : 1
+                            ,"subSchema.usrName" : 1
+                            ,"subSchema.readYn" : {
+                                $cond:[
+                                    "$subSchema.readYn"
+                                    ,false
+                                    ,1
+                                ]
+                            }
+                        }}
+                        ,{$sort:{
+                            'fstWrDt' : -1
+                        }}
+                        ,{$group:{
+                            _id : "$subSchema.noticeCt"
+                            ,'noticeCt' : {'$first':'$subSchema.noticeCt'}
+                            ,'usrName' : {'$first':'$subSchema.usrName'}
+                            ,'notDate' : {'$first' : '$fstWrDt'}
+                            ,'notCount' : {'$sum':'$subSchema.readYn'}
+                        }}
+                    ]
+                }}
+            ],function(msgErr, msgResult){
+                if (msgErr) {
+                    console.log('error \n', msgErr);
+                    return res.status(500).send("메시지 리스트 조회 실패 >> " + err)
+                }
+                if (msgResult.length > 0) {
+                    var msgList = msgResult[0].msgList;
+                    var usrInfo = msgResult[0].usrInfo;
+                    var msgNot = msgResult[0].msgNot;
+
+                    for(let ii=0; ii<msgList.length; ii++){
+                        for(let jj=0; jj<usrInfo.length; jj++){
+                            if(msgList[ii]._id === usrInfo[jj].usrName){
+                                let temp = msgList;
+                                temp.usrPt = usrInfo[jj].usrPt;
+                                msgList = temp;
+                            }
+                        }
+                        for(let kk = 0; kk<msgNot.length; kk++){
+                            if(msgList[ii]._id === msgNot[kk]._id){
+                                let temp = msgList;
+                                temp.msgNot = msgNot[kk].notCount;
+                                msgList = temp;
+                            }
+                        }
+                        let temp = msgList;
+                        temp.checked = false;
+                        temp.msgDate = date.getWriteDate(temp.msgDate);
+                        msgList = temp;
+                    }
+
+                    res.json({
+                        reCd : '01'
+                        ,msgList : msgList
+                    });
+
+                }else{
+                    res.json({
+                        reCd : '01'
+                    });
+                }
+            });            
+
+
+        }else{
+            console.log('★★★ 메시지 없음 ★★★');
+            res.json({
+                reCd : '03'
+            });
+        }
+    });
+});
+
 module.exports = router;

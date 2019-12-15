@@ -33,14 +33,12 @@ class MsgList extends React.Component {
         ,msgMg : false
         ,deleteCd : false
         ,allCd : false
-        // 임시
-        ,radioTest1 : false
-        ,radioTest2 : false
-        // 임시
+        ,msgList : []
     };
     this.handleSubmit = this.handleSubmit.bind(this);
     // this.goPage = this.props.callbackFromParent;    
     // this.imgDrop = React.createRef();
+    this.msgList();
   }
   toggle = (e) => {
     // if(!this.state.firstCd){
@@ -107,6 +105,38 @@ class MsgList extends React.Component {
 //     this.imgClick.current.props.pstPk = pstPk;
 //     this.imgClick.current.toggle();
 //   }
+  msgListCallback = (rs) =>{
+    if(rs.reCd ==='01'){
+      // 메시지 리스트 조회 성공
+      this.setState({
+        msgList : rs.msgList
+      });
+    }else if(rs.reCd ==='03'){
+      // 메시지 없음
+
+    }else{
+      // 메시지 리스트 조회 실패
+
+    }
+  }
+
+  msgList =() =>{
+    if(localStorage.getItem('usrInfo')){
+      let param={
+        usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
+      };
+      api.apiSend('post','/msg/msgList',param,this.msgListCallback);
+    }
+  }
+
+  checkChnage = (msgIdx)=>{
+    var msgList = this.state.msgList;
+    msgList[msgIdx] ? msgList[msgIdx] = false : msgList[msgIdx] = true;
+    this.setState({
+      msgList : msgList
+    });
+  }
+
   render() {
     return (
         <div>
@@ -207,106 +237,62 @@ class MsgList extends React.Component {
             </Row>
             }
           <br/>
-          <FormGroup check>
-            <Card className="card-profile shadow">
-              <Row className="justify-content-center modal-center form-control-cursor"> 
-                <Col lg="2">
-                  <CardHeader className="text-center border-0 pt-8 pt-md-4 pb-0 pb-md-4">
-                  {this.state.deleteCd ?
-                    <span>
-                      <Label check>
-                        <Input type="radio" 
-                              name="radio1"
-                              checked={this.state.radioTest2} 
-                              className="form-input-margin" 
-                              onClick ={e=>{this.setState({
-                                radioTest2 : !this.state.radioTest2
-                              })}}
-                        />{' '}
-                      </Label>
-                      &nbsp;
-                    </span>
-                    :''}
-                    {/* <Row className="justify-content-center"> */}
-                      {/* <Col className="order-lg-2" lg="3"> */}
-                        <div className="avatar avatar-sm rounded-circle">
-                          <a href="javascript:void(0)" 
-                            onClick={e => popup.openImg(require("assets/img/theme/no-profile-130x130.png"))}>
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/no-profile-130x130.png")}
-                            />
-                          </a>
-                        </div>
-                      </CardHeader>
-                </Col>
-                <Col lg="3">
-                      닉네임
-                </Col>
-                <Col lg="4">
-                      마지막 메시지
-                </Col>
-                <Col lg="1">
-                      11
-                </Col>
-                <Col lg="2">
-                      2019.11.10
-                </Col>
-            </Row>
-              <hr className="chat-hr"/>
-            <Row className="justify-content-center modal-center"> 
-                <Col lg="2">
-                  <CardHeader className="text-center border-0 pt-8 pt-md-4 pb-0 pb-md-4">
-                    <Label check>
-                      <Input 
-                        type="radio" 
-                        className="form-input-margin" 
-                        checked={this.state.radioTest1}
-                        onClick ={e=>{
-                          this.setState({
-                          radioTest1 : !this.state.radioTest1
-                        })}}
-                        />{' '}
-                    </Label>
-                    &nbsp;
-                    {/* <Row className="justify-content-center"> */}
-                      {/* <Col className="order-lg-2" lg="3"> */}
-                        <div className="avatar avatar-sm rounded-circle">
-                          <a href="javascript:void(0)" 
-                            onClick={e => popup.openImg(require("assets/img/theme/no-profile-130x130.png"))}>
-                            <img
-                              alt="..."
-                              className="rounded-circle"
-                              src={require("assets/img/theme/no-profile-130x130.png")}
-                            />
-                          </a>
-                        </div>
-                      </CardHeader>
-                      {/* <div className="d-flex justify-content-between"> */}
-                        {/* 스타일을 위해 넣은 안쓰는 버튼 */}
-                        {/* <Button style={{
-                          'visibility':'hidden'
-                        }}>
-                        </Button>
-                      </div>
-                      */}
-                </Col>
-                <Col lg="3">
-                      닉네임
-                </Col>
-                <Col lg="4">
-                      마지막 메시지
-                </Col>
-                <Col lg="1">
-                      11
-                </Col>
-                <Col lg="2">
-                      2019.11.10
-                </Col>
-            </Row>
-          </Card>
-        </FormGroup>
+          {this.state.msgList.length > 0 ? 
+            this.state.msgList.map((msg, msgIdx)=>{
+            return(
+            <FormGroup check>
+              <Card className="card-profile shadow">
+                <Row className="justify-content-center modal-center form-control-cursor"> 
+                  <Col lg="2">
+                    <CardHeader className="text-center border-0 pt-8 pt-md-4 pb-0 pb-md-4">
+                    {this.state.deleteCd ?
+                      <span>
+                        <Label check>
+                          <Input type="radio" 
+                                name="radio1"
+                                checked={msg.checked} 
+                                className="form-input-margin" 
+                                onClick ={e=>{
+                                  this.checkChnage(msgIdx)
+                                }}
+                          />{' '}
+                        </Label>
+                        &nbsp;
+                      </span>
+                      :''}
+                          <div className="avatar avatar-sm rounded-circle">
+                            <a href="javascript:void(0)" 
+                              onClick={e => popup.openImg(msg.usrPt)}>
+                              <img
+                                alt="..."
+                                className="rounded-circle"
+                                src={(msg.usrPt && msg.usrPt !=="") 
+                                ? msg.usrPt
+                                : require("assets/img/theme/no-profile-130x130.png")}
+                              />
+                            </a>
+                          </div>
+                        </CardHeader>
+                  </Col>
+                  <Col lg="3">
+                        {msg._id}
+                  </Col>
+                  <Col lg="4">
+                        {msg.msgContent}
+                  </Col>
+                  <Col lg="1">
+                        {msg.msgNot>0 ? msg.msgNot : ''}
+                  </Col>
+                  <Col lg="2">
+                        {msg.msgDate}
+                  </Col>
+              </Row>
+                <hr className="chat-hr"/>
+            </Card>
+          </FormGroup>
+            )})
+        :''
+        }
         <br />
         <Row className="align-items-center justify-content-center"> 
           <Button 
