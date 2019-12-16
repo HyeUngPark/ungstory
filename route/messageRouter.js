@@ -152,7 +152,7 @@ router.post('/msgSearch',function(req, res){
     ],function(err, result){
         if (err) {
             console.log('error \n', err);
-            return res.status(500).send("내 포스팅 리스트 조회 실패 >> " + err)
+            return res.status(500).send("내 메시지 리스트 조회 실패 >> " + err)
         }
         if (result.length > 0) {
             for(let i=0; i<result.length; i++){
@@ -206,7 +206,7 @@ router.post('/msgList',function(req,res){
     ],function(stErr, stResult){
         if (stErr) {
             console.log('error \n', stErr);
-            return res.status(500).send("메시지 리스트 조회 실패 >> " + err)
+            return res.status(500).send("메시지 조회 실패 >> " + err)
         }
         if (stResult.length > 0) {
             var msgPartner =[];
@@ -237,21 +237,43 @@ router.post('/msgList',function(req,res){
                         {$match:{
                             wkCd : 'MSG'
                             ,wkDtCd : 'MSG'
-                            ,"subSchema.msgRecv" : params.usrName
-                            ,"subSchema.msgSend" : {$in : msgPartner}
+                            ,$or:[
+                                {$and:[
+                                  {"subSchema.msgRecv" : params.usrName}
+                                  ,{"subSchema.msgSend" : {$in : msgPartner}}
+                                ]}
+                                ,{$and:[
+                                  {"subSchema.msgSend" : params.usrName}
+                                  ,{"subSchema.msgRecv" : {$in : msgPartner}}
+                                ]}
+                            ]
+                        }}
+                        ,{$addFields: {
+                            msgPartner : {
+                                $cond:
+                                    [{$eq:['$subSchema.msgSend',params.usrName]}
+                                        ,'$subSchema.msgRecv'
+                                        ,'$subSchema.msgSend'
+                                    ]
+                            }
                         }}
                         ,{$project:{
-                            _id : 1
+                            _id : 0
+                            ,'msgPartner' : 1
                             ,"subSchema.msgSend" :1
+                            ,"subSchema.msgRecv" :1
                             ,"subSchema.msgContent" :1
                             ,"fstWrDt" :1
                         }}
                         ,{$sort:{
-                            'fstWrDt' : -1
+                            'msgDate' : -1
                         }}
                         ,{$group:{
-                            _id : "$subSchema.msgSend"
+                            _id : "$msgPartner"
+                            ,'msgPartner' : {'$first':'$msgPartner'}
+                            ,'msgSend' : {'$first':'$subSchema.msgSend'}
                             ,'msgDate' : {'$first' : '$fstWrDt'}
+                            ,'msgRecv' : {'$first':'$subSchema.msgRecv'}
                             ,'msgContent' : {'$first' : '$subSchema.msgContent'}
                         }}
                     ]
@@ -301,9 +323,9 @@ router.post('/msgList',function(req,res){
                     for(let ii=0; ii<msgList.length; ii++){
                         for(let jj=0; jj<usrInfo.length; jj++){
                             if(msgList[ii]._id === usrInfo[jj].usrName){
-                                let temp = msgList;
+                                let temp = msgList[ii];
                                 temp.usrPt = usrInfo[jj].usrPt;
-                                msgList = temp;
+                                msgList[ii] = temp;
                             }
                         }
                         for(let kk = 0; kk<msgNot.length; kk++){
@@ -313,10 +335,10 @@ router.post('/msgList',function(req,res){
                                 msgList = temp;
                             }
                         }
-                        let temp = msgList;
+                        let temp = msgList[ii];
                         temp.checked = false;
                         temp.msgDate = date.getWriteDate(temp.msgDate);
-                        msgList = temp;
+                        msgList[ii] = temp;
                     }
 
                     res.json({

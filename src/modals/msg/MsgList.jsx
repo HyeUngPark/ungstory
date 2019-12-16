@@ -57,9 +57,15 @@ class MsgList extends React.Component {
 
   }
 
-  goPages = (page)=>{
+  goPages = (page,param)=>{
     if(page){
-      this.props.history.push(page);
+      this.props.history.push({
+        pathname: page,
+        search: '',
+        state: {
+          frdName : param ? param : ''
+        }
+      });
       this.toggle();
     }
   }
@@ -176,6 +182,8 @@ class MsgList extends React.Component {
                   >
                     새 메시지 작성
                   </button>
+                  {
+                  this.state.msgList.length > 0 ?
                     <UncontrolledDropdown
                       isOpen={this.state.msgMg}
                     >
@@ -199,6 +207,8 @@ class MsgList extends React.Component {
                           </DropdownItem>
                         </DropdownMenu>
                     </UncontrolledDropdown>
+                    :''
+                  }
                   </span>
               </Col>
             </Row>
@@ -242,7 +252,9 @@ class MsgList extends React.Component {
             return(
             <FormGroup check>
               <Card className="card-profile shadow">
-                <Row className="justify-content-center modal-center form-control-cursor"> 
+                <Row className="justify-content-center modal-center form-control-cursor"
+                     onClick = {e=>{this.goPages('/user/msg-send',msg._id)}}
+                >
                   <Col lg="2">
                     <CardHeader className="text-center border-0 pt-8 pt-md-4 pb-0 pb-md-4">
                     {this.state.deleteCd ?
@@ -291,7 +303,14 @@ class MsgList extends React.Component {
             </Card>
           </FormGroup>
             )})
-        :''
+        :
+        <Card>
+          <Row className="justify-content-center modal-center form-control-cursor"> 
+            <Col lg="12">
+              주고받은 메시지가 없습니다. 새 메시지 버튼을 눌러서 메시지를 주고받아보세요!
+            </Col>
+          </Row>
+        </Card>
         }
         <br />
         <Row className="align-items-center justify-content-center"> 

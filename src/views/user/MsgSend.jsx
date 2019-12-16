@@ -59,6 +59,9 @@ class MsgSend extends React.Component {
         myFrdList : []
       });
     }
+    if(this.props.location.state.frdName){
+      this.selectFrd(-1, this.props.location.state.frdName);
+    }
   }
 
   myFrdSelect = ()=>{

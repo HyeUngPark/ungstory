@@ -924,7 +924,7 @@
                         ,usrActive : aResult[0].usrInfo[0].usrLikePst + aResult[0].cmtInfo[0].pstCmt
                         // ,pstCmt : aResult.pstCmt.length
                         ,usrFrds : aResult[0].usrInfo[0].usrFrds.length
-                        ,pstPts : aResult[0].pstInfo[0].pstPts.length
+                        ,pstPts : aResult[0].pstInfo.length>0 ? aResult[0].pstInfo[0].pstPts.length : 0
                         ,usrPt : aResult[0].usrInfo[0].usrPt
                         ,usrId : aResult[0].usrInfo[0].usrId
                         ,usrName :aResult[0].usrInfo[0].usrName
