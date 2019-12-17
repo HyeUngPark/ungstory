@@ -35,7 +35,11 @@ class LoginProfile extends React.Component {
             ,noticeList : []
         };
         this.getNotice = this.props.callbackFromParent;
-        this.sessionCheck();
+        if(!this.state.seesionCheck){
+            this.sessionCheck();
+        }else{
+            window.location.reload();
+        }
     }
 
     toggle = (e) =>{
@@ -85,13 +89,16 @@ class LoginProfile extends React.Component {
             usrInfo.usrToken = result.usrToken;
             localStorage.setItem('usrInfo',JSON.stringify(usrInfo));
             // this.sessionCheck();
+            this.setState({
+                seesionCheck : true
+            });
         }else if(result.reCd === '04'){
             this.logout();
         }
       }
   
     sessionCheck =()=>{
-      // 세션 체크
+        // 세션 체크
         if(localStorage.getItem('usrInfo')){
             var param={
                 usrToken : JSON.parse(localStorage.getItem('usrInfo')).usrToken

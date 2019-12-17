@@ -73,13 +73,24 @@ class MsgList extends React.Component {
   allSelect = ()=>{
     if(!this.state.allCd){
       // 전체 선택
+      var msgList = this.state.msgList;
+      for(var i=0; i<msgList.length; i++){
+        msgList[i].checked = true;
+      }
+      
       this.setState({
         allCd : true
+        ,msgList : msgList
       });
     }else{
       // 전체 해제
+      var msgList = this.state.msgList;
+      for(var i=0; i<msgList.length; i++){
+        msgList[i].checked = false;
+      }
       this.setState({
         allCd : false
+        ,msgList : msgList
       });
     }
   }
@@ -93,24 +104,59 @@ class MsgList extends React.Component {
         ,msgMg : false
       });
     }else{
+      var msgList = this.state.msgList;
+      for(var i=0; i<msgList.length; i++){
+        msgList[i].checked = false;
+      }
       this.setState({
         deleteCd : false
+        ,allCd : false
+        ,msgList : msgList
       });
+    }
+  }
+
+  msgDelCallback = (rs) =>{
+    if(rs.reCd ==='01'){
+      // 메시지 삭제 성공
+      alert('메시지 삭제 성공');
+      this.setState({
+        deleteCd : false
+        ,msgList : []
+      });
+      this.msgList();
+    }else{
+      // 메시지 삭제 실패
+      alert('메시지 삭제 실패');
+
     }
   }
 
   delEvent =(cd) =>{
     if(cd === 'd'){
-      console.log('메시지 삭제');
+      var delMsg =[];
+      var msgList = this.state.msgList;
+      for(var i=0; i<msgList.length; i++){
+        if(msgList[i].checked){
+          delMsg.push(msgList[i]._id);
+        }
+      }
+      if(delMsg.length>0){
+        let param={
+          usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
+          ,delMsg : delMsg
+        };
+        api.apiSend('put','/msg/msgDelete',param,this.msgDelCallback);
+        
+      }else{
+        alert('삭제할 메시지를 선택해주세요.');
+      }
     }else if(cd === 'c'){
       this.msgDelete(false);
     }
 
   }
-//   openPost =(e, pstPk) =>{
-//     this.imgClick.current.props.pstPk = pstPk;
-//     this.imgClick.current.toggle();
-//   }
+
   msgListCallback = (rs) =>{
     if(rs.reCd ==='01'){
       // 메시지 리스트 조회 성공
@@ -137,7 +183,7 @@ class MsgList extends React.Component {
 
   checkChnage = (msgIdx)=>{
     var msgList = this.state.msgList;
-    msgList[msgIdx] ? msgList[msgIdx] = false : msgList[msgIdx] = true;
+    msgList[msgIdx].checked ? msgList[msgIdx].checked = false : msgList[msgIdx].checked = true;
     this.setState({
       msgList : msgList
     });
@@ -252,8 +298,7 @@ class MsgList extends React.Component {
             return(
             <FormGroup check>
               <Card className="card-profile shadow">
-                <Row className="justify-content-center modal-center form-control-cursor"
-                     onClick = {e=>{this.goPages('/user/msg-send',msg._id)}}
+                <Row className="justify-content-center modal-center"
                 >
                   <Col lg="2">
                     <CardHeader className="text-center border-0 pt-8 pt-md-4 pb-0 pb-md-4">
@@ -261,7 +306,7 @@ class MsgList extends React.Component {
                       <span>
                         <Label check>
                           <Input type="radio" 
-                                name="radio1"
+                                name={"radio"+msgIdx}
                                 checked={msg.checked} 
                                 className="form-input-margin" 
                                 onClick ={e=>{
@@ -272,30 +317,46 @@ class MsgList extends React.Component {
                         &nbsp;
                       </span>
                       :''}
-                          <div className="avatar avatar-sm rounded-circle">
-                            <a href="javascript:void(0)" 
-                              onClick={e => popup.openImg(msg.usrPt)}>
-                              <img
-                                alt="..."
-                                className="rounded-circle"
-                                src={(msg.usrPt && msg.usrPt !=="") 
-                                ? msg.usrPt
-                                : require("assets/img/theme/no-profile-130x130.png")}
-                              />
-                            </a>
-                          </div>
-                        </CardHeader>
+                      <div className="avatar avatar-sm rounded-circle">
+                        <a href="javascript:void(0)" 
+                          onClick={e => popup.openImg(msg.usrPt)}>
+                          <img
+                            alt="..."
+                            className="rounded-circle"
+                            src={(msg.usrPt && msg.usrPt !=="") 
+                            ? msg.usrPt
+                            : require("assets/img/theme/no-profile-130x130.png")}
+                          />
+                        </a>
+                      </div>
+                    </CardHeader>
                   </Col>
-                  <Col lg="3">
+                  <Col 
+                    lg="3"
+                    className ="form-control-cursor"
+                    onClick = {e=>{this.goPages('/user/msg-send',msg._id)}}
+                  >
                         {msg._id}
                   </Col>
-                  <Col lg="4">
+                  <Col 
+                    lg="4"
+                    className ="form-control-cursor"
+                    onClick = {e=>{this.goPages('/user/msg-send',msg._id)}}
+                  >
                         {msg.msgContent}
                   </Col>
-                  <Col lg="1">
+                  <Col 
+                    lg="1"
+                    className ="form-control-cursor"
+                    onClick = {e=>{this.goPages('/user/msg-send',msg._id)}}
+                  >
                         {msg.msgNot>0 ? msg.msgNot : ''}
                   </Col>
-                  <Col lg="2">
+                  <Col 
+                    lg="2"
+                    className ="form-control-cursor"
+                    onClick = {e=>{this.goPages('/user/msg-send',msg._id)}}
+                  >
                         {msg.msgDate}
                   </Col>
               </Row>

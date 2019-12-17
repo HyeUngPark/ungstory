@@ -116,7 +116,29 @@ router.msgSend = (msgInfo) =>{
 router.post('/msgSearch',function(req, res){
     var params = req.body;
     schema.aggregate([
-        {$match : {
+        {$match:{
+            wkCd:'MSG'
+            ,wkDtCd:'STA'
+            ,'subSchema.usrName' : params.usrName
+            ,'subSchema.msgPartner' : params.searchName
+        }}
+        ,{$project:{
+            _id : 1,
+            'subSchema.msgPartner' : 1
+            ,'subSchema.msgDelDate' : 1    
+        }}
+        ,{$group:{
+            _id : '$_id',
+            'msgPartner' : {'$first' : '$subSchema.msgPartner'}
+            ,'msgDelDate' : {'$first' : '$subSchema.msgDelDate'}
+        }}
+    ],function(stErr, stResult){
+        if (stErr) {
+            console.log('error \n', stErr);
+            return res.status(500).send("메시지 조회 실패 >> " + err)
+        }
+
+        var matchQuery = {
             wkCd : 'MSG'
             ,wkDtCd : 'MSG'
             ,$or:[
@@ -129,52 +151,66 @@ router.post('/msgSearch',function(req, res){
                     ,{"subSchema.msgSend" : params.searchName}
                 ]}
             ]
-        }}
-        ,{$project:{
-            _id : 1
-            ,"subSchema.usrFrds" : 1
-            ,"subSchema.msgSend" : 1
-            ,"subSchema.msgRecv" : 1
-            ,"subSchema.msgContent" : 1
-            ,"subSchema.msgDate" : 1
-            ,"fstWrDt" :1
-        }}
-        ,{$group:{
-            _id : "$_id"
-            ,"msgSend" : {"$first":"$subSchema.msgSend"}
-            ,"msgRecv" : {"$first":"$subSchema.msgRecv"}
-            ,"msgContent" : {"$first":"$subSchema.msgContent"}
-            ,"msgDate" : {"$max":"$fstWrDt"}
-        }}
-        ,{$sort:{
-            'msgDate' : 1
-        }}
-    ],function(err, result){
-        if (err) {
-            console.log('error \n', err);
-            return res.status(500).send("내 메시지 리스트 조회 실패 >> " + err)
         }
-        if (result.length > 0) {
-            for(let i=0; i<result.length; i++){
-                let temp=result[i];
-                temp.msgDate = date.dateFormat(result[i].msgDate,'YYYY-MM-DD hh:mm:ss');
-                result[i] = temp;
+        if (stResult.length > 0) {
+            if(stResult[0].msgDelDate !==''){
+                matchQuery['subSchema.msgDate'] = {$gt : stResult[0].msgDelDate};
             }
-            res.json({
-                reCd : '01'
-                ,msgList : result
-            }); 
-        }else{
-            // 메시지 없음
-            res.json({
-                reCd : '03'
-            });
         }
+        console.log(matchQuery);
+        schema.aggregate([
+            {$match : {
+              matchQuery 
+            }}
+            ,{$project:{
+                _id : 1
+                ,"subSchema.usrFrds" : 1
+                ,"subSchema.msgSend" : 1
+                ,"subSchema.msgRecv" : 1
+                ,"subSchema.msgContent" : 1
+                ,"subSchema.msgDate" : 1
+                ,"fstWrDt" :1
+            }}
+            ,{$group:{
+                _id : "$_id"
+                ,"msgSend" : {"$first":"$subSchema.msgSend"}
+                ,"msgRecv" : {"$first":"$subSchema.msgRecv"}
+                ,"msgContent" : {"$first":"$subSchema.msgContent"}
+                ,"msgDate" : {"$max":"$fstWrDt"}
+            }}
+            ,{$sort:{
+                'msgDate' : 1
+            }}
+        ],function(err, result){
+            if (err) {
+                console.log('error \n', err);
+                return res.status(500).send("내 메시지 리스트 조회 실패 >> " + err)
+            }
+            if (result.length > 0) {
+                console.log(result);
+                for(let i=0; i<result.length; i++){
+                    let temp=result[i];
+                    temp.msgDate = date.dateFormat(result[i].msgDate,'YYYY-MM-DD hh:mm:ss');
+                    result[i] = temp;
+                }
+                res.json({
+                    reCd : '01'
+                    ,msgList : result
+                }); 
+            }else{
+                // 메시지 없음
+                res.json({
+                    reCd : '03'
+                });
+            }
+        });
     });
 });
 
 router.post('/msgList',function(req,res){
     var params = req.body;
+
+    var stRs;
     schema.aggregate([
         {$match:{
             wkCd:'MSG'
@@ -184,19 +220,7 @@ router.post('/msgList',function(req,res){
         ,{$project:{
             _id : 1,
             'subSchema.msgPartner' : 1
-            ,'subSchema.msgDelDate' : {
-                $cond : [
-                    {$or : [
-                        {$eq : ['$subSchema.msgDelDate' , '']}
-                        ,{$lte : [
-                            {$toDate : '$subSchema.msgDelDate'}
-                            ,date.getDate()
-                        ]}
-                    ]}
-                    ,"$subSchema.msgDelDate"
-                    ,"$unset"
-                ]
-            }
+            ,'subSchema.msgDelDate' : 1    
         }}
         ,{$group:{
             _id : '$_id',
@@ -209,6 +233,7 @@ router.post('/msgList',function(req,res){
             return res.status(500).send("메시지 조회 실패 >> " + err)
         }
         if (stResult.length > 0) {
+            stRs = stResult;
             var msgPartner =[];
             for(let i=0; i<stResult.length; i++){
                 msgPartner.push(stResult[i].msgPartner);
@@ -265,16 +290,16 @@ router.post('/msgList',function(req,res){
                             ,"subSchema.msgContent" :1
                             ,"fstWrDt" :1
                         }}
-                        ,{$sort:{
-                            'msgDate' : -1
-                        }}
                         ,{$group:{
                             _id : "$msgPartner"
                             ,'msgPartner' : {'$first':'$msgPartner'}
                             ,'msgSend' : {'$first':'$subSchema.msgSend'}
-                            ,'msgDate' : {'$first' : '$fstWrDt'}
+                            ,'msgDate' : {'$max' : '$fstWrDt'}
                             ,'msgRecv' : {'$first':'$subSchema.msgRecv'}
-                            ,'msgContent' : {'$first' : '$subSchema.msgContent'}
+                            ,'msgContent' : {'$last' : '$subSchema.msgContent'}
+                        }}
+                        ,{$sort:{
+                            'msgDate' : -1
                         }}
                     ]
                     ,msgNot : [
@@ -316,11 +341,27 @@ router.post('/msgList',function(req,res){
                     return res.status(500).send("메시지 리스트 조회 실패 >> " + err)
                 }
                 if (msgResult.length > 0) {
+                    console.log('메시지 리스트 조회 성공 >> ',stRs);
                     var msgList = msgResult[0].msgList;
                     var usrInfo = msgResult[0].usrInfo;
                     var msgNot = msgResult[0].msgNot;
 
+                    var delList = [];
                     for(let ii=0; ii<msgList.length; ii++){
+                        for(let ll=0; ll<stRs.length; ll++){
+                            if(stRs[ll].msgDelDate 
+                                && stRs[ll].msgPartner === msgList[ii]._id
+                                && new Date(stRs[ll].msgDelDate) > new Date(msgList[ii].msgDate)
+                            ){
+                                if(delList.indexOf(ii) <0){
+                                    console.log(ii,' 마지막 메시지 날짜 >> ', new Date(msgList[ii].msgDate));
+                                    console.log(ii,' 메시지 숨김 처리 >> ',msgList[ii].msgContent);
+                                    console.log(ii,' 삭제 날짜 >> ', new Date(stRs[ll].msgDelDate));
+                                    delList.indexOf(ii) <0 ?  delList.push(ii) : '';
+                                }
+                            }
+                        }
+
                         for(let jj=0; jj<usrInfo.length; jj++){
                             if(msgList[ii]._id === usrInfo[jj].usrName){
                                 let temp = msgList[ii];
@@ -340,7 +381,17 @@ router.post('/msgList',function(req,res){
                         temp.msgDate = date.getWriteDate(temp.msgDate);
                         msgList[ii] = temp;
                     }
-
+                    if(delList.length>0){
+                        delList.sort(function(a, b){
+                            return b - a;
+                        });
+                        for(var i=0; i<delList.length; i++){
+                            let temp = msgList;
+                            temp.splice(delList[i],1);
+                            msgList = temp;
+                        }
+                    }
+                    
                     res.json({
                         reCd : '01'
                         ,msgList : msgList
@@ -358,6 +409,37 @@ router.post('/msgList',function(req,res){
             console.log('★★★ 메시지 없음 ★★★');
             res.json({
                 reCd : '03'
+            });
+        }
+    });
+});
+
+router.put('/msgDelete',function(req, res){
+    let params = req.body;
+
+    schema.update({
+        wkCd : 'MSG'
+        ,wkDtCd : 'STA'
+        ,'subSchema.usrName' : params.usrName
+        ,'subSchema.msgPartner' : {$in : params.delMsg}
+    }
+    , { $set: {
+        lstWrDt : date.getDate()
+        ,'subSchema.msgDelDate': date.getDate()
+    }}
+    , function(fErr, fResult) {
+        if (fErr) {
+            console.log('message delete error \n', fErr);
+            return res.status(500).send("메시지 삭제 실패 " + fErr)
+        }
+        if (fResult.n) {
+            console.log(params.delMsg.length,'명 메시지 삭제 완료');
+            res.json({
+                reCd : '01'
+            });
+        }else{
+            res.json({
+                reCd : '02'
             });
         }
     });

@@ -112,6 +112,12 @@ class Login extends React.Component {
     }));
   }
 
+  goPage = (page) =>{
+    if(page){
+      this.props.history.push(page);
+    }
+  }
+
   render() {
     return (
       <>
@@ -230,8 +236,8 @@ class Login extends React.Component {
             <Col className="text-right" xs="6">
               <a
                 className="text-light"
-                href="#pablo"
-                onClick={e => e.preventDefault()}
+                href="javascript:void(0)"
+                onClick={e => this.goPage('/auth/register')}
               >
                 <small>회원가입</small>
               </a>
