@@ -154,14 +154,16 @@ router.post('/msgSearch',function(req, res){
         }
         if (stResult.length > 0) {
             if(stResult[0].msgDelDate !==''){
-                matchQuery['subSchema.msgDate'] = {$gt : stResult[0].msgDelDate};
+                // matchQuery['fstWrDt'] = {$gte : {$toDate:stResult[0].msgDelDate}};
+                matchQuery['fstWrDt'] = {$gte : new Date(stResult[0].msgDelDate)};
             }
         }
-        console.log(matchQuery);
+        // matchQuery = JSON.parse(matchQuery);
+
         schema.aggregate([
-            {$match : {
+            {$match : 
               matchQuery 
-            }}
+            }
             ,{$project:{
                 _id : 1
                 ,"subSchema.usrFrds" : 1
@@ -186,8 +188,8 @@ router.post('/msgSearch',function(req, res){
                 console.log('error \n', err);
                 return res.status(500).send("내 메시지 리스트 조회 실패 >> " + err)
             }
+            console.log(result);
             if (result.length > 0) {
-                console.log(result);
                 for(let i=0; i<result.length; i++){
                     let temp=result[i];
                     temp.msgDate = date.dateFormat(result[i].msgDate,'YYYY-MM-DD hh:mm:ss');
@@ -318,7 +320,7 @@ router.post('/msgList',function(req,res){
                             ,"subSchema.readYn" : {
                                 $cond:[
                                     "$subSchema.readYn"
-                                    ,false
+                                    ,0
                                     ,1
                                 ]
                             }
@@ -371,9 +373,9 @@ router.post('/msgList',function(req,res){
                         }
                         for(let kk = 0; kk<msgNot.length; kk++){
                             if(msgList[ii]._id === msgNot[kk]._id){
-                                let temp = msgList;
+                                let temp = msgList[ii];
                                 temp.msgNot = msgNot[kk].notCount;
-                                msgList = temp;
+                                msgList[ii] = temp;
                             }
                         }
                         let temp = msgList[ii];
