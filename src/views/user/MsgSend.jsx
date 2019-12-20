@@ -23,7 +23,10 @@ import FrdInfo from '../../modals/frd/FrdInfo';
 
 import socketIoClient from 'socket.io-client';
 
+import UserNavbar  from "components/Navbars/UserNavbar.jsx";
+
 var socket;
+var userNavbar = new UserNavbar();
 
 class MsgSend extends React.Component {
   constructor(props) {
@@ -272,13 +275,38 @@ class MsgSend extends React.Component {
             ,msgNot : memList[idx].msgNot+1
           };
           memList[idx]=temp;
+        }else{
+          let temp ={
+            usrName : data[0]
+            ,msgNot : 1
+          };
+          memList.push(temp);
         } 
         this.setState({
           msgMemList : memList
         });
+
+        // 메시지 알림 추가
+        this.msgNotAdd(data);
       }
-      // socket.emit('chat message','클라이언트 소켓 테스트');
     });
+  }
+
+  msgNotAdd = (data) =>{
+    let param={
+      usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
+      ,notCt : data[0]
+    };
+    api.apiSend('post','/not/msgNotAdd',param,this.msgNotAddCallback);      
+  }
+
+  msgNotAddCallback = (rs) => {
+    if(rs.reCd === '01'){
+      console.log('메시지 알림 추가 성공\n',userNavbar);
+      userNavbar.noticeClear();
+    }else{
+      console.log('메시지 알림 추가 실패');
+    }
   }
 
   componentWillUnmount(){

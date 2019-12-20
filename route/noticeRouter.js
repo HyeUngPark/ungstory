@@ -136,7 +136,31 @@ router.post('/getNoticeList',function(req, res){
         }
         res.json(resultList);
     });
-
 });
+
+    router.post('/msgNotAdd', function(req, res){
+        var params = req.body;
+        ntSchema.noticeCt = params.notCt;
+        ntSchema.usrName = params.usrName;
+        ntSchema.readYn = false;
+        schema.create({
+            wkCd: 'NOT'
+            ,wkDtCd : "MSG"
+            ,fstWrDt: date.getDate() // 최초 작성일
+            ,lstWrDt: date.getDate() // 최종 작성일
+            ,subSchema: ntSchema
+        }).then((result)=>{
+            console.log("★★★★ 메시지 알람 추가 성공 ★★★★\n",result);
+            res.json({
+                reCd: '01'
+            });
+        }).catch((err)=>{
+            console.log("★★★★ 메시지 알람 추가 실패 ★★★★\n",err);
+            res.json({
+                reCd : '02'
+            });
+        });
+
+    });
 
 module.exports = router;

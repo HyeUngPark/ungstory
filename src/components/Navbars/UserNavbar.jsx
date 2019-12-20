@@ -44,6 +44,7 @@ class UserNavbar extends React.Component {
     }
 }
   noticeClearCallback = (rs) => {
+    console.log("userNavBar's noticeClear cb()");
     if(rs.reCd === '01'){
       // console.log('친구 알람 클리어 성공');
     }else{
@@ -58,6 +59,7 @@ class UserNavbar extends React.Component {
   
   noticeClear = () => {
     // notice clear callback
+    console.log("userNavBar's noticeClear()");
     if(localStorage.getItem('usrInfo')){
       let param={
         usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
@@ -204,4 +206,4 @@ class UserNavbar extends React.Component {
   }
 }
 
-export default UserNavbar;
+export default UserNavbar

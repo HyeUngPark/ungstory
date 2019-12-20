@@ -160,51 +160,74 @@ router.post('/msgSearch',function(req, res){
         }
         // matchQuery = JSON.parse(matchQuery);
 
-        schema.aggregate([
-            {$match : 
-              matchQuery 
+        schema.updateMany({
+            wkCd : 'NOT'
+            ,wkDtCd : 'MSG'
+            ,fstWrDt:{"$lte":date.getDate()}
+            ,"subSchema.usrName" : params.usrName
+            ,"subSchema.noticeCt" : params.searchName
+            ,'subSchema.readYn' : false
+        }
+        , { $set: {
+            lstWrDt : date.getDate()
+            ,'subSchema.readYn': true
+        }}
+        , function(uErr, uResult) {
+            if (uErr) {
+                console.log('error \n', uErr);
+                return res.status(500).send("메시지 읽기 처리 실패 " + uErr)
             }
-            ,{$project:{
-                _id : 1
-                ,"subSchema.usrFrds" : 1
-                ,"subSchema.msgSend" : 1
-                ,"subSchema.msgRecv" : 1
-                ,"subSchema.msgContent" : 1
-                ,"subSchema.msgDate" : 1
-                ,"fstWrDt" :1
-            }}
-            ,{$group:{
-                _id : "$_id"
-                ,"msgSend" : {"$first":"$subSchema.msgSend"}
-                ,"msgRecv" : {"$first":"$subSchema.msgRecv"}
-                ,"msgContent" : {"$first":"$subSchema.msgContent"}
-                ,"msgDate" : {"$max":"$fstWrDt"}
-            }}
-            ,{$sort:{
-                'msgDate' : 1
-            }}
-        ],function(err, result){
-            if (err) {
-                console.log('error \n', err);
-                return res.status(500).send("내 메시지 리스트 조회 실패 >> " + err)
-            }
-            console.log(result);
-            if (result.length > 0) {
-                for(let i=0; i<result.length; i++){
-                    let temp=result[i];
-                    temp.msgDate = date.dateFormat(result[i].msgDate,'YYYY-MM-DD hh:mm:ss');
-                    result[i] = temp;
-                }
-                res.json({
-                    reCd : '01'
-                    ,msgList : result
-                }); 
+            if (uResult.n) {
+                console.log('★★★ 메시지 읽기 처리 성공 ★★★');
             }else{
-                // 메시지 없음
-                res.json({
-                    reCd : '03'
-                });
+                console.log('★★★ 메시지 읽기 처리할 대상 없음 ★★★');
             }
+            schema.aggregate([
+                {$match : 
+                  matchQuery 
+                }
+                ,{$project:{
+                    _id : 1
+                    ,"subSchema.usrFrds" : 1
+                    ,"subSchema.msgSend" : 1
+                    ,"subSchema.msgRecv" : 1
+                    ,"subSchema.msgContent" : 1
+                    ,"subSchema.msgDate" : 1
+                    ,"fstWrDt" :1
+                }}
+                ,{$group:{
+                    _id : "$_id"
+                    ,"msgSend" : {"$first":"$subSchema.msgSend"}
+                    ,"msgRecv" : {"$first":"$subSchema.msgRecv"}
+                    ,"msgContent" : {"$first":"$subSchema.msgContent"}
+                    ,"msgDate" : {"$max":"$fstWrDt"}
+                }}
+                ,{$sort:{
+                    'msgDate' : 1
+                }}
+            ],function(err, result){
+                if (err) {
+                    console.log('error \n', err);
+                    return res.status(500).send("내 메시지 리스트 조회 실패 >> " + err)
+                }
+                console.log(result);
+                if (result.length > 0) {
+                    for(let i=0; i<result.length; i++){
+                        let temp=result[i];
+                        temp.msgDate = date.dateFormat(result[i].msgDate,'YYYY-MM-DD hh:mm:ss');
+                        result[i] = temp;
+                    }
+                    res.json({
+                        reCd : '01'
+                        ,msgList : result
+                    }); 
+                }else{
+                    // 메시지 없음
+                    res.json({
+                        reCd : '03'
+                    });
+                }
+            });
         });
     });
 });

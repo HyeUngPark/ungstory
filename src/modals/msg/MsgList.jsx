@@ -3,7 +3,6 @@ import {Button,
         Modal, 
         ModalBody,
         Card, 
-        CardHeader,
         Label,
         Input,
         Row, 
@@ -19,7 +18,6 @@ import * as api from "utils/api";
 import * as popup from "utils/popup";
 import { withRouter } from 'react-router-dom';
 
-import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 
 class MsgList extends React.Component {
@@ -38,12 +36,19 @@ class MsgList extends React.Component {
     this.handleSubmit = this.handleSubmit.bind(this);
     // this.goPage = this.props.callbackFromParent;    
     // this.imgDrop = React.createRef();
-    this.msgList();
+    // this.msgList();
   }
   toggle = (e) => {
     // if(!this.state.firstCd){
     //   this.frdInfo();
     // }
+    if(!this.state.msgModal){
+      this.msgList();
+    }else{
+      this.setState({
+        msgMg : false
+      });
+    }
     this.setState({
         msgModal: !this.state.msgModal
     });
@@ -65,6 +70,9 @@ class MsgList extends React.Component {
         state: {
           frdName : param ? param : ''
         }
+      });
+      this.setState({
+        msgMg : false
       });
       this.toggle();
     }
@@ -298,10 +306,12 @@ class MsgList extends React.Component {
             return(
             <FormGroup check>
               <Card className="card-profile shadow">
-                <Row className="justify-content-center modal-center"
-                >
-                  <Col lg="2">
-                    <CardHeader className="text-center border-0 pt-8 pt-md-4 pb-0 pb-md-4">
+                <Row 
+                  lg="12"
+                  className = {`justify-content-center modal-center ${msg.msgNot>0 ? 'chat-unread' : 'chat-read'}`}
+                  >
+                  <Col lg="1">
+                    <span className="text-center border-0 pt-8 pt-md-4 pb-0 pb-md-4">
                     {this.state.deleteCd ?
                       <span>
                         <Label check>
@@ -329,10 +339,10 @@ class MsgList extends React.Component {
                           />
                         </a>
                       </div>
-                    </CardHeader>
+                    </span>
                   </Col>
                   <Col 
-                    lg="3"
+                    lg="2"
                     className ="form-control-cursor"
                     onClick = {e=>{this.goPages('/user/msg-send',msg._id)}}
                   >
@@ -350,17 +360,17 @@ class MsgList extends React.Component {
                     className ="form-control-cursor"
                     onClick = {e=>{this.goPages('/user/msg-send',msg._id)}}
                   >
-                        {msg.msgNot>0 ? msg.msgNot : ''}
+                        {msg.msgNot>0 ? <b className="chat-notice">{msg.msgNot}</b> : ''}
                   </Col>
                   <Col 
-                    lg="2"
+                    lg="4"
                     className ="form-control-cursor"
                     onClick = {e=>{this.goPages('/user/msg-send',msg._id)}}
                   >
                         {msg.msgDate}
                   </Col>
               </Row>
-                <hr className="chat-hr"/>
+                <hr className="chat-hr-none"/>
             </Card>
           </FormGroup>
             )})
