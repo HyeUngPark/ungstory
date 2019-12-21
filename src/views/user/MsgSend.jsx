@@ -302,10 +302,10 @@ class MsgSend extends React.Component {
 
   msgNotAddCallback = (rs) => {
     if(rs.reCd === '01'){
-      console.log('메시지 알림 추가 성공\n',userNavbar);
+      // console.log('메시지 알림 추가 성공\n',userNavbar);
       userNavbar.noticeClear();
     }else{
-      console.log('메시지 알림 추가 실패');
+      // console.log('메시지 알림 추가 실패');
     }
   }
 

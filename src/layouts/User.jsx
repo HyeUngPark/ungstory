@@ -49,7 +49,7 @@ class User extends React.Component {
           {...this.props}
           routes={routes}
           logo={{
-            innerLink: "/user/index",
+            innerLink: "/",
             imgSrc: require("assets/img/brand/ungstory_logo.png"),
             imgAlt: "..."
           }}

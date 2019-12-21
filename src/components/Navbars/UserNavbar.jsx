@@ -18,12 +18,16 @@ import MsgList from '../../modals/msg/MsgList';
 import * as api from "utils/api";
 
 class UserNavbar extends React.Component {
-  state ={
-    loginYn : false
-    ,noticeList : {}
-  };
   constructor(props){
     super(props);
+    this.state ={
+      loginYn : false
+      ,noticeList : {
+        frdNotice : 0
+        ,msgNotice : 0
+        ,pstNotice : 0
+      }
+    };
   }
   sessionCheck =()=>{
     // 세션 체크
@@ -42,24 +46,24 @@ class UserNavbar extends React.Component {
     if(localStorage.getItem('usrInfo')){
         this.sessionCheck();
     }
-}
-  noticeClearCallback = (rs) => {
-    console.log("userNavBar's noticeClear cb()");
-    if(rs.reCd === '01'){
+  }
+  noticeClearCallback = (rs) =>{
+    if(rs.reCd === '01' && rs.noticeList){
       // console.log('친구 알람 클리어 성공');
-    }else{
-      // console.log('친구 알람 클리어 실패');
-    }
-    if(rs.noticeList){
+      console.log("userNavBar's noticeClear change state\n",rs);
       this.setState({
         noticeList : rs.noticeList
-      });
+      },function(rs){
+        console.log('rs >> ',rs);
+        console.log('noticeList >> ',this.state.noticeList);
+      }.bind(this));
+    }else{
+      // console.log('친구 알람 클리어 실패');
     }
   }
   
   noticeClear = () => {
     // notice clear callback
-    console.log("userNavBar's noticeClear()");
     if(localStorage.getItem('usrInfo')){
       let param={
         usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
@@ -114,7 +118,7 @@ class UserNavbar extends React.Component {
                         }}
                       >
                           <FrdReqList callbackFromParent={this.noticeClear}/>
-                            {this.state.noticeList && this.state.noticeList.frdNotice > 0 ?
+                            {this.state.noticeList.frdNotice > 0 ?
                               <span className="form-control-notice"
                                     // value={index} 
                                     style ={{
@@ -143,7 +147,7 @@ class UserNavbar extends React.Component {
                         }}
                     >
                       <MsgList />
-                          {this.state.noticeList && this.state.noticeList.msgNotice > 0 ?
+                          {this.state.noticeList.msgNotice > 0 ?
                             <span className="form-control-notice"
                                   // value={index} 
                                   style ={{
@@ -178,7 +182,7 @@ class UserNavbar extends React.Component {
                           <i className=" ni ni-bulb-61"></i>
                           &nbsp;
                           </a>
-                            {this.state.noticeList && this.state.noticeList.pstNotice > 0 ?
+                            {this.state.noticeList.pstNotice > 0 ?
                               <span className="form-control-notice"
                                     // value={index} 
                                     style ={{
