@@ -21,42 +21,21 @@ class UserNavbar extends React.Component {
   constructor(props){
     super(props);
     this.state ={
-      loginYn : false
-      ,noticeList : {
+      noticeList : {
         frdNotice : 0
         ,msgNotice : 0
         ,pstNotice : 0
       }
     };
   }
-  sessionCheck =()=>{
-    // 세션 체크
-    let usrToken = JSON.parse(localStorage.getItem('usrInfo')).usrToken
-    if(usrToken){
-      this.setState({
-        loginYn : true
-      });
-    }else{
-      this.setState({
-        loginYn : false
-      });
-    }
-  }
-  componentDidMount(){
-    if(localStorage.getItem('usrInfo')){
-        this.sessionCheck();
-    }
-  }
+  
   noticeClearCallback = (rs) =>{
     if(rs.reCd === '01' && rs.noticeList){
       // console.log('친구 알람 클리어 성공');
       console.log("userNavBar's noticeClear change state\n",rs);
       this.setState({
         noticeList : rs.noticeList
-      },function(rs){
-        console.log('rs >> ',rs);
-        console.log('noticeList >> ',this.state.noticeList);
-      }.bind(this));
+      });
     }else{
       // console.log('친구 알람 클리어 실패');
     }
@@ -79,6 +58,27 @@ class UserNavbar extends React.Component {
   }
 
   render() {
+    UserNavbar.defaultProps = {
+      ntClear: ()=>{
+        if(localStorage.getItem('usrInfo')){
+         console.log('ntClear()');
+          let param={
+            usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
+          };
+          api.apiSend('post','/not/getNoticeList',param,(rs)=>{
+            if(rs.reCd === '01' && rs.noticeList){
+              // console.log('친구 알람 클리어 성공');
+              console.log("userNavBar's noticeClear change state\n",rs);
+              this.setState({
+                noticeList : rs.noticeList
+              });
+            }else{
+              console.log('친구 알람 클리어 실패');
+            }
+          });
+        }
+      }
+    };
     return (
       <>
         <Navbar className="navbar-top navbar-dark" expand="md" id="navbar-main">
@@ -86,7 +86,7 @@ class UserNavbar extends React.Component {
             <Link
               className="h4 mb-0 text-white text-uppercase d-none d-lg-inline-block"
               to="/"
-            >
+              >
               {this.props.brandText}
             </Link>
             <Form className="justify-content-center navbar-search navbar-search-dark form-inline mr-3 d-md-flex ml-lg-auto">
@@ -106,7 +106,7 @@ class UserNavbar extends React.Component {
               {/* d-none */}
               <Form className="justify-content-center navbar-search navbar-search-dark form-inline mr-3 d-md-flex ml-lg-auto">
               <div
-                style={{ display: (this.state.loginYn ? 'inherit' : 'none') }}
+                style={{ display: ((localStorage.getItem('usrInfo') && JSON.parse(localStorage.getItem('usrInfo')).usrToken) ? 'inherit' : 'none') }}
               >
               {/* 친구추가 알림 */}
               <FormGroup className="mb-0 form-control-cursor">
@@ -146,7 +146,7 @@ class UserNavbar extends React.Component {
                           position: "relative"
                         }}
                     >
-                      <MsgList />
+                      <MsgList/>
                           {this.state.noticeList.msgNotice > 0 ?
                             <span className="form-control-notice"
                                   // value={index} 

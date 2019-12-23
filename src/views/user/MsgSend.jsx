@@ -26,7 +26,8 @@ import socketIoClient from 'socket.io-client';
 import UserNavbar  from "components/Navbars/UserNavbar.jsx";
 
 var socket;
-var userNavbar = new UserNavbar();
+
+var notice = <UserNavbar/>;
 
 class MsgSend extends React.Component {
   constructor(props) {
@@ -41,6 +42,7 @@ class MsgSend extends React.Component {
       ,msgList : []
       ,myFrdList : []
       ,msgMemList : []
+      ,userNavbar : <UserNavbar/>
     }
     this.myFrdSelect();
   }
@@ -143,6 +145,9 @@ class MsgSend extends React.Component {
         msgList : []
       });
     }
+    let notice = <UserNavbar/>;
+    notice.props.ntClear();
+
   }
   selectFrd=(frdIdx, selectName)=>{
     // 해당하는 친구 메시지 조회
@@ -168,7 +173,7 @@ class MsgSend extends React.Component {
     const itemToFind = memList.find(function(item) {
       return item.usrName === select.usrName
     });
-    const idx = memList.indexOf(itemToFind) 
+    const idx = memList.indexOf(itemToFind); 
     if (idx < 0){
       let temp={
         usrName : select.usrName
@@ -300,10 +305,16 @@ class MsgSend extends React.Component {
     api.apiSend('post','/not/msgNotAdd',param,this.msgNotAddCallback);      
   }
 
+  noticeClear = () =>{
+    let notice = <UserNavbar/>;
+    notice.props.ntClear();
+  }
+
   msgNotAddCallback = (rs) => {
     if(rs.reCd === '01'){
       // console.log('메시지 알림 추가 성공\n',userNavbar);
-      userNavbar.noticeClear();
+      // console.log(this.state.userNavbar.props);
+      this.noticeClear();
     }else{
       // console.log('메시지 알림 추가 실패');
     }

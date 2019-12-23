@@ -34,7 +34,6 @@ class MsgList extends React.Component {
         ,msgList : []
     };
     this.handleSubmit = this.handleSubmit.bind(this);
-    // this.goPage = this.props.callbackFromParent;    
     // this.imgDrop = React.createRef();
     // this.msgList();
   }

@@ -41,9 +41,8 @@ router.msgSend = (msgInfo) =>{
         },function(fErr, fResult){
             if (fErr) {
                 console.log('error \n', err);
-                return res.status(500).send("mewssage state select error >> " + err)
+                return res.status(500).send("message state select error >> " + err)
             }
-
             if (fResult.length === 0) {
                 var msgStateSchema1 = {};
                 var msgStateSchema2 = {};
@@ -73,7 +72,7 @@ router.msgSend = (msgInfo) =>{
                     ,subSchema: msgStateSchema2
                 }
                 ]).then((result)=>{
-                    console.log("★★★ msg state save success ★★★\n",result);
+                    console.log("★★★ msg state save success ★★★\n");
                     return '01';
                 }).catch((err)=>{
                     console.log("★★★ msg state save fail ★★★\n",err);
