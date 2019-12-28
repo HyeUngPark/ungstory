@@ -29,9 +29,6 @@ import {
   Button
 } from "reactstrap";
 
-import LoginProfile from '../../views/auth/LoginProfile';
-import * as api from "utils/api";
-
 class Sidebar extends React.Component {
   state = {
     collapseOpen: false

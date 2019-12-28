@@ -1,8 +1,6 @@
 import { Map, List } from 'immutable';
 import { handleActions, createAction } from 'redux-actions';
 
-import * as api from "api/api";
-
 // import { connect } from 'react-redux';
 // import { bindActionCreators } from 'redux';
 
