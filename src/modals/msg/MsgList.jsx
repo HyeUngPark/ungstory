@@ -19,6 +19,7 @@ import * as popup from "utils/popup";
 import { withRouter } from 'react-router-dom';
 
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
+import MsgSend from '../../views/user/MsgSend';
 
 class MsgList extends React.Component {
   constructor(props) {
@@ -62,7 +63,8 @@ class MsgList extends React.Component {
   }
 
   goPages = (page,param)=>{
-    if(page){
+    var nowPage = window.location.pathname;
+    if(nowPage !== '/user/msg-send' && page){
       this.props.history.push({
         pathname: page,
         search: '',
@@ -70,6 +72,13 @@ class MsgList extends React.Component {
           frdName : param ? param : ''
         }
       });
+      this.setState({
+        msgMg : false
+      });
+      this.toggle();
+    }else if(nowPage === '/user/msg-send'){
+      let msgSend = <MsgSend/>;
+      msgSend.props.frdSelect(param);
       this.setState({
         msgMg : false
       });

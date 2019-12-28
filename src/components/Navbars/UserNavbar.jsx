@@ -61,14 +61,12 @@ class UserNavbar extends React.Component {
     UserNavbar.defaultProps = {
       ntClear: ()=>{
         if(localStorage.getItem('usrInfo')){
-         console.log('ntClear()');
           let param={
             usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
           };
           api.apiSend('post','/not/getNoticeList',param,(rs)=>{
             if(rs.reCd === '01' && rs.noticeList){
               // console.log('친구 알람 클리어 성공');
-              console.log("userNavBar's noticeClear change state\n",rs);
               this.setState({
                 noticeList : rs.noticeList
               });

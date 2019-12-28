@@ -149,7 +149,7 @@ class MsgSend extends React.Component {
     notice.props.ntClear();
 
   }
-  selectFrd=(frdIdx, selectName)=>{
+  selectFrd = (frdIdx, selectName)=>{
     // 해당하는 친구 메시지 조회
     var select ={};
     var searchList = this.state.searchList;
@@ -326,6 +326,73 @@ class MsgSend extends React.Component {
   }
 
   render() {
+    MsgSend.defaultProps = {
+      frdSelect : (frdName)=>{
+        if(localStorage.getItem('usrInfo')){
+          var select ={};
+          var frdList = this.state.myFrdList;
+            const itemToFind = frdList.find(function(item) {
+              return item.usrName === frdName
+            });
+            const idx = frdList.indexOf(itemToFind) 
+            if (idx > -1){
+              select.usrName = frdList[idx].usrName;
+              select.usrPt = frdList[idx].usrPt;
+            } 
+          }
+      
+          let memList = this.state.msgMemList;
+          const itemToFind = memList.find(function(item) {
+            return item.usrName === select.usrName
+          });
+          const idx = memList.indexOf(itemToFind); 
+          if (idx < 0){
+            let temp={
+              usrName : select.usrName
+              ,msgNot : 0
+            }
+            memList.push(temp);
+          }else{
+            let temp={
+              usrName : memList[idx].usrName
+              ,msgNot : 0
+            }
+            memList[idx] = temp;
+          } 
+          this.setState({
+            selectCd : true
+            ,selectInfo : select
+            ,msgMemList : memList
+            ,msgList : []
+          });
+      
+          let param={
+            usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
+            ,searchName : select.usrName
+          };
+          api.apiSend('post','/msg/msgSearch',param,(rs)=>{
+            if(rs.reCd==='01'){
+              // 메시지 조회 성공
+              this.setState({
+                msgList : rs.msgList
+              });
+            }else if(rs.reCd ==='03'){
+              // 주고받은 메시지 없음
+              this.setState({
+                msgList : []
+              });
+            }else{
+              // 메시지 조회 실패
+              this.setState({
+                msgList : []
+              });
+            }
+            let notice = <UserNavbar/>;
+            notice.props.ntClear();
+          });                
+      }
+    };
+
     return (
       <>
         <Header />
