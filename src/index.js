@@ -10,7 +10,6 @@ import "assets/scss/my.scss";
 import UserLayout from "layouts/User.jsx";
 import AuthLayout from "layouts/Auth.jsx";
 
-
 ReactDOM.render(
   <BrowserRouter>
       <Switch>

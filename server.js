@@ -33,11 +33,11 @@ var session = require('express-session');
 
 // app.use(express.cookieParser());
 app.use(bodyParser.urlencoded({
-    limit : '50mb'
+    limit : '100mb'
     ,extended:true
 }));
 app.use(bodyParser.json({
-    limit : '50mb'
+    limit : '100mb'
     ,extended:true
 }));
 // app.use(cookieParser());

@@ -42,7 +42,6 @@ class MsgSend extends React.Component {
       ,msgList : []
       ,myFrdList : []
       ,msgMemList : []
-      ,userNavbar : <UserNavbar/>
     }
     this.myFrdSelect();
   }

@@ -9,11 +9,24 @@ import Sidebar from "components/Sidebar/Sidebar.jsx";
 
 import routes from "routes.js";
 
+import Loading from '../components/Loadings/Loading.jsx';
+
+var loading = <Loading />;
+
 class User extends React.Component {
+
+  componentWillMount(){
+    console.log(loading);
+    loading.props.toggle();
+  }
+  
   componentDidUpdate(e) {
     document.documentElement.scrollTop = 0;
     document.scrollingElement.scrollTop = 0;
     this.refs.mainContent.scrollTop = 0;
+    
+    console.log(loading);
+    loading.props.toggle();
   }
   getRoutes = routes => {
     return routes.map((prop, key) => {
