@@ -27,19 +27,13 @@ class LoginProfile extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            loginYn : false
-            ,usrName : ''
-            ,dropdownOpen:false
+            dropdownOpen:false
             ,isModalOpen:false
             ,seesionCheck : false
             ,noticeList : []
         };
         this.getNotice = this.props.callbackFromParent;
-        if(!this.state.seesionCheck){
-            this.sessionCheck();
-        }else{
-            window.location.reload();
-        }
+        this.sessionCheck();
     }
 
     toggle = (e) =>{
@@ -67,31 +61,16 @@ class LoginProfile extends React.Component {
 
     loginCkCallback= (result) =>{
         if(result.reCd==="01"){
-            let updateResult = {
-                loginYn : true
-                ,seesionCheck : true
-            };
-            if(localStorage.getItem('usrInfo')){
-                updateResult.usrName = JSON.parse(localStorage.getItem('usrInfo')).usrName;
-            }
-    
             if(result.noticeList){
                 this.getNotice(result.noticeList);
             }
-            this.setState(updateResult);
         }else if(result.reCd ==='02'){
-          this.setState({
-            loginYn : false
-            ,seesionCheck : true
-          });
+            // fail
         }else if(result.reCd === '03'){
             let usrInfo = JSON.parse(localStorage.getItem('usrInfo'));
             usrInfo.usrToken = result.usrToken;
             localStorage.setItem('usrInfo',JSON.stringify(usrInfo));
             // this.sessionCheck();
-            this.setState({
-                seesionCheck : true
-            });
         }else if(result.reCd === '04'){
             this.logout();
         }
@@ -99,7 +78,7 @@ class LoginProfile extends React.Component {
   
     sessionCheck =()=>{
         // 세션 체크
-        if(localStorage.getItem('usrInfo')){
+        if(localStorage.getItem('usrInfo') && JSON.parse(localStorage.getItem('usrInfo')).usrToken){
             var param={
                 usrToken : JSON.parse(localStorage.getItem('usrInfo')).usrToken
                 ,usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
@@ -137,7 +116,7 @@ class LoginProfile extends React.Component {
     // }
 
     render() {
-        let loginButton, profile= null;
+        let loginButton = null;
         if(this.props.isMobile === 'N'){ // PC
             loginButton = <>
                 <Link
@@ -148,57 +127,6 @@ class LoginProfile extends React.Component {
                     <i className="ni ni-key-25" /><span className="nav-link-inner--text">&nbsp;Login&nbsp;</span>
                 </Link> 
             </>;
-            profile = <>
-                <Nav className="align-items-centerd-md-flex" navbar>
-                    <UncontrolledDropdown nav 
-                    isOpen={this.state.dropdownOpen} toggle={this.toggle}
-                    >
-                        <DropdownToggle className="pr-0" nav>
-                        <Media className="align-items-center">
-                            <span className="avatar avatar-sm rounded-circle">
-                            <img
-                                alt="..."
-                                src={(localStorage.getItem('usrInfo') 
-                                && JSON.parse(localStorage.getItem('usrInfo')).usrPt !== '')  
-                                ? JSON.parse(localStorage.getItem('usrInfo')).usrPt
-                                : require("assets/img/theme/no-profile-130x130.png")}
-                            />
-                            </span>
-                            <Media className="ml-2 d-lg-block">
-                            <span className="mb-0 text-sm font-weight-bold">
-                                {this.state.usrName} 님
-                            </span>
-                            </Media>
-                        </Media>
-                        </DropdownToggle>
-                        <DropdownMenu className="dropdown-menu-arrow" right>
-                        <DropdownItem className="noti-title" header tag="div">
-                            <h6 className="text-overflow m-0">Welcome!</h6>
-                        </DropdownItem>
-                        <a href="javascript:void(0)" onClick={e=>{this.modalOpen('m')}}>
-                            <PostWriteModal callbackFromParent={this.modalClose}/>
-                        </a>
-                        <DropdownItem to="/user/user-profile" tag={Link}>
-                            <i className="ni ni-single-02" />
-                            <span>내 프로필</span>
-                        </DropdownItem>
-                        {/* <DropdownItem to="/admin/user-profile" tag={Link}>
-                            <i className="ni ni-support-16" />
-                            <span>Support</span>
-                        </DropdownItem> */}
-                        {/* <DropdownItem to="/admin/user-profile" tag={Link}>
-                            <i className="ni ni-settings-gear-65" />
-                            <span>설정</span>
-                        </DropdownItem> */}
-                        <DropdownItem divider />
-                        <DropdownItem href="javascript:void(0)" onClick={this.logout}>
-                            <i className="ni ni-user-run" />
-                            <span>Logout</span>
-                        </DropdownItem>
-                        </DropdownMenu>
-                    </UncontrolledDropdown>
-                </Nav>
-            </>;
         }else{ // Mobile
             loginButton = <>
                 <Link
@@ -208,7 +136,13 @@ class LoginProfile extends React.Component {
                     <Button color="primary" type="button"><i className="ni ni-key-25" /><span className="nav-link-inner--text">Login</span></Button>
                 </Link>
             </>;
-            profile = <>
+        }
+        return (
+          <>
+            {/* 회원 */}
+            {
+                localStorage.getItem('usrInfo') && JSON.parse(localStorage.getItem('usrInfo')).usrToken
+                ?
                 <UncontrolledDropdown nav 
                 isOpen={this.state.dropdownOpen} toggle={this.toggle}
                 >
@@ -222,7 +156,7 @@ class LoginProfile extends React.Component {
                         </span>
                         <Media className="ml-2 d-none d-lg-block">
                         <span className="mb-0 text-sm font-weight-bold">
-                            {this.state.usrName} 님
+                            {JSON.parse(localStorage.getItem('usrInfo')).usrName} 님
                         </span>
                         </Media>
                     </Media>
@@ -253,28 +187,15 @@ class LoginProfile extends React.Component {
                     </DropdownItem>
                     </DropdownMenu>
                 </UncontrolledDropdown>
-            </>;            
-        }
-        return (
-          <>
-            {/* 비 회원 */}
-            <div
-             style={{ display: (!this.state.loginYn ? 'inherit' : 'none') }}
-            >
-            <FormGroup className="mb-0 form-control-cursor">
-            <InputGroup className="input-group-alternative">
-                <InputGroupAddon addonType="prepend">
-                    {loginButton}
-                </InputGroupAddon>
-            </InputGroup>
-            </FormGroup>
-            </div>
-            {/* 회원 */}
-            <div
-                style={{ display: (this.state.loginYn ? 'inherit' : 'none') }}
-            >
-                {profile}
-            </div>
+                : <FormGroup className="mb-0 form-control-cursor">
+                    <InputGroup className="input-group-alternative">
+                        <InputGroupAddon addonType="prepend">
+                            {loginButton}
+                        </InputGroupAddon>
+                    </InputGroup>
+                </FormGroup>
+            }
+            
         </>
     );
   }

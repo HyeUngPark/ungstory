@@ -65,6 +65,7 @@ class Auth extends React.Component {
           {/* Page content */}
           <Container className="mt--8 pb-5">
             <Row className="justify-content-center">
+              <div id="loadingAuth">Loading...</div>
               <Switch>{this.getRoutes(routes)}</Switch>
             </Row>
           </Container>

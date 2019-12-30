@@ -58,7 +58,7 @@ var routes =[
   회원 전용 메뉴
 */
 // 프로필 페이지
-  if(localStorage.getItem('usrInfo')){
+  if(localStorage.getItem('usrInfo') && JSON.parse(localStorage.getItem('usrInfo')).usrToken){
   routes.push(
     {
       path: "/user-profile",
