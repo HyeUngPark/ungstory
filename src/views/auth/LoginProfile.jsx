@@ -168,13 +168,9 @@ class LoginProfile extends React.Component {
                     <a href="javascript:void(0)" onClick={e=>{this.modalOpen('m')}}>
                         <PostWriteModal callbackFromParent={this.modalClose}/>
                     </a>
-                    <DropdownItem to="/admin/user-profile" tag={Link}>
+                    <DropdownItem to="/user/user-profile" tag={Link}>
                         <i className="ni ni-single-02" />
                         <span>내 프로필</span>
-                    </DropdownItem>
-                    <DropdownItem to="/admin/user-profile" tag={Link}>
-                        <i className="ni ni-support-16" />
-                        <span>Support</span>
                     </DropdownItem>
                     <DropdownItem to="/admin/user-profile" tag={Link}>
                         <i className="ni ni-settings-gear-65" />
