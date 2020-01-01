@@ -104,7 +104,7 @@ class FriendSearch extends React.Component {
       });
 
       let param={
-        usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
+        usrName : localStorage.getItem('usrInfo') ? JSON.parse(localStorage.getItem('usrInfo')).usrName  : ''
         ,searchName : searchName
       };
       api.apiSend('post','/frd/frendSearch',param,this.friendSearchCallback);      
@@ -200,7 +200,9 @@ class FriendSearch extends React.Component {
                         </Media>
                       </th>
                       <td>
-                         {search.usrName === JSON.parse(localStorage.getItem('usrInfo')).usrName ?
+                         {
+                         localStorage.getItem('usrInfo') &&
+                         search.usrName === JSON.parse(localStorage.getItem('usrInfo')).usrName ?
                          <div className="d-flex align-items-center">
                             본인
                           </div>
@@ -216,7 +218,7 @@ class FriendSearch extends React.Component {
                       </td>
                       <td>
                         <div className="d-flex align-items-center">
-                          {search.usrName === JSON.parse(localStorage.getItem('usrInfo')).usrName
+                          {localStorage.getItem('usrInfo') && search.usrName === JSON.parse(localStorage.getItem('usrInfo')).usrName
                             ?
                             '본인'
                             :

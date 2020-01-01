@@ -81,7 +81,7 @@ router.post('/frendSearch',function(req, res){
                 });
             }
         });
-    }else{
+    }else if(params.usrName){
         schema.aggregate([
             {$match : {
                 wkCd : 'USR'
@@ -148,8 +148,9 @@ router.post('/frendSearch',function(req, res){
                         }
                     }}
                     ,{$sort:{
-                        "withFrd" : -1
-                        ,"frdYn" : -1
+                        "frdYn" : -1
+                        ,"withFrd" : -1
+                        ,"usrName" : 1
                     }}
                 ],function(err, result) {
                     if (err) {
@@ -166,6 +167,56 @@ router.post('/frendSearch',function(req, res){
                             reCd : '02'
                         });
                     }
+                });
+            }
+        });
+    }else{ // 비회원
+        let matchQuery = ".*"+params.searchName+".*";
+
+        schema.aggregate([
+            {$match : {
+                wkCd : 'USR'
+                ,wkDtCd : 'USR'
+                ,"subSchema.usrName" :  {$regex:matchQuery}
+            }}
+            ,{$project:{
+                _id : 1,
+                "subSchema.usrName" : 1
+                ,"subSchema.usrPt" : 1
+                ,"subSchema.usrFrds" : 1
+                ,frdYn : 1
+                ,withFrd : 1
+            }}
+            ,{$group:{
+            _id : "$_id"
+            ,"usrName" : {"$max":"$subSchema.usrName"}
+            ,"usrPt" : {"$first":"$subSchema.usrPt"}
+            ,"frdYn" : {"$sum" : "$frdYn"}
+            ,"withFrd" : {"$sum" : "$withFrd"}
+            ,"usrFrds" : {"$first":"$subSchema.usrFrds"}
+            }}
+            ,{$addFields: {
+                withFrd : 0
+                ,frdYn : false
+            }}
+            ,{$sort:{
+                "frdYn" : -1
+                ,"withFrd" : -1
+                ,"usrName" : 1
+            }}
+        ],function(err, result) {
+            if (err) {
+                console.log('error \n', err);
+                return res.status(500).send("친구 검색 실패 >> " + err)
+            }
+            if (result.length > 0) {
+                res.json({
+                    reCd : '01'
+                    ,frdList : result 
+                });
+            }else{
+                res.json({
+                    reCd : '02'
                 });
             }
         });
@@ -453,7 +504,7 @@ router.post('/frdInfo',function(req, res){
                     ,"subSchema.usrMsg" : 1
                     ,"subSchema.pstPts" : 1
                     ,"subSchema.pstPts" : {
-                         $cond : [
+                        $cond : [
                            {$and:[
                                {$ne: ["$subSchema.pstPubYn" , "04"]}
                            ]}//and
