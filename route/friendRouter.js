@@ -67,7 +67,7 @@ router.post('/frendSearch',function(req, res){
                         return res.status(500).send("내 친구 프로필 조회 실패 >> " + fError)
                     }
                     if (pResult.length > 0) {
-                        console.log('★★★메시지 작성 내 친구 조회 최종 성공★★★');
+                        console.log('★★★메시지 작성 내 친구 조회 최종 성공★★★ ',pResult.length);
                         res.json({
                             reCd : '01'
                             ,myFrd : pResult
@@ -859,8 +859,76 @@ router.post('/frdPtView',function(req, res){
             }
         });
     }
+});
+router.post('/getFrdList',function(req, res){
+    var params = req.body;
+    // 1.내 친구 목록 조회
+    schema.aggregate([
+        {$match : {
+            wkCd : 'USR'
+            ,wkDtCd : 'USR'
+            ,"subSchema.usrName" : params.usrName
+        }}
+        ,{$project:{
+            _id : 1
+            ,"subSchema.usrFrds" : 1
+        }}
+        ,{$group:{
+            _id : "$_id"
+            ,"myFrd" : {"$first":"$subSchema.usrFrds"}
+        }}
+    ],function(fError, fResult){
+        if (fError) {
+            console.log('error \n', fError);
+            return res.status(500).send("내 친구 목록 조회 실패 >> " + fError)
+        }
+        if (fResult.length > 0) {
+            console.log('★★★ 내 친구 조회 성공 ★★★');
+            let myFrd = fResult[0].myFrd;
+            schema.aggregate([
+                {$match:{
+                    wkCd : 'USR'
+                    ,wkDtCd : 'USR'
+                    ,'subSchema.usrName' : {$in :myFrd}
+                }}
+                ,{$project:{
+                    _id : 1
+                    ,"subSchema.usrName" : 1
+                    ,"subSchema.usrFrds" : {
+                        $size : "$subSchema.usrFrds"
+                    }
+                    ,"subSchema.usrPt" : 1
+                }}
+                ,{$group:{
+                    _id : "$subSchema.usrName"
+                    ,"usrFrds" : {"$first" : "$subSchema.usrFrds"}
+                    ,"usrPt" : {"$first" : "$subSchema.usrPt"}
+                }}
+                ,{$sort:{
+                    "_id" : 1
+                }}
+            ],function(pError, pResult){
+                if (fError) {
+                    console.log('error \n', pError);
+                    return res.status(500).send("내 친구 목록 조회 실패 >> " + fError)
+                }
+                if (pResult.length > 0) {
+                    console.log('★★★ 내프로필 내 친구 목록 조회 최종 성공★★★');
+                    res.json({
+                        reCd : '01'
+                        ,myFrd : pResult
+                    });
+                }
+            });
+        }else{
+            // 친구 없음
+            res.json({
+                reCd : '03'
+            });
+        }
+    });
+    
 
 });
-
 
 module.exports = router;

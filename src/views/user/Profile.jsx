@@ -19,6 +19,8 @@ import * as api from "utils/api";
 import * as popup from "utils/popup";
 import ProfileChange from "../../modals/auth/ProfileChange";
 import ProfileMsgChange from "../../modals/auth/ProfileMsgChange";
+import FriendList from "../../modals/auth/FriendList";
+
 var passwordValidator = require('password-validator');
 
 class Profile extends React.Component {
@@ -260,7 +262,8 @@ class Profile extends React.Component {
                       <div className="card-profile-stats d-flex justify-content-center mt-md-5">
                         <div>
                           <span className="description">친구</span>
-                          <span className="heading">{this.state.profileData.usrFrds}</span>
+                          <span className="heading">
+                          <FriendList frdCount = {this.state.profileData.usrFrds}/></span>
                         </div>
                         <div>
                           <span className="description">사진</span>
