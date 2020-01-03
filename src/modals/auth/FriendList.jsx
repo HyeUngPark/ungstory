@@ -16,6 +16,8 @@ import FrdInfo from '../frd/FrdInfo.jsx';
 import * as popup from "utils/popup";
 import { withRouter } from 'react-router-dom';
 
+import { confirmAlert } from 'react-confirm-alert'; // Import
+import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 
 class FriendList extends React.Component {
   constructor(props) {
@@ -79,6 +81,47 @@ class FriendList extends React.Component {
         usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
       };
       api.apiSend('post','/frd/getFrdList',param,this.getFrdListCallback);
+   }else{
+     this.setState({
+      FrdListModal: !this.state.FrdListModal
+     });
+   }
+  }
+
+  frdCutOffCf = (frdName) =>{
+    confirmAlert({
+      title: '친구 끊기',
+      message: `정말 ${frdName}님과 친구를 끊으시겠습니까?`,
+      buttons: [
+        {
+          label: '끊기',
+          onClick: () => this.frdCutOff(frdName)
+        },
+        {
+          label: '취소',
+          onClick: () => {}
+        }
+      ],
+    });
+  }
+
+  frdCutOffCallback = (result)=>{
+    if(result.reCd==="01"){
+      alert(`${result.frdName}님과 성공적으로 친구를 끊었습니다.`);
+      this.getFrdList();
+    }else if(result.reCd ==='02'){
+      // console.log('내 친구 목록 조회 실패');
+      alert('친구 끊기에 실패하였습니다.');
+    }
+  }
+
+  frdCutOff = (frdName) =>{
+    if(localStorage.getItem('usrInfo')){
+      let param={
+        usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
+        ,frdName : frdName
+      };
+      api.apiSend('post','/frd/frdCutOff',param,this.frdCutOffCallback);
    }else{
      this.setState({
       FrdListModal: !this.state.FrdListModal
@@ -164,6 +207,7 @@ class FriendList extends React.Component {
                               onClick={e=>{this.frdMsg(frd._id)}}
                             />
                         </div>
+                        <Button color="danger" onClick={e=>{this.frdCutOffCf(frd._id)}}>친구끊기</Button>
                       </td>
                     </tr>
                   );

@@ -927,7 +927,68 @@ router.post('/getFrdList',function(req, res){
             });
         }
     });
-    
+});
+
+router.post('/frdCutOff',function(req, res){
+    var params = req.body;
+
+    var cutOffFrd = [];
+    cutOffFrd.push(params.usrName);
+    cutOffFrd.push(params.frdName);
+
+    // 1. 각각 친구 목록에서 삭제
+    schema.updateMany({
+        wkCd:'USR'
+        ,wkDtCd:'USR'
+        ,"subSchema.usrName" : {$in : cutOffFrd}    
+    }
+    ,{$pull: { "subSchema.usrFrds": { $in: cutOffFrd }} }
+    ,{multi:true}
+    , function(fErr, fResult) {
+        if (fErr) {
+            console.log('error \n', fErr);
+            return res.status(500).send("친구 끊기 처리 실패 " + fErr)
+        }
+        if (fResult.n) {
+
+        }
+        // 2. 각각 메시지 상태 삭제 날짜 변경
+        schema.updateMany({
+            wkCd:'MSG'
+            ,wkDtCd:'STA'
+            ,$or:[
+                {$and : [
+                    {"subSchema.usrName" : cutOffFrd[0]}       
+                    ,{"subSchema.msgPartner" : cutOffFrd[1]}
+                ]}
+                ,{$and : [
+                    {"subSchema.usrName" : cutOffFrd[1]}       
+                    ,{"subSchema.msgPartner" : cutOffFrd[0]}
+                ]}
+            ]
+        }
+        ,{$set:{
+            lstWrDt : date.getDate()
+            ,"subSchema.msgDelDate" : date.getDate()
+        }}
+        , function(fsErr, fsResult) {
+            if (fsErr) {
+                console.log('error \n', fsErr);
+                return res.status(500).send("친구 끊기 처리 실패 " + fsErr)
+            }
+            if (fsResult.n) {
+                console.log('★★★ 친구 끊기 - 메시지 주고 받은 삭제 처리 ★★★');
+            }else{
+                console.log('★★★ 친구 끊기 - 메시지 주고 받은 내역 없음 ★★★');
+            }
+            res.json({
+                reCd : '01'
+                ,frdName : params.frdName
+            });          
+        });
+
+    });
+
 
 });
 
