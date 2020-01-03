@@ -151,7 +151,10 @@ class LoginProfile extends React.Component {
                         <span className="avatar avatar-sm rounded-circle">
                         <img
                             alt="..."
-                            src={require("assets/img/theme/team-4-800x800.jpg")}
+                            src={(localStorage.getItem('usrInfo') 
+                            && JSON.parse(localStorage.getItem('usrInfo')).usrPt !== '')  
+                            ? JSON.parse(localStorage.getItem('usrInfo')).usrPt
+                            : require("assets/img/theme/no-profile-130x130.png")}
                         />
                         </span>
                         <Media className="ml-2 d-none d-lg-block">

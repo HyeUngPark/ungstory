@@ -1092,86 +1092,163 @@
                             return res.status(500).send("유저 닉네임 수정 실패 >> " + nameErr);
                         }
                         if (nameResult.n) {
-                            console.log('★★★ 유저 닉네임 수정 성공 ★★★');
-                            // 2. 친구 목록 닉네임 업데이트
-                            schema.updateMany({
-                                wkCd : 'USR'
-                                ,wkDtCd : 'USR'
-                                ,"subSchema.usrFrds" : params.usrName
-                            }
-                            ,{$set: {
-                                "subSchema.usrFrds.$": params.changeName
-                            }}
-                            , function(frdErr, frdResult) {
-                                if (frdErr) {
-                                    console.log('error \n', frdErr);
-                                    return res.status(500).send("친구 닉네임 수정 실패 >> " + frdErr);
-                                }
-                                if (frdResult.n) {
-                                    //3. 포스팅 닉네임 업데이트
-                                    schema.updateMany({
-                                        wkCd : 'PST',
-                                        wkDtCd : 'PST',
-                                        "subSchema.usrId" : params.usrId
-                                        }
-                                        ,{$set:{
-                                            "subSchema.usrName" : params.changeName
-                                            // ,"lstWrDt" :  date.getDate()
-                                        }}
-                                        ,{multi:true}
-                                        , function(postErr, postResult) {
-                                            if (postErr) {
-                                                console.log('error \n', postErr);
-                                                return res.status(500).send("유저 닉네임 수정 실패 >> " + postErr);
-                                            }
-                                            if (postResult.n) {
-                                                console.log('★★★ 포스트 닉네임 수정 성공 ★★★');
-                                                // 4. 댓글 닉네임 업데이트
-                                                schema.update({
-                                                    wkCd : 'PST',
-                                                    wkDtCd : 'PST',
-                                                    "subSchema.pstCmt.usrName" : params.usrName
-                                                }
-                                                ,{$set:{
-                                                    "subSchema.pstCmt.$[].usrName" : params.changeName
-                                                    // ,"lstWrDt" :  date.getDate()
-                                                }}
-                                                ,{multi:true}
-                                                , function(cmtErr, cmtResult) {
-                                                    if (cmtErr) {
-                                                        console.log('error \n', cmtErr);
-                                                        return res.status(500).send("포스트 닉네임 수정 실패 >> " + cmtErr);
-                                                    }
-                                                    if (cmtResult.n) {
-                                                        console.log('★★★ 댓글 닉네임 수정 성공 ★★★');
-                                                        res.json({
-                                                            reCd : '01'
-                                                            ,svCd : params.changeCd
-                                                        });
-                                                    }else{
-                                                        console.log('일치하는 댓글 없음');
-                                                        res.json({
-                                                            reCd : '01'
-                                                            ,svCd : params.changeCd
-                                                        });
-                                                    }
-                                                }); // 댓글 닉네임 업데이트
-                                            }else{
-                                                console.log('일치하는 포스팅 없음');
-                                                res.json({
-                                                    reCd : '01'
-                                                    ,svCd : params.changeCd
-                                                });
-                                            }
-                            }); // 포스팅 닉네임 업데이트
+                            console.log('★★★ 1. 유저 닉네임 수정 성공 ★★★');
+                        }else{
+                            console.log('★★★ 1. 유저 닉네임 수정 실패 ★★★');
                         }
+                        // 2. 친구 목록 닉네임 업데이트
+                        schema.updateMany({
+                            wkCd : 'USR'
+                            ,wkDtCd : 'USR'
+                            ,"subSchema.usrFrds" : params.usrName
+                        }
+                        ,{$set: {
+                            "subSchema.usrFrds.$": params.changeName
+                        }}
+                        , function(frdErr, frdResult) {
+                            if (frdErr) {
+                                console.log('error \n', frdErr);
+                                return res.status(500).send("친구 닉네임 수정 실패 >> " + frdErr);
+                            }
+                            if (frdResult.n) {
+                                console.log('★★★ 2. 친구 목록 닉네임 수정 성공 ★★★');
+                            }else{
+                                console.log('★★★ 2. 친구 목록 닉네임 수정 실패 ★★★');
+                            }
+                            //3. 포스팅 닉네임 업데이트
+                            schema.updateMany({
+                                wkCd : 'PST',
+                                wkDtCd : 'PST',
+                                "subSchema.usrId" : params.usrId
+                            }
+                            ,{$set:{
+                                "subSchema.usrName" : params.changeName
+                                // ,"lstWrDt" :  date.getDate()
+                            }}
+                            ,{multi:true}
+                            , function(postErr, postResult) {
+                                if (postErr) {
+                                    console.log('error \n', postErr);
+                                    return res.status(500).send("유저 닉네임 수정 실패 >> " + postErr);
+                                }
+                                if (postResult.n) {
+                                    console.log('★★★ 3. 포스트 닉네임 수정 성공 ★★★');
+                                }else{
+                                    console.log('★★★ 3. 포스트 닉네임 수정 실패 ★★★');
+                                }
+                                // 4. 댓글 닉네임 업데이트
+                                schema.update({
+                                    wkCd : 'PST',
+                                    wkDtCd : 'PST',
+                                    "subSchema.pstCmt.usrName" : params.usrName
+                                }
+                                ,{$set:{
+                                    "subSchema.pstCmt.$[].usrName" : params.changeName
+                                    // ,"lstWrDt" :  date.getDate()
+                                }}
+                                ,{multi:true}
+                                , function(cmtErr, cmtResult) {
+                                    if (cmtErr) {
+                                        console.log('error \n', cmtErr);
+                                        return res.status(500).send("포스트 닉네임 수정 실패 >> " + cmtErr);
+                                    }
+                                    if (cmtResult.n) {
+                                        console.log('★★★ 4. 댓글 닉네임 수정 성공 ★★★');
+                                    }else{
+                                        console.log('★★★ 4. 댓글 닉네임 수정 실패 ★★★');
+                                    }
+                                    // 5-0. 메시지 상태 업데이트(당사자)
+                                    schema.updateMany({
+                                            wkCd:"MSG"
+                                            ,wkDtCd : "STA"
+                                            ,"subSchema.usrName" : params.usrName
+                                        }
+                                        ,{$set: {
+                                            lstWrDt : date.getDate()
+                                            ,"subSchema.usrName" : params.changeName
+                                        }}   
+                                        , function(msgSt1Err, msgSt1Result) {
+                                            if (msgSt1Err) {
+                                                console.log('error \n', msgSt1Err);
+                                                return res.status(500).send("메시지 상태 닉네임 업데이트 처리 실패 " + msgSt1Err)
+                                            }
+                                            if (msgSt1Result.n) {
+                                                console.log('★★★ 5-0. 메시지 상태(당사자) 닉네임 수정 성공 ★★★');
+                                            }else{
+                                                console.log('★★★ 5-0. 메시지 상태(당사자) 닉네임 수정 실패 ★★★');
+                                            }
+                                            // 5-0. 메시지 상태 업데이트(상대)
+                                            schema.updateMany({
+                                                wkCd:"MSG"
+                                                ,wkDtCd : "STA"
+                                                ,"subSchema.msgPartner" : params.usrName
+                                            }
+                                            ,{$set: {
+                                                lstWrDt : date.getDate()
+                                                ,"subSchema.msgPartner" : params.changeName
+                                            }}   
+                                            , function(msgSt2Err, msgSt2Result) {
+                                                if (msgSt2Err) {
+                                                    console.log('error \n', msgSt2Err);
+                                                    return res.status(500).send("메시지 상태 닉네임 업데이트 처리 실패 " + msgSt2Err)
+                                                }
+                                                if (msgSt2Result.n) {
+                                                    console.log('★★★ 5-0. 메시지 상태(상대방) 닉네임 수정 성공 ★★★');
+                                                }else{
+                                                    console.log('★★★ 5-0. 메시지 상태(상대방) 닉네임 수정 실패 ★★★');
+                                                }
+                                                // 5-1. 메시지 발신자 업데이트
+                                                schema.updateMany({
+                                                    wkCd:"MSG"
+                                                    ,wkCd : "MSG"
+                                                    ,"subSchema.msgSend" : params.usrName
+                                                }
+                                                ,{$set: {
+                                                    lstWrDt : date.getDate()
+                                                    ,"subSchema.msgSend" : params.changeName
+                                                }}    
+                                                , function(msg1Err, msg1Result) {
+                                                    if (msg1Err) {
+                                                        console.log('error \n', msg1Err);
+                                                        return res.status(500).send("메시지 닉네임 업데이트 처리 실패 " + msg1Err)
+                                                    }
+                                                    if (msg1Result.n) {
+                                                        console.log('★★★ 5-1. 메시지 발신자 닉네임 수정 성공 ★★★');
+                                                    }else{
+                                                        console.log('★★★ 5-1. 메시지 발신자 닉네임 수정 실패 ★★★');
+                                                    }
+                                                    // 5-2. 메시지 수신자 업데이트
+                                                    schema.updateMany({
+                                                        wkCd:"MSG"
+                                                        ,wkCd : "MSG"
+                                                        ,"subSchema.msgRecv" : params.usrName
+                                                    }
+                                                    ,{$set: {
+                                                        lstWrDt : date.getDate()
+                                                        ,"subSchema.msgRecv" : params.changeName
+                                                    }}    
+                                                    , function(msg2Err, msg2Result) {
+                                                    if (msg2Err) {
+                                                        console.log('error \n', msg2Err);
+                                                        return res.status(500).send("메시지 수신자 닉네임 업데이트 처리 실패 " + msg2Err)
+                                                    }
+                                                    if (msg2Result.n) {
+                                                        console.log('★★★ 5-2. 메시지 수신자 닉네임 수정 성공 ★★★');
+                                                    }else{
+                                                        console.log('★★★ 5-2. 메시지 수신자 닉네임 수정 실패 ★★★');
+                                                    }
+                                                    // 6.닉네임 업데이트 알림 추가
+                                                    res.json({
+                                                        reCd : '01'
+                                                        ,svCd : params.changeCd
+                                                    });
+                                                });
+                                            }); // 발신자
+                                        }); // 메시지 상태(상대)
+                                    }); // 메시지 상태 (당사자)
+                                }); // 댓글 닉네임 업데이트
+                        }); // 포스팅 닉네임 업데이트
                     }); // 친구 목록 닉네임 업데이트
-                }else{
-                    console.log('유저 닉네임 업데이트 실패');
-                    res.json({
-                        reCd : '02'
-                    });
-                }
             }); // 닉네임 업데이트
         }else if(params.changeCd === 'np'){
             schema.find({
@@ -1224,7 +1301,7 @@
                                             return res.status(500).send("유저 닉네임 수정 실패 >> " + nameErr);
                                         }
                                         if (nameResult.n) {
-                                            console.log('★★★ 유저 닉네임 수정 성공 ★★★');
+                                            console.log('★★★ 1. 유저 닉네임 수정 성공 ★★★');
                                             
                                             // 2. 친구 목록 닉네임 업데이트
                                             schema.updateMany({
@@ -1241,6 +1318,7 @@
                                                     return res.status(500).send("친구 닉네임 수정 실패 >> " + frdErr);
                                                 }
                                                 if (frdResult.n) {
+                                                    console.log('★★★ 2. 친구 목록 닉네임 수정 성공 ★★★');
                                                     //3. 포스팅 닉네임 업데이트
                                                     schema.update({
                                                         wkCd : 'PST',
@@ -1257,7 +1335,7 @@
                                                             return res.status(500).send("유저 닉네임 수정 실패 >> " + postErr);
                                                         }
                                                         if (postResult.n) {
-                                                            console.log('★★★ 포스트 닉네임 수정 성공 ★★★');
+                                                            console.log('★★★ 3. 포스팅 목록 닉네임 수정 성공 ★★★');
                                                             // 4. 댓글 닉네임 업데이트
                                                             schema.update({
                                                                 wkCd : 'PST',
@@ -1275,7 +1353,7 @@
                                                                     return res.status(500).send("포스트 닉네임 수정 실패 >> " + cmtErr);
                                                                 }
                                                                 if (cmtResult.n) {
-                                                                    console.log('★★★ 댓글 닉네임 수정 성공 ★★★');
+                                                                    console.log('★★★ 4. 댓글 목록 닉네임 수정 성공 ★★★');
                                                                     res.json({
                                                                         reCd : '01'
                                                                         ,svCd : params.changeCd
@@ -1288,14 +1366,14 @@
                                                                     });
                                                                 }
                                                             });
-                                                            }else{
-                                                                console.log('일치하는 포스팅 없음');
-                                                                res.json({
-                                                                    reCd : '01'
-                                                                    ,svCd : params.changeCd
+                                                        }else{
+                                                            console.log('일치하는 포스팅 없음');
+                                                            res.json({
+                                                                reCd : '01'
+                                                                ,svCd : params.changeCd
                                                                 });
-                                                                }
-                                                            });
+                                                            }
+                                                        });
                                                     }
                                                 });
                                             }else{

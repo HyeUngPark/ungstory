@@ -184,12 +184,12 @@ class Profile extends React.Component {
 
   overCheck =() =>{
     if(this.state.name.usrName !=='' && 
-    this.state.name.usrName !== this.state.profileData.usrName){
+    this.state.name.usrName !== JSON.parse(localStorage.getItem('usrInfo')).usrName){
       let param ={
         usrName : this.state.name.usrName
       };
       api.apiSend('get','/auth/nameCheck',param,this.checkCallback);
-    }else if(this.state.name.usrName === this.state.profileData.usrName){
+    }else if(this.state.name.usrName === JSON.parse(localStorage.getItem('usrInfo')).usrName){
       alert('기존 닉네임과 같습니다.');
       let name = this.state.name;
       name.nameCd = false;
@@ -347,7 +347,7 @@ class Profile extends React.Component {
                               className="form-control-alternative"
                               id="input-username"
                               type="text"
-                              placeholder="비밀번호 변경을 원하시면 입력해주세요"
+                              placeholder="닉네임 변경 시에만 입력"
                               value ={this.state.name.usrName}
                               onChange={e=>this.valChange('n',e)}
                             />
@@ -451,7 +451,7 @@ class Profile extends React.Component {
                                   className="form-control-alternative"
                                   id="input-username2"
                                   type="text"
-                                  value ={this.state.name.usrName}
+                                  value ={JSON.parse(localStorage.getItem('usrInfo')).usrName}
                                 />
                               </FormGroup>
                             </Col>   
