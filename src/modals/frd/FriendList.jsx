@@ -140,7 +140,7 @@ class FriendList extends React.Component {
           </div>
           <Modal 
                 isOpen={this.state.FrdListModal} 
-                zIndex = "90"
+                zIndex = "70"
                 backdrop={false} onKeyUp={(e)=>{
                 if(e.key === "Escape"){
                   this.cancel();

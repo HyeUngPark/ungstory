@@ -19,7 +19,7 @@ import * as api from "utils/api";
 import * as popup from "utils/popup";
 import ProfileChange from "../../modals/auth/ProfileChange";
 import ProfileMsgChange from "../../modals/auth/ProfileMsgChange";
-import FriendList from "../../modals/auth/FriendList";
+import FriendList from "../../modals/frd/FriendList";
 
 var passwordValidator = require('password-validator');
 
