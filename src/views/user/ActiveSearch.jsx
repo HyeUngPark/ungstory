@@ -35,7 +35,7 @@ class ActiveSearch extends React.Component {
   constructor(props) {
     super(props);
     this.state = { 
-      beforeDate : new Date()
+      beforeDate : date.getBeforeDate('1w')
       ,afterDate : new Date()
       ,likeList : []
       ,cmtList : []
@@ -46,6 +46,12 @@ class ActiveSearch extends React.Component {
         ,activeTab : '1'
       }
     };
+    let param ={
+      usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
+      ,beforeDate : date.getBeforeDate('1w')
+      ,afterDate : new Date()
+    };
+    api.apiSend('post','getActiveList',param,this.activeSearchCallback);
   }
   activeSearchCallback = (rs) => {
     if(rs.reCd === '01'){

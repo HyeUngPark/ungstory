@@ -212,6 +212,18 @@ class Profile extends React.Component {
     });
   }
 
+  goPages = (page) => {
+    if(page){
+      this.props.history.push({
+        pathname: page,
+        search: '',
+        state: {
+        //
+        }
+      });  
+    }
+  }
+
   componentDidMount () {
     if(!this.state.getProfile && localStorage.getItem('usrInfo')){
         this.getProfile();
@@ -271,7 +283,11 @@ class Profile extends React.Component {
                         </div>
                         <div>
                           <span className="description">활동(댓글, 좋아요)</span>
-                          <span className="heading">{this.state.profileData.usrActive}</span>
+                          <span className="heading form-control-cursor"
+                              onClick = {e=>{this.goPages('/user/active-search')}}
+                          >
+                            {this.state.profileData.usrActive}
+                          </span>
                         </div>
                       </div>
                     </div>
@@ -294,9 +310,9 @@ class Profile extends React.Component {
                       </div>
                       {(this.state.profileData.usrMsg !== '') ? this.state.profileData.usrMsg : '대화명이 없습니다.'}
                     </p>
-                    <a href="#pablo" onClick={e => e.preventDefault()}>
+                    {/* <a href="#pablo" onClick={e => e.preventDefault()}>
                       Show more
-                    </a>
+                    </a> */}
                   </div>
                 </CardBody>
               </Card>
