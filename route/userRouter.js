@@ -853,13 +853,12 @@
                                 "_id" : "$_id"
                                 ,"usrName" : {"$first":"$subSchema.usrName"}
                                 ,"usrId" : {"$first":"$subSchema.usrId"}
-                                ,"usrMsg" : {"$first":"$subSchema.usrMsg"}
+                                ,"usrMsg" : {"$max":"$subSchema.usrMsg"}
                                 ,"usrPt" : {"$max":"$subSchema.usrPt"}
                                 ,"usrLikePst" : {"$max":"$subSchema.usrLikePst"}
                                 ,"usrFrds" : {"$push":"$subSchema.usrFrds"}
                                 ,"loginDate" : {"$push":"$subSchema.loginDate"}
                             }}
-                            
                         ]
                         ,pstInfo : [
                             {$match:{
@@ -930,6 +929,7 @@
                         ,usrName :aResult[0].usrInfo[0].usrName
                         ,usrMsg : aResult[0].usrInfo[0].usrMsg
                     };
+                    console.log('대화명 >> ',profileData.usrMsg);
                     res.json({
                         reCd : '01'
                         ,profileData : profileData
