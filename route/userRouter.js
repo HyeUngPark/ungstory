@@ -1905,4 +1905,67 @@ router.post('/getActiveList', function(req, res){
     });
 });
 
+router.post('/usrPostImgList',function(req, res){
+    var params = req.body;
+
+    schema.aggregate([
+        {$match:{
+            wkCd : 'PST'
+            ,wkDtCd : 'PST'
+            ,"subSchema.usrName" : params.usrName
+            ,"subSchema.pstPts" : {
+                $ne : []
+            }
+            ,"subSchema.pstPubYn" : {
+                $ne : '04'
+            }
+        }}
+        ,{$project:{
+            _id : 1
+            ,'subSchema.pstPk' : 1
+            ,'subSchema.pstPts' : 1
+        }}
+        ,{$group:{
+            _id : "$subSchema.pstPk"
+            ,"pstPk" : {"$first":'$subSchema.pstPk'}
+            ,"pstPts" : {"$first":'$subSchema.pstPts'}
+        }}
+    ],function(imgErr, imgResult){
+        if (imgErr) {
+            console.log('내 프로필 - 포스트 이미지 조회 실패 \n', imgErr);
+            return res.status(500).send("내 프로필 - 포스트 이미지 조회 실패" + imgErr);
+        }
+        if (imgResult.length > 0) {
+            let imgList = [];
+
+            for(let i=0; i<imgResult.length; i++){
+                let tempList = [];
+                for(let j=0; j<imgResult[i].pstPts.length; j++){
+                    let temp = {
+                        pstPk : imgResult[i].pstPk
+                        ,pstPt : imgResult[i].pstPts[j]
+                    }
+                    tempList.push(temp);
+                }
+                let monthImg ={
+                    date : imgResult[i].pstPk.substring(0,6)
+                    ,pstPts : tempList
+                }
+                imgList.push(monthImg);
+            }
+
+            res.json({
+                reCd : '01'
+                ,pstPts : imgList
+            });
+        }else{
+            console.log('★★★ 내 프로필 - 포스트 이미지 없음 ★★★');
+            res.json({
+                reCd : '03'
+            });
+        }
+    });
+
+});
+
 module.exports = router;

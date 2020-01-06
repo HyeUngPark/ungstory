@@ -20,6 +20,7 @@ import * as popup from "utils/popup";
 import ProfileChange from "../../modals/auth/ProfileChange";
 import ProfileMsgChange from "../../modals/auth/ProfileMsgChange";
 import FriendList from "../../modals/frd/FriendList";
+import UsrPostImgList from "../../modals/auth/UsrPostImgList";
 
 var passwordValidator = require('password-validator');
 
@@ -279,7 +280,11 @@ class Profile extends React.Component {
                         </div>
                         <div>
                           <span className="description">사진</span>
-                          <span className="heading">{this.state.profileData.pstPts}</span>
+                          <span className="heading">
+                            <UsrPostImgList
+                              postImgCount =  {this.state.profileData.pstPts}
+                            />
+                          </span>
                         </div>
                         <div>
                           <span className="description">활동(댓글, 좋아요)</span>
