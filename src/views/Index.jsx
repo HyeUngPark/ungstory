@@ -1,5 +1,6 @@
 import React from "react";
 import Gallery from 'react-photo-gallery';
+import PropTypes from 'prop-types';
 
 import {
   Card,
@@ -32,6 +33,34 @@ class Index extends React.Component {
         , replyComment : ''
     };
   }
+
+  static propTypes = {
+    getPost : PropTypes.func
+  };
+
+  static defaultProps = {
+    getPost: ()=>{
+      let param ={
+        usrName : (localStorage.getItem('usrInfo') &&
+        JSON.parse(localStorage.getItem('usrInfo')).usrName) 
+        ? JSON.parse(localStorage.getItem('usrInfo')).usrName
+        : ''
+      };
+      api.apiSend('post','postList',param,(result)=>{
+        let postList = [];
+        if(result && result.reCd==="01"){
+          postList = result.pstList;
+        }else {
+          // console.log('게시글 조회 실패');
+        }
+        this.setState({
+          pstStSuCd : true
+          ,postList : postList
+        });
+      });
+    }
+  };
+
   getPostListCallback= (result) =>{
     let postList = [];
     if(result.reCd==="01"){
@@ -702,3 +731,4 @@ class Index extends React.Component {
 }
 
 export default Index;
+

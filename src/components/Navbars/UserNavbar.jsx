@@ -15,6 +15,8 @@ import {
 import LoginProfile from '../../views/auth/LoginProfile';
 import FrdReqList from '../../modals/frd/FrdReqList';
 import MsgList from '../../modals/msg/MsgList';
+import Index from '../../views/Index';
+
 import * as api from "utils/api";
 
 class UserNavbar extends React.Component {
@@ -26,9 +28,32 @@ class UserNavbar extends React.Component {
         ,msgNotice : 0
         ,pstNotice : 0
       }
+      ,searchText : ''
     };
   }
   
+  handleSubmit = (event) =>{
+    event.preventDefault();
+  }
+
+  searchChange = (e) =>{
+    this.setState({
+      searchText : e.target.value
+    });
+  }
+  
+  search = () =>{
+    if(this.state.searchText){
+      console.log(`'${this.state.searchText}' 검색`);
+      var index = <Index/>;
+      console.log(index);
+      index.props.getPost();
+    }else{
+      alert('검색하시려면 검색어를 입력해주세요.');
+    }
+    return;
+  }
+
   noticeClearCallback = (rs) =>{
     if(rs.reCd === '01' && rs.noticeList){
       // console.log('친구 알람 클리어 성공');
@@ -87,7 +112,8 @@ class UserNavbar extends React.Component {
               >
               {this.props.brandText}
             </Link>
-            <Form className="justify-content-center navbar-search navbar-search-dark form-inline mr-3 d-md-flex ml-lg-auto">
+            <Form className="justify-content-center navbar-search navbar-search-dark form-inline mr-3 d-md-flex ml-lg-auto"
+             onSubmit={this.handleSubmit}>
             {/* 검색 */}
               <FormGroup className="mb-0">
                 <InputGroup className="input-group-alternative">
@@ -96,7 +122,14 @@ class UserNavbar extends React.Component {
                       <i className="fas fa-search" />
                     </InputGroupText>
                   </InputGroupAddon>
-                  <Input placeholder="Search" type="text" />
+                  <Input placeholder="Search" 
+                         type="text" 
+                         onChange={e=>{this.searchChange(e)}}
+                         value={this.state.searchText}
+                         onKeyPress={e=>{if(e.key==='Enter'){
+                          this.search();
+                        }}}
+                         />
                 </InputGroup>
               </FormGroup>
               &nbsp;&nbsp;&nbsp;
