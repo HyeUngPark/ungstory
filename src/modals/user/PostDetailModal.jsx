@@ -21,8 +21,7 @@ import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 import FrdInfo from '../frd/FrdInfo';
 import PostModifyModal from '../user/PostModifyModal';
 
-
-export default class PostDetailModal extends React.Component {
+class PostDetailModal extends React.Component {
   constructor(props) {
     super(props);
     this.state = { 
@@ -33,8 +32,8 @@ export default class PostDetailModal extends React.Component {
       ,defaultStyle : !this.props.style ? {'display':'none'}: {'display':''}
     };
     this.handleSubmit = this.handleSubmit.bind(this);
-    
     // this.modalClose = this.props.callbackFromParent;
+    // this.props.viewPt = this.getPostInfo.bind(this);
   }
   toggle = (e) => {
     if(!Object.getOwnPropertyNames(this.state.postInfo).length > 0){
@@ -61,14 +60,12 @@ export default class PostDetailModal extends React.Component {
     }
   }
 
-  getPostInfo = () => {
-    if(this.props.pstPk){
-      let param ={
-        pstPk : this.props.pstPk
-        ,usrName : localStorage.getItem('usrInfo') ? JSON.parse(localStorage.getItem('usrInfo')).usrName : ''
-      };
-      api.apiSend('post','getPostInfo',param,this.getPostInfoCallback);
-    }
+  getPostInfo = (pstPk) => {
+    let param ={
+      pstPk : this.props.pstPk ? this.props.pstPk : pstPk
+      ,usrName : localStorage.getItem('usrInfo') ? JSON.parse(localStorage.getItem('usrInfo')).usrName : ''
+    };
+    api.apiSend('post','getPostInfo',param,this.getPostInfoCallback);
   }
 
   handleSubmit(event) {
@@ -342,7 +339,7 @@ export default class PostDetailModal extends React.Component {
       postInfo: postInfo
     }));
   }
-
+ 
   render() {
     return (
         <div>
@@ -840,3 +837,5 @@ export default class PostDetailModal extends React.Component {
     );
   }
 }
+
+export default PostDetailModal

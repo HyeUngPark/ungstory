@@ -27,8 +27,6 @@ import UserNavbar  from "components/Navbars/UserNavbar.jsx";
 
 var socket;
 
-var notice = <UserNavbar/>;
-
 class MsgSend extends React.Component {
   constructor(props) {
     super(props);

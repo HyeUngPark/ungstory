@@ -1936,6 +1936,7 @@ router.post('/usrPostImgList',function(req, res){
             return res.status(500).send("내 프로필 - 포스트 이미지 조회 실패" + imgErr);
         }
         if (imgResult.length > 0) {
+            console.log('★★★ 내 프로필 - 포스트 이미지 조회 성공 ★★★ ',imgResult.length);
             let imgList = [];
 
             for(let i=0; i<imgResult.length; i++){

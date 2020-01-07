@@ -3,7 +3,8 @@ import { Button, Modal, ModalBody,ModalHeader, Card , Row, Col} from 'reactstrap
 
 import * as api from "utils/api";
 
-export default class UsrPostImgList extends React.Component {
+import PostDetailModal from "../user/PostDetailModal";
+class UsrPostImgList extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -11,10 +12,11 @@ export default class UsrPostImgList extends React.Component {
       ,imgList : []
     };
     this.handleSubmit = this.handleSubmit.bind(this);
-    this.selectCallback = this.props.callbackFromParent;
+    this.imgClick = React.createRef();
+    this.usrPostImgList();
   }
   static defaultProps = {
-    thisYear : new Date().getFullYear()
+    thisYear : new Date().getFullYear()+''
   };
 
   toggle = (e) => {
@@ -39,35 +41,30 @@ export default class UsrPostImgList extends React.Component {
     if(result.reCd==="01"){
       this.setState({
         imgList : result.pstPts
-        ,modal: !this.state.modal
       });
     }else if(result.reCd ==='02'){
       // console.log('내 사진목록 조회 실패');
       this.setState({
-        modal: !this.state.modal
-        ,imgList : []
+        imgList : []
       });
     }else if(result.reCd ==='03'){
       // console.log('내 사진목록 0건');
       this.setState({
-        modal: !this.state.modal
-        ,imgList : []
+        imgList : []
       });
     }
   }
   
-  imgSelect =(index , e) =>{
-    this.selectCallback(this.state.imgList[index]);
-    this.cancel();
-  }
-
   usrPostImgList =() =>{
     let param={
-      usrId : this.props.usrId
+      usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
     };
     api.apiSend('post','usrPostImgList',param,this.usrPostImgListCallback);
   }
-
+  openPost =(e, pstPk) =>{
+    this.imgClick.current.props.pstPk = pstPk;
+    this.imgClick.current.toggle();
+  }
   render() {
     return (
         <div>
@@ -79,10 +76,14 @@ export default class UsrPostImgList extends React.Component {
           >
             {this.props.postImgCount}
           </div>
-          <Modal isOpen={this.state.modal} backdrop={false} onKeyUp={(e)=>{
-            if(e.key === "Escape"){
-              this.cancel();
-            }
+          <Modal 
+            isOpen={this.state.modal} 
+            backdrop={false} 
+            zIndex = "80"
+            onKeyUp={(e)=>{
+              if(e.key === "Escape"){
+                this.cancel();
+              }
           }}>
           <form className="card shadow" onSubmit={this.handleSubmit}>
           <Card className="bg-secondary shadow border-0">
@@ -97,33 +98,35 @@ export default class UsrPostImgList extends React.Component {
                       <Row>
                         <Col lg="12">
                         {imgs.date.substring(0,4) === this.props.thisYear 
-                          ? `${imgs.date.substring(4,2)}월`
-                          : `${imgs.date.substring(0,4)}년 ${imgs.date.substring(4,2)} 월`
+                          ? `${imgs.date.substring(4,6)}월`
+                          : `${imgs.date.substring(0,4)}년 ${imgs.date.substring(4,6)}월`
                         }
                         </Col>
                           <hr className="my-4" />
                         <Col lg="12">
                         {imgs.pstPts.map(
-                          (img,imgIndex) => (<li className="form-tag form-tag-li" key={index}>
-                          <a href="javascript:void(0)" 
-                            className="form-control-cursor"
-                            onClick={e=>{this.imgSelect(img.pstPk)}}
-                          >
-                            <img src={img.pstPts} 
+                          (img,imgIndex) => (<li className="form-tag form-tag-li" key={imgIndex}>
+                              <PostDetailModal 
+                                ref={this.imgClick}
+                                pstPk={img.pstPk}
+                                style={false}
+                              />
+                              <img 
+                                onClick={e=>{this.openPost(e, img.pstPk)}}
+                                src={img.pstPt} 
+                                className="form-control-cursor"
                                 style={{
                                   width: "100px",
                                   height: "100px",
                                 }}
-                                value={imgIndex} 
                               />
-                          </a>
                         </li>))}
                         </Col>
                       </Row>
                       )})
                     :<Row>
                     <Col lg="12">
-                      '포스팅한 사진이 없습니다.'<br/>
+                      포스팅한 사진이 없습니다.<br/>
                     </Col>
                     </Row>
                 }
@@ -145,3 +148,5 @@ export default class UsrPostImgList extends React.Component {
     );
   }
 }
+
+export default UsrPostImgList
