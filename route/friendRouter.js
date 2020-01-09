@@ -502,7 +502,6 @@ router.post('/frdInfo',function(req, res){
                     ,"subSchema.usrPt" : 1
                     ,"subSchema.usrFrds" : 1
                     ,"subSchema.usrMsg" : 1
-                    ,"subSchema.pstPts" : 1
                     ,"subSchema.pstPts" : {
                         $cond : [
                            {$and:[

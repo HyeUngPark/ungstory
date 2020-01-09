@@ -6,6 +6,7 @@ import { Container } from "reactstrap";
 import UserNavbar from "components/Navbars/UserNavbar.jsx";
 import UserFooter from "components/Footers/UserFooter.jsx";
 import Sidebar from "components/Sidebar/Sidebar.jsx";
+import Loading from "components/Loadings/Loading.jsx";
 
 import routes from "routes.js";
 
@@ -61,7 +62,7 @@ class User extends React.Component {
             {...this.props}
             brandText={this.getBrandText(this.props.location.pathname)}
           />
-          <div id="loadingUser">Loading...</div>
+          <div id="loadingUser"><Loading/></div>
           <Switch>{this.getRoutes(routes)}</Switch>
           <Container fluid>
             <UserFooter />

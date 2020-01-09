@@ -6,6 +6,7 @@ import { Container, Row, Col } from "reactstrap";
 // core components
 import AuthNavbar from "components/Navbars/AuthNavbar.jsx";
 import AuthFooter from "components/Footers/AuthFooter.jsx";
+import Loading from "components/Loadings/Loading.jsx";
 
 import routes from "routes.js";
 
@@ -65,7 +66,7 @@ class Auth extends React.Component {
           {/* Page content */}
           <Container className="mt--8 pb-5">
             <Row className="justify-content-center">
-              <div id="loadingAuth">Loading...</div>
+              <div id="loadingAuth"><Loading/></div>
               <Switch>{this.getRoutes(routes)}</Switch>
             </Row>
           </Container>

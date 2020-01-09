@@ -29,37 +29,13 @@ class Index extends React.Component {
     super(props);
     this.state =  {
         postList : []
-        , pstStSuCd : false
         , replyComment : ''
+        , searchText : ''
     };
-  }
-
-  static propTypes = {
-    getPost : PropTypes.func
-  };
-
-  static defaultProps = {
-    getPost: ()=>{
-      let param ={
-        usrName : (localStorage.getItem('usrInfo') &&
-        JSON.parse(localStorage.getItem('usrInfo')).usrName) 
-        ? JSON.parse(localStorage.getItem('usrInfo')).usrName
-        : ''
-      };
-      api.apiSend('post','postList',param,(result)=>{
-        let postList = [];
-        if(result && result.reCd==="01"){
-          postList = result.pstList;
-        }else {
-          // console.log('게시글 조회 실패');
-        }
-        this.setState({
-          pstStSuCd : true
-          ,postList : postList
-        });
-      });
+    if(this.state.postList && this.state.postList.length === 0){
+      this.getPostList();
     }
-  };
+  }
 
   getPostListCallback= (result) =>{
     let postList = [];
@@ -69,18 +45,23 @@ class Index extends React.Component {
       // console.log('게시글 조회 실패');
     }
     this.setState({
-      pstStSuCd : true
-      ,postList : postList
+      postList : postList
     });
   }
 
-  getPostList =()=>{
+  getPostList =(searchCd, text)=>{
     let param ={};
     if(localStorage.getItem('usrInfo') &&
       JSON.parse(localStorage.getItem('usrInfo')).usrName){
       param.usrName = JSON.parse(localStorage.getItem('usrInfo')).usrName;
     }else{
       param.usrName = '';
+    }
+    if(searchCd && searchCd === 'search'){
+      param.searchText=text;
+      this.setState({
+        searchText : text
+      });
     }
     api.apiSend('post','postList',param,this.getPostListCallback);
   }
@@ -364,19 +345,54 @@ class Index extends React.Component {
     }
   }
 
-  componentDidMount(){
-      if(!this.state.pstStSuCd){
-          this.getPostList();
-      }
-  }
-
   render() {
+    Index.defaultProps = {
+      getPost: (searchText)=>{
+        this.setState({
+          searchText : searchText
+        });
+        let param ={
+          usrName : (localStorage.getItem('usrInfo') &&
+          JSON.parse(localStorage.getItem('usrInfo')).usrName) 
+          ? JSON.parse(localStorage.getItem('usrInfo')).usrName
+          : ''
+          ,searchText : searchText
+        };
+        api.apiSend('post','postList',param, (result)=>{
+          var pstList = [];
+          if(result && result.reCd==="01"){
+            pstList = result.pstList;
+            this.setState({
+              postList : pstList
+            });
+          }else if(result && result.reCd === '02'){
+            this.setState({
+              postList :[]
+            });
+          }
+        });
+      }
+    };
+
     return (
       <>
         <Header />
         {/* Page content */}
         <Container className="mt--2" fluid>
+        {this.state.searchText 
+        && this.state.postList 
+        && this.state.postList.length>0?
+        <Row className="mt-5">
+          <Col className="mb-5 mb-xl-0" xl="8">
+            <Card className="shadow">
+              <CardHeader className="border-0">
+                '{this.state.searchText}'로 검색한 결과입니다. 
+              </CardHeader>
+            </Card>
+          </Col>
+        </Row> :''}
         {
+          this.state.postList && this.state.postList.length>0?
           this.state.postList.map((post, postIdx)=>{
             return(
               <Row className="mt-5">
@@ -462,7 +478,9 @@ class Index extends React.Component {
                                         (post.pstHt && post.pstHt.length >0 ) ?
                                           post.pstHt.map((tag, index)=>{
                                             return(
-                                            <a href="#">
+                                            <a href="javascript:void(0)" onClick={e=>{
+                                              this.getPostList('search',tag);
+                                            }}>
                                               #{tag}&nbsp;
                                             </a> 
                                             )
@@ -723,12 +741,24 @@ class Index extends React.Component {
               ////////////////////////////////////////////////////////////////////////////////////////////////
             );
           })
+          :this.state.searchText || this.state.searchText !== ''?
+          <Row className="mt-5">
+              <Col className="mb-5 mb-xl-0" xl="8">
+                <Card className="shadow">
+                  <CardHeader className="border-0">
+                    '{this.state.searchText}'로 검색한 게시물이 존재하지 않습니다.
+                  </CardHeader>
+                </Card>
+              </Col>
+            </Row> 
+          :''
         }
         </Container>
       </>
     );
   }
 }
+
 
 export default Index;
 

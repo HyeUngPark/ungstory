@@ -105,8 +105,10 @@
     router.post('/postList',function(req, res){
 
     var params = req.body;
+    var searchText = params.searchText?params.searchText:'';
     if(params.usrName !==''){ // 회원
-        schema.find({
+       
+       schema.find({
             wkCd : 'USR'
             ,wkDtCd : 'USR'
             ,"subSchema.usrName" : params.usrName
@@ -123,30 +125,53 @@
             if (fResult.length > 0) {
                 myFrds = fResult[0].subSchema.usrFrds;
             }
+
+            var myQeury = {
+                wkCd : 'PST'
+               ,wkDtCd : 'PST'
+               ,"subSchema.usrName" : params.usrName
+               ,"subSchema.pstPubYn" : {$ne : '04'}
+           };
+       
+           var allQuery = {
+               wkCd : 'PST'
+               ,wkDtCd : 'PST'
+               ,"subSchema.pstPubYn" : '01'
+           };
+       
+           var frdQuery = {
+               wkCd : 'PST'
+               ,wkDtCd : 'PST'
+               ,"subSchema.usrName" : {$in:myFrds}
+               ,"subSchema.pstPubYn" : '02'
+           };
+    
+            if(searchText){
+                console.log(`★★★ ${searchText} 검색 ★★★`);
+                myQeury.$or=[
+                    {'subSchema.pstHt' : {$regex:".*"+searchText+".*"}},
+                    {'subSchema.pstCt' : {$regex:".*"+searchText+".*"}}
+                ];
+                allQuery.$or=[
+                    {'subSchema.pstHt' : {$regex:".*"+searchText+".*"}},
+                    {'subSchema.pstCt' : {$regex:".*"+searchText+".*"}}
+                ];
+                frdQuery.$or=[
+                    {'subSchema.pstHt' : {$regex:".*"+searchText+".*"}},
+                    {'subSchema.pstCt' : {$regex:".*"+searchText+".*"}}
+                ];
+            }
+
             schema.aggregate([
                 {$facet:{    
                     myPst : [
-                        {$match:{
-                            wkCd : 'PST'
-                            ,wkDtCd : 'PST'
-                            ,"subSchema.usrName" : params.usrName
-                            ,"subSchema.pstPubYn" : {$ne : '04'}
-                        }}
+                        {$match: myQeury}
                     ]
                     ,allPst : [
-                        {$match:{
-                            wkCd : 'PST'
-                            ,wkDtCd : 'PST'
-                            ,"subSchema.pstPubYn" : '01'
-                        }}
+                        {$match:allQuery}
                     ]
                     ,frdPst : [
-                        {$match:{
-                            wkCd : 'PST'
-                            ,wkDtCd : 'PST'
-                            ,"subSchema.usrName" : {$in:myFrds}
-                            ,"subSchema.pstPubYn" : '02'
-                        }}
+                        {$match:frdQuery}
                     ]
                 }}
                 ,{$project: {
@@ -292,10 +317,13 @@
                                     }
                                 }
                             }
-                            res.json({
+                            let resultList ={
                                 reCd : '01'
                                 ,pstList : postList
-                            });
+                            }
+                            res.json(
+                                resultList
+                            );
                         });
                         
                     }else{
@@ -306,12 +334,21 @@
             });
         });
     }else{ // 비회원
-    schema.aggregate([
-        {$match:{
+        var nonQuery = {
             wkCd : 'PST'
             ,wkDtCd : 'PST'
             ,"subSchema.pstPubYn" : '01'
-        }}
+        };
+        if(searchText){
+            nonQuery.$or=[
+                {'subSchema.pstHt' : {$regex:".*"+searchText+".*"}},
+                {'subSchema.pstCt' : {$regex:".*"+searchText+".*"}}
+            ];
+        }
+    schema.aggregate([
+        {$match:
+            nonQuery    
+        }
         ,{$unwind:{
             path: "$subSchema.pstCmt",
             preserveNullAndEmptyArrays: true

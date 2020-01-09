@@ -44,14 +44,15 @@ class UserNavbar extends React.Component {
   
   search = () =>{
     if(this.state.searchText){
-      console.log(`'${this.state.searchText}' 검색`);
       var index = <Index/>;
-      console.log(index);
-      index.props.getPost();
+      index.props.getPost(this.state.searchText);
+      this.setState({
+        searchText : ''
+      });
+
     }else{
       alert('검색하시려면 검색어를 입력해주세요.');
     }
-    return;
   }
 
   noticeClearCallback = (rs) =>{
