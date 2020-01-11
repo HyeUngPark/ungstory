@@ -60,18 +60,18 @@ class LoginProfile extends React.Component {
     }
 
     loginCkCallback= (result) =>{
-        if(result.reCd==="01"){
+        if(result && result.reCd==="01"){
             if(result.noticeList){
                 this.getNotice(result.noticeList);
             }
-        }else if(result.reCd ==='02'){
+        }else if(result && result.reCd ==='02'){
             // fail
-        }else if(result.reCd === '03'){
+        }else if(result && result.reCd === '03'){
             let usrInfo = JSON.parse(localStorage.getItem('usrInfo'));
             usrInfo.usrToken = result.usrToken;
             localStorage.setItem('usrInfo',JSON.stringify(usrInfo));
             // this.sessionCheck();
-        }else if(result.reCd === '04'){
+        }else if(result && result.reCd === '04'){
             this.logout();
         }
       }

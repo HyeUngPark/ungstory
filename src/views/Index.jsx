@@ -345,6 +345,11 @@ class Index extends React.Component {
     }
   }
 
+  scrollTop = () => {
+    let scroll = this.refs.scrollElement || document.getElementById('scrollElement');
+    scroll.scrollTop=0;
+  }
+
   render() {
     Index.defaultProps = {
       getPost: (searchText)=>{
@@ -370,6 +375,8 @@ class Index extends React.Component {
               postList :[]
             });
           }
+          let scroll = this.refs.scrollElement || document.getElementById('scrollElement');
+          scroll.scrollTop=0;
         });
       }
     };
@@ -378,7 +385,7 @@ class Index extends React.Component {
       <>
         <Header />
         {/* Page content */}
-        <Container className="mt--2" fluid>
+        <Container className="mt--2" fluid id="scrollElement" ref="scrollElement">
         {this.state.searchText 
         && this.state.postList 
         && this.state.postList.length>0?

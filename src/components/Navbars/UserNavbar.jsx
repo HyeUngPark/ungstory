@@ -10,6 +10,7 @@ import {
   InputGroup,
   Navbar,
   Container,
+  Tooltip,
 } from "reactstrap";
 
 import LoginProfile from '../../views/auth/LoginProfile';
@@ -58,7 +59,6 @@ class UserNavbar extends React.Component {
   noticeClearCallback = (rs) =>{
     if(rs.reCd === '01' && rs.noticeList){
       // console.log('친구 알람 클리어 성공');
-      console.log("userNavBar's noticeClear change state\n",rs);
       this.setState({
         noticeList : rs.noticeList
       });
@@ -81,6 +81,13 @@ class UserNavbar extends React.Component {
     this.setState({
       noticeList : result    
     });
+  }
+  tooltipToggle = (e,tooltip) =>{
+    if(!this.state.tooltipToggle){
+      this.setState({
+        searchTooltip : tooltip
+      });
+    }
   }
 
   render() {
@@ -124,13 +131,22 @@ class UserNavbar extends React.Component {
                     </InputGroupText>
                   </InputGroupAddon>
                   <Input placeholder="Search" 
+                         id="searchText"
                          type="text" 
                          onChange={e=>{this.searchChange(e)}}
                          value={this.state.searchText}
                          onKeyPress={e=>{if(e.key==='Enter'){
                           this.search();
                         }}}
-                         />
+                        onFocus={e=>{this.tooltipToggle(e,true)}}
+                        onBlur={e=>{this.tooltipToggle(e,false)}}
+                  />
+                  <Tooltip placement="right" 
+                           isOpen={this.state.searchTooltip} 
+                          //  toggle={e=>{this.tooltipToggle()}}
+                           target="searchText" >
+                    Enter키를 입력하시면 검색 가능합니다.
+                  </Tooltip>
                 </InputGroup>
               </FormGroup>
               &nbsp;&nbsp;&nbsp;

@@ -20,6 +20,7 @@ import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 
 import FrdInfo from '../frd/FrdInfo';
 import PostModifyModal from '../user/PostModifyModal';
+import Index from "../../views/Index";
 
 class PostDetailModal extends React.Component {
   constructor(props) {
@@ -42,6 +43,12 @@ class PostDetailModal extends React.Component {
     this.setState({
       modal: !this.state.modal
     });
+  }
+
+  getPostList = (tag) => {
+    var index = <Index/>;
+    index.props.getPost(tag);
+    this.cancel();
   }
 
   getPostInfoCallback = (result) => {
@@ -529,11 +536,13 @@ class PostDetailModal extends React.Component {
                             position: "relative"
                           }}
                         >
-                            <a href="javascript:void(0)" 
+                          <a href="javascript:void(0)" 
                               className="form-control-cursor"
                               style={{
                               }}
-                              // onClick={e => popup.openImg(img)}
+                              onClick={e=>{
+                                this.getPostList(tag);
+                              }}
                             > 
                               #{tag}
                             </a>
