@@ -1,11 +1,10 @@
 import Index from "views/Index.jsx";
 import Profile from "views/user/Profile.jsx";
-import Tables from "views/user/Tables.jsx";
 import FriendSearch from "views/user/FriendSearch.jsx";
 import PostSearch from "views/user/PostSearch.jsx";
 import ActiveSearch from "views/user/ActiveSearch.jsx";
 import MsgSend from "views/user/MsgSend.jsx";
-import Icons from "views/user/Icons.jsx";
+// import Icons from "views/user/Icons.jsx";
 
 import Register from "views/auth/Register.jsx";
 import Login from "views/auth/Login.jsx";
@@ -18,13 +17,13 @@ var routes =[
     component: Index,
     layout: "/user"
   },
-  {
-    path: "/icons",
-    name: "Icons",
-    icon: "ni ni-planet text-blue",
-    component: Icons,
-    layout: "/user"
-  },
+  // {
+  //   path: "/icons",
+  //   name: "Icons",
+  //   icon: "ni ni-planet text-blue",
+  //   component: Icons,
+  //   layout: "/user"
+  // },
   {
     path: "/login",
     name: "Login",
@@ -38,13 +37,6 @@ var routes =[
     icon: "ni ni-circle-08 text-pink",
     component: Register,
     layout: "/auth"
-  },
-  {
-    path: "/tables",
-    name: "Tables",
-    icon: "ni ni-bullet-list-67 text-red",
-    component: Tables,
-    layout: "/user"
   },
   {
     path: "/friend-Search",
