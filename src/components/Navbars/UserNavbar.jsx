@@ -16,6 +16,7 @@ import {
 import LoginProfile from '../../views/auth/LoginProfile';
 import FrdReqList from '../../modals/frd/FrdReqList';
 import MsgList from '../../modals/msg/MsgList';
+import NotList from '../../modals/not/NoticeList';
 import Index from '../../views/Index';
 
 import * as api from "utils/api";
@@ -214,7 +215,7 @@ class UserNavbar extends React.Component {
               </FormGroup>
               &nbsp;&nbsp;&nbsp;
 
-              {/* 게시글 알림 */}
+              {/* 전체적인 알림 */}
               <FormGroup className="mb-0 form-control-cursor" href="#">
                 <InputGroup className="input-group-alternative">
                   <InputGroupAddon addonType="prepend">
@@ -227,8 +228,7 @@ class UserNavbar extends React.Component {
                             className="form-control-cursor"
                           //  onClick={e=>{this.imgView(index,e)}}
                           >
-                          <i className=" ni ni-bulb-61"></i>
-                          &nbsp;
+                          <NotList/>
                           </a>
                             {this.state.noticeList.pstNotice > 0 ?
                               <span className="form-control-notice"
