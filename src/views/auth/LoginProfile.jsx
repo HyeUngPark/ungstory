@@ -180,7 +180,7 @@ class LoginProfile extends React.Component {
                         <span>설정</span>
                     </DropdownItem>
                     <DropdownItem divider />
-                    <DropdownItem href="#pablo" onClick={this.logout}>
+                    <DropdownItem href="javascript:void(0)" onClick={this.logout}>
                         <i className="ni ni-user-run" />
                         <span>Logout</span>
                     </DropdownItem>

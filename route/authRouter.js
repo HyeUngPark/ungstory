@@ -163,7 +163,7 @@ router.get('/nameCheck', function(req, res) {
 
 router.post('/login', function(req, res) {
     var params = req.body;
-
+    console.log("login's params \n",params);
     schema.aggregate([
         {$match:{
             wkCd: 'USR',
@@ -212,7 +212,6 @@ router.post('/login', function(req, res) {
                 // let session = req.session;
                 // session.usrToken = token;
                 // console.log('★★★ 로그인 성공 ★★★\n',session);
-
                 // 접속 IP
                 var ipAddress;
                 var forwardedIpsStr = req.header('x-forwarded-for');
@@ -222,7 +221,6 @@ router.post('/login', function(req, res) {
                 }else{
                     ipAddress = req.connection.remoteAddress;
                 }
-
                 loginSchema.loginToken = token;
                 loginSchema.usrId = result[0].usrId;
                 loginSchema.connIp = ipAddress;
@@ -259,6 +257,16 @@ router.post('/login', function(req, res) {
 });
 router.post('/loginCk',function(req, res){
     let params = req.body;
+    // 접속 IP
+    var ipAddress;
+    var forwardedIpsStr = req.header('x-forwarded-for');
+    if(forwardedIpsStr){
+        var forwardedIps = forwardedIpsStr.split(',');
+        ipAddress = forwardedIps[0];
+    }else{
+        ipAddress = req.connection.remoteAddress;
+    }
+
     if(params.usrToken){
         jwt.verify(params.usrToken,process.env.tokenKey,function(err, decoded){
             if(decoded){
@@ -386,8 +394,57 @@ router.post('/loginCk',function(req, res){
                         }); // update close
                     }else{
                         console.log('로그인 내역에 등록되지않은 Token');                            
+                        schema.find({
+                            wkCd: 'USR',
+                            wkDtCd : 'USR',
+                            "subSchema.usrName": params.usrName
+                        }, function(reErr, reResult) {
+                            if (reErr) {
+                                console.log('error \n', reErr);
+                                return res.status(500).send("select error >> " + reErr)
+                            }
+                            if (reResult.length > 0) {
+                                console.log("로그인 내역에 새 토큰 추가\n",newToken);
+                                loginSchema.loginToken = newToken;
+                                loginSchema.usrId = reResult[0].subSchema.usrId;
+                                loginSchema.connIp = ipAddress;
+                                loginSchema.loginDate = date.getDate();
+                            
+                                var usrResult = reResult[0].subSchema;
+
+                                schema.create({
+                                    wkCd: 'USR'
+                                    ,wkDtCd : "LOGIN"
+                                    ,fstWrDt: date.getDate() // 최초 작성일
+                                    ,lstWrDt: date.getDate() // 최종 작성일
+                                    ,subSchema: loginSchema
+                                }).then((loginResult)=>{
+                                    console.log("★★새 로그인 내역 등록 성공★★\n");
+                                    res.json({
+                                        "reCd" : '03',
+                                        "usrToken" : newToken,
+                                        "usrInfo" :{
+                                            "usrName" : usrResult.usrName
+                                            ,"usrPt" : usrResult.usrPt
+                                            ,"usrLikePst" : usrResult.usrLikePst
+                                        }
+                                    });       
+                                }).catch((err)=>{
+                                    console.log("★★새 로그인 내역 등록 실패★★\n",err);
+                                    res.json({
+                                        reCd: '02'
+                                    });
+                                });
+                            }else{
+                                console.log('★★로그인 토큰 갱신 실패★★');
+                                res.json({
+                                    reCd: '02'
+                                });
+                            } // 회원 조회
+                        }); // 로그인 내역 조회
                     }
                 }); // find close
+
              }
             }
             });
@@ -402,54 +459,31 @@ router.post('/loginCk',function(req, res){
 router.post('/logout',function(req,res){
     var params = req.body;
     console.log("★★★logout★★★\n",params.usrToken);
-    if(params.usrToken){
-        schema.find({
-            wkCd: 'USR',
-            wkDtCd : 'LOGIN',
-            "subSchema.loginToken": params.usrToken
-        }, function(err, result) {
-            if (err) {
-                console.log('error \n', err);
-                return res.status(500).send("select error >> " + err)
-            }
-            if (result.length > 0) {
-                console.log("★★★ login history search result ★★★ \n",result[0]);
-    
-                var _id = result[0]._id;
-
-                schema.updateOne({
-                    "_id" : _id
-                }
-                , { $set: {
-                    lstWrDt : date.getDate()
-                    ,'subSchema.logoutDate': date.getDate()
-                }}
-                , function(err, result) {
-                    if (err) {
-                        console.log('error \n', err);
-                        return res.status(500).send("select error >> " + err)
-                    }
-                    if (result.n) {
-                        console.log("★★★ 로그아웃 성공 result ★★★ \n",result.n);
-                        // 세션파기
-                        // req.session.destroy();
-                        // res.clearCookie('sid');
-                        
-                        res.json({
-                            reCd : '01'
-                        })
-                    } else {
-                        console.log("★★★ fail ★★★ \n",result.n);
-                    }
-                });
-            } else {
-                console.log("★★★ 로그아웃 실패 result ★★★ \n");
-                res.json({
-                    reCd : '02'
-                })
-            }
-        });
+    schema.updateMany({
+        wkCd: 'USR',
+        wkDtCd : 'LOGIN',
+        "subSchema.loginToken": params.usrToken   
     }
+    , { $set: {
+        lstWrDt : date.getDate()
+        ,'subSchema.logoutDate': date.getDate()
+    }}, function(err, result) {
+        if (err) {
+            console.log('error \n', err);
+            return res.status(500).send("logout error >> " + err)
+        }
+        if (result.n) {
+            console.log("★★★ 로그아웃 성공 result ★★★ \n",result.n);
+            res.json({
+                reCd : '01'
+            });
+        } else {
+            console.log("★★★ fail ★★★ \n",result);
+            res.json({
+                reCd : '02'
+            });
+        }
+    });
 });
 
 router.post('/pwFind',function(req,res){
@@ -469,7 +503,6 @@ router.post('/pwFind',function(req,res){
         if (result.length > 0) {
             _id = result[0]._id;
             var newPw = random.getRandomPw();
-            console.log('pwSearch || ',newPw);
             
             let mailParam={
                 toEmail : usrId
