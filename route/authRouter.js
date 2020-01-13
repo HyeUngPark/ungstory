@@ -212,6 +212,7 @@ router.post('/login', function(req, res) {
                 // let session = req.session;
                 // session.usrToken = token;
                 // console.log('★★★ 로그인 성공 ★★★\n',session);
+
                 // 접속 IP
                 var ipAddress;
                 var forwardedIpsStr = req.header('x-forwarded-for');
@@ -225,6 +226,7 @@ router.post('/login', function(req, res) {
                 loginSchema.usrId = result[0].usrId;
                 loginSchema.connIp = ipAddress;
                 loginSchema.loginDate = date.getDate();
+                
                 // 로그인 내역 추가
                 schema.create({
                     wkCd: 'USR'

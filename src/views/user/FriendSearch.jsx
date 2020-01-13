@@ -107,7 +107,7 @@ class FriendSearch extends React.Component {
         usrName : localStorage.getItem('usrInfo') ? JSON.parse(localStorage.getItem('usrInfo')).usrName  : ''
         ,searchName : searchName
       };
-      api.apiSend('post','/frd/frendSearch',param,this.friendSearchCallback);      
+      api.apiSend('post','/frd/friendSearch',param,this.friendSearchCallback);      
     }else{
       alert('검색할 닉네임을 입력해주세요');
     }

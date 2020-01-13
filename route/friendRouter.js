@@ -9,12 +9,14 @@ var schema = require('../schema/commonSchema');
 var frdSchema = require('../schema/friendSchema');
 var ntSchema =  require('../schema/noticeSchema');
 
+var notRouter = require('./noticeRouter');
+
 var date = require('../myUtils/dateUtils');
 
 var env = require('dotenv');
 env.config();
 
-router.post('/frendSearch',function(req, res){
+router.post('/friendSearch',function(req, res){
     var params = req.body;
     if(params.searchCd === 'MY'){
         // 1.내 친구 목록 조회
@@ -435,10 +437,39 @@ router.put('/frdYn',function(req, res){
                             }
                             if (uResult2.n) {
                                 console.log('★★★ 친구수락 - 수신자 친구목록 추가 완료 ★★★');
-                                res.json({
-                                    reCd : '01'
-                                    ,ynCd : params.ynCd
+
+                                // 3. 친구 상태 업데이트
+                                schema.updateOne({
+                                    wkCd : 'FRD'
+                                    ,wkDtCd : 'FRD'
+                                    ,"subSchema.frdReq" : params.frdReq
+                                    ,"subSchema.frdRes" : params.frdRes
+                                }
+                                , { $set: {
+                                    lstWrDt : date.getDate()
+                                    ,'subSchema.frdSt': 'Y'
+                                }}
+                                , function(err, result) {
+                                    if (err) {
+                                        console.log('error \n', err);
+                                        return res.status(500).send("친구 수락 - 상태 업데이트 실패\n" + err)
+                                    }
+                                    if (result.n) {
+                                        console.log("★★★ 친구 수락 - 상태 업데이트 성공 result ★★★ \n",result.n);
+                                        // 4. 친구 수락 알림 추가
+                                        let friendInfo = {
+                                            frdReq : params.frdReq
+                                            ,frdRes : params.frdRes
+                                        }
+                                        notRouter.frdNotAdd(friendInfo);
+                                        
+                                        res.json({
+                                            reCd : '01'
+                                            ,ynCd : params.ynCd
+                                        });
+                                    }
                                 });
+                                
                             }else{
                                 res.json({
                                     reCd : '02'

@@ -71,7 +71,7 @@ class MsgSend extends React.Component {
       usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
       ,searchCd : 'MY'
     };
-    api.apiSend('post','/frd/frendSearch',param,this.myFrdSelectCallback);      
+    api.apiSend('post','/frd/friendSearch',param,this.myFrdSelectCallback);      
   }
 
   friendSearch =(e)=>{

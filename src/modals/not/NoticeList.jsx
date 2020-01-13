@@ -136,6 +136,7 @@ class NoticeList extends React.Component {
                   </span>
               </Col>
             </Row>
+            <br/>
             {/* : 
             <Row className="align-items-center" lg="12">
               <Col lg="4">
@@ -152,29 +153,31 @@ class NoticeList extends React.Component {
               <Card className="card-profile shadow">
                 <Row 
                   lg="12"
-                  className = {`justify-content-center modal-center `}
+                  className = {` modal-center `}
                   // className = {`justify-content-center modal-center 
                   // ${not.notCountt>0 ? 'chat-unread' : 'chat-read'}
                   // `}
                   >
-                  <Col lg="1">
+                  <Col lg="1" className="form-padding-left-2">
                     <span className="text-center border-0 pt-8 pt-md-4 pb-0 pb-md-4">
                       <div className="avatar avatar-sm rounded-circle">
                         <a href="javascript:void(0)" 
-                          onClick={e => popup.openImg(msg.usrPt)}>
+                          // onClick={e => popup.openImg(msg.usrPt)}
+                        >
                           <img
                             alt="..."
                             className="rounded-circle"
-                            src={(msg.usrPt && msg.usrPt !=="") 
-                            ? msg.usrPt
-                            : require("assets/img/theme/no-profile-130x130.png")}
+                            // src={(msg.usrPt && msg.usrPt !=="") 
+                            // ? msg.usrPt
+                            // : 
+                            src={require("assets/img/theme/no-profile-130x130.png")}
                           />
                         </a>
                       </div>
                     </span>
                   </Col>
                   <Col 
-                    lg="2"
+                    lg="11"
                     className ="form-control-cursor"
                   >
                         님이 메시지를 보냈습니다.
@@ -192,13 +195,12 @@ class NoticeList extends React.Component {
                     <span className="text-center border-0 pt-8 pt-md-4 pb-0 pb-md-4">
                       <div className="avatar avatar-sm rounded-circle">
                         <a href="javascript:void(0)" 
-                          onClick={e => popup.openImg(msg.usrPt)}>
+                          // onClick={e => popup.openImg(msg.usrPt)}
+                          >
                           <img
                             alt="..."
                             className="rounded-circle"
-                            src={(msg.usrPt && msg.usrPt !=="") 
-                            ? msg.usrPt
-                            : require("assets/img/theme/no-profile-130x130.png")}
+                            src={require("assets/img/theme/no-profile-130x130.png")}
                           />
                         </a>
                       </div>
@@ -214,22 +216,23 @@ class NoticeList extends React.Component {
                 <hr className="chat-hr-none"/>
                 <Row 
                   lg="12"
-                  className = {`justify-content-center modal-center `}
-                  // className = {`justify-content-center modal-center 
-                  // ${not.notCountt>0 ? 'chat-unread' : 'chat-read'}
-                  // `}
+                  className = {`justify-content-center modal-center 
+                  `}
+                  //  ${not.notCountt>0 ? 'chat-unread' : 'chat-read'}
                   >
                   <Col lg="1">
                     <span className="text-center border-0 pt-8 pt-md-4 pb-0 pb-md-4">
                       <div className="avatar avatar-sm rounded-circle">
                         <a href="javascript:void(0)" 
-                          onClick={e => popup.openImg(msg.usrPt)}>
+                          // onClick={e => popup.openImg(msg.usrPt)}
+                          >
                           <img
                             alt="..."
                             className="rounded-circle"
-                            src={(msg.usrPt && msg.usrPt !=="") 
-                            ? msg.usrPt
-                            : require("assets/img/theme/no-profile-130x130.png")}
+                            // src={(msg.usrPt && msg.usrPt !=="") 
+                            // ? msg.usrPt
+                            // : 
+                            src = {require("assets/img/theme/no-profile-130x130.png")}
                           />
                         </a>
                       </div>
@@ -249,7 +252,7 @@ class NoticeList extends React.Component {
         <Card>
           <Row className="justify-content-center modal-center form-control-cursor"> 
             <Col lg="12">
-              주고받은 메시지가 없습니다. 새 메시지 버튼을 눌러서 메시지를 주고받아보세요!
+              새로운 알림이 없습니다.
             </Col>
           </Row>
         </Card>

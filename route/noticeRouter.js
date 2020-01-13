@@ -35,6 +35,71 @@ router.msgNotAdd = (msgInfo) =>{
 
 };
 
+router.frdNotAdd = (frdInfo) =>{
+    ntSchema.readYn=false;
+    ntSchema.noticeCt=frdInfo.frdReq;
+    ntSchema.usrName=frdInfo.frdRes;
+    
+    schema.create({
+        wkCd: 'NOT'
+        ,wkDtCd : "FRDY"
+        ,fstWrDt: date.getDate() // 최초 작성일
+        ,lstWrDt: date.getDate() // 최종 작성일
+        ,subSchema: ntSchema
+    }).then((result)=>{
+        console.log("★★ frdNotAdd success ★★\n",result);
+        return 01;
+    }).catch((err)=>{
+        console.log("★★ frdNotAdd fail ★★\n",err);
+        return 02;
+    }); 
+};
+
+router.pstNotAdd = (frdList, usrName) =>{
+    var insertList = [];
+    for(let i=0; i<frdList.length; i++){
+        let frdTemp = {
+            wkCd: 'NOT'
+            ,wkDtCd : "PST"
+            ,fstWrDt: date.getDate() // 최초 작성일
+            ,lstWrDt: date.getDate() // 최종 작성일
+            ,subSchema: {
+                readYn : false,
+                noticeCt : usrName, // 친구
+                usrName : frdList[i] // 친구들
+            }
+        }
+        insertList.push(frdTemp);
+    }
+    schema.create(insertList).then((result)=>{
+        console.log("★★ pstNotAdd success ★★\n",result);
+        return 01;
+    }).catch((err)=>{
+        console.log("★★ pstNotAdd fail ★★\n",err);
+        return 02;
+    }); 
+};
+
+router.actNotAdd = (usrInfo) =>{
+    ntSchema.readYn=false;
+    ntSchema.noticeCt=""; // 좋아요/댓글 작성자
+    ntSchema.usrName=""; // 게시글 작성자
+    
+    schema.create({
+        wkCd: 'NOT'
+        ,wkDtCd : "" // COMM(댓글), LIKE(좋아요)
+        ,fstWrDt: date.getDate() // 최초 작성일
+        ,lstWrDt: date.getDate() // 최종 작성일
+        ,subSchema: ntSchema
+    }).then((result)=>{
+        console.log("★★ actNotAdd success ★★\n",result);
+        return 01;
+    }).catch((err)=>{
+        console.log("★★ actNotAdd fail ★★\n",err);
+        return 02;
+    }); 
+};
+
 router.put('/frdNotClear',function(req,res){
     var params = req.body;
     // 0. 클릭 시점 친구 알림 0으로 변경

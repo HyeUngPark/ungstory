@@ -9,6 +9,8 @@
     var env = require('dotenv');
     env.config();
 
+    var notRouter = require('./noticeRouter');
+
     var date = require('../myUtils/dateUtils');
     var random = require('../myUtils/randomUtils');
     var encrypt = require('../myUtils/encryptUtils');
@@ -20,7 +22,7 @@
 
     router.post('/post',function(req, res){
         let params = req.body;
-        // 사용자 이름으로 id 검색 후 입력
+        
         schema.find({
             wkCd: 'USR',
             wkDtCd : 'USR',
@@ -50,16 +52,46 @@
                     ,lstWrDt: date.getDate() // 최종 작성일
                     ,subSchema: postSchema
                 }).then((result)=>{
-                    // console.log("★★post success★★\n",result);
-                    res.json({
-                        reCd: '01'
-                    });
+                    console.log("★★post success★★\n");
+                    
                 }).catch((err)=>{
                     console.log("★★post fail★★\n",err);
                     res.json({
                         reCd: '02'
                     });
                 }); // post close
+
+                // 게시글 알람 등록
+
+                // 1. 내 친구 조회
+                schema.aggregate([
+                    {$match : {
+                        wkCd : 'USR'
+                        ,wkDtCd : 'USR'
+                        ,"subSchema.usrName" : params.usrName
+                    }}
+                    ,{$project:{
+                        _id : 1
+                        ,"subSchema.usrFrds" : 1
+                    }}
+                    ,{$group:{
+                        _id : "$_id"
+                        ,"myFrd" : {"$first":"$subSchema.usrFrds"}
+                    }}
+                ],function(fError, fResult){
+                    if (fError) {
+                        console.log('error \n', fError);
+                        return res.status(500).send("내 친구 목록 조회 실패 >> " + fError)
+                    }
+                    if (fResult.length > 0 && fResult[0].myFrd.length > 0) {
+                        // 포스팅 알람 등록
+                        notRouter.pstNotAdd(fResult[0].myFrd, params.usrName);
+                    }
+                    res.json({
+                        reCd: '01'
+                    });
+                });
+
             }
         }); // find close
     });
@@ -535,6 +567,12 @@
                     }
                     if (result.n) {
                         console.log("★★★ 댓글 등록 성공 result ★★★ \n",result.n);
+
+                        // 여기
+                        // 댓글 작성 알람 등록
+
+                        notRouter.actNotAdd(usrInfo);
+
                         res.json({
                             reCd : '01'
                         });
@@ -551,7 +589,6 @@
 
     router.post('/postCmtUd',function(req, res){
         let params = req.body;
-        console.log('댓글 업데이트 \n', params);
         schema.update({
             wkCd : 'PST',
             wkDtCd : 'PST',
@@ -772,6 +809,11 @@
                                     for(let i=0; i<tempLikePst.length; i++){
                                         myLikePst.push(tempLikePst[i].pstPk);
                                     }
+
+                                    // 여기
+                                    // 좋아요 알람 등록
+                                    notRouter.actNotAdd(usrInfo);
+
                                     res.json({
                                         reCd : '01'
                                         ,usrLikePst : myLikePst
