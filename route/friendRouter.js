@@ -243,6 +243,7 @@ router.post('/friendRequest',function(req,res){
         ntSchema.noticeCt = '친구 요청';
         ntSchema.usrName = params.frdRes;
         ntSchema.readYn = false;
+        ntSchema.delYn = false;
 
         schema.create({
             wkCd: 'NOT'

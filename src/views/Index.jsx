@@ -1,6 +1,5 @@
 import React from "react";
 import Gallery from 'react-photo-gallery';
-import PropTypes from 'prop-types';
 
 import {
   Card,
@@ -35,6 +34,7 @@ class Index extends React.Component {
     if(this.state.postList && this.state.postList.length === 0){
       this.getPostList();
     }
+    // this.scrollElement = React.createRef();
   }
 
   getPostListCallback= (result) =>{
@@ -63,7 +63,9 @@ class Index extends React.Component {
         searchText : text
       });
     }
+    this.scrollTop();
     api.apiSend('post','postList',param,this.getPostListCallback);
+
   }
 
   commentWrite = (pstPk, postIdx) => {
@@ -346,8 +348,7 @@ class Index extends React.Component {
   }
 
   scrollTop = () => {
-    let scroll = this.refs.scrollElement || document.getElementById('scrollElement');
-    scroll.scrollTop=0;
+    window.scrollTo(0, 0);
   }
 
   render() {
@@ -375,8 +376,7 @@ class Index extends React.Component {
               postList :[]
             });
           }
-          let scroll = this.refs.scrollElement || document.getElementById('scrollElement');
-          scroll.scrollTop=0;
+          window.scrollTo(0, 0);
         });
       }
     };
@@ -385,7 +385,7 @@ class Index extends React.Component {
       <>
         <Header />
         {/* Page content */}
-        <Container className="mt--2" fluid id="scrollElement" ref="scrollElement">
+        <Container className="mt--2" fluid>
         {this.state.searchText 
         && this.state.postList 
         && this.state.postList.length>0?

@@ -527,12 +527,13 @@
 
     router.post('/postCmtWt',function(req, res){
         let params = req.body;
-        
+        var pstResult;
         schema.find({
             wkCd : 'PST',
             wkDtCd : 'PST',
             "subSchema.pstPk" : params.pstPk
         },function(err, result){
+            pstResult = result;
             if (err) {
                 console.log('error \n', err);
                 return res.status(500).send("select error >> " + err)
@@ -560,18 +561,24 @@
                 , { $set: {
                     'subSchema.pstCmt': commentList
                 }}
-                , function(err, result) {
-                    if (err) {
-                        console.log('error \n', err);
-                        return res.status(500).send("select error >> " + err)
+                , function(cmtErr, cmtResult) {
+                    if (cmtErr) {
+                        console.log('★★★ 댓글 등록 실패 ★★★ \n', cmtErr);
+                        return res.status(500).send("select error >> " + cmtErr);
                     }
-                    if (result.n) {
+                    if (cmtResult.n) {
                         console.log("★★★ 댓글 등록 성공 result ★★★ \n",result.n);
 
                         // 여기
                         // 댓글 작성 알람 등록
-
-                        notRouter.actNotAdd(usrInfo);
+                        if(pstResult[0].subSchema.usrName !== params.usrName){
+                            var cmtInfo ={
+                                wkDtCd : "COMM"
+                                , usrName  : pstResult[0].subSchema.usrName
+                                , noticeCt : params.usrName + "###" + params.pstPk
+                            }
+                            notRouter.actNotAdd(cmtInfo);
+                        }
 
                         res.json({
                             reCd : '01'
@@ -812,12 +819,49 @@
 
                                     // 여기
                                     // 좋아요 알람 등록
-                                    notRouter.actNotAdd(usrInfo);
+                                    // 좋아요를 한 경우(좋아요 취소가 아닌경우)
+                                    if(!params.myLike){
+                                    schema.aggregate([
+                                        {$match:{
+                                            wkCd : 'PST'
+                                            , wkDtCd : 'PST'
+                                            ,"subSchema.pstPk" : params.pstPk
+                                        }}
+                                        ,{$project : {
+                                           _id : 1
+                                           ,"subSchema.usrName" : 1
+                                        }}
+                                        ,{$group : {
+                                           _id : "$_id"
+                                           ,"usrName" : {"$first" : "$subSchema.usrName"}
+                                        }}
+                                    ],function(aErr, pstResult){
+                                        if (aErr) {
+                                            console.log('error \n', aErr);
+                                            return res.status(500).send("select error >> " + aErr);
+                                        }
+                                        if (pstResult.length > 0) {
+                                            if(pstResult[0].usrName !== params.usrName){
+                                                var likeInfo ={
+                                                    wkDtCd : "LIKE"
+                                                    , usrName  : pstResult[0].usrName
+                                                    , noticeCt : params.usrName + "###" + params.pstPk
+                                                }
+                                                notRouter.actNotAdd(likeInfo);
+                                            }
+                                            res.json({
+                                                reCd : '01'
+                                                ,usrLikePst : myLikePst
+                                            });
+                                            }
+                                        });
+                                    }else{ // 좋아요 취소인 경우
+                                        res.json({
+                                            reCd : '01'
+                                            ,usrLikePst : myLikePst
+                                        });
 
-                                    res.json({
-                                        reCd : '01'
-                                        ,usrLikePst : myLikePst
-                                    });
+                                    }
                                 }else{
                                     console.log('★★★ 포스트 좋아요 user update 실패 ★★★');
                                     res.json({
