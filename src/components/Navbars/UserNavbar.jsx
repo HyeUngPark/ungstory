@@ -25,11 +25,12 @@ class UserNavbar extends React.Component {
   constructor(props){
     super(props);
     this.state ={
-      noticeList : {
+      noticeCount : {
         frdNotice : 0
         ,msgNotice : 0
-        ,pstNotice : 0
+        ,actNotice : 0
       }
+      ,actNotice : []
       ,searchText : ''
     };
   }
@@ -58,10 +59,10 @@ class UserNavbar extends React.Component {
   }
 
   noticeClearCallback = (rs) =>{
-    if(rs.reCd === '01' && rs.noticeList){
+    if(rs.reCd === '01' && rs.noticeCount){
       // console.log('친구 알람 클리어 성공');
       this.setState({
-        noticeList : rs.noticeList
+        noticeCount : rs.noticeCount
       });
     }else{
       // console.log('친구 알람 클리어 실패');
@@ -79,8 +80,10 @@ class UserNavbar extends React.Component {
   };
 
   getNotice = (result)=>{
+    console.log('알람 result \n',result);
     this.setState({
-      noticeList : result    
+      noticeCount : result.noticeCount
+      ,actNotice : result.actNotice    
     });
   }
   tooltipToggle = (e,tooltip) =>{
@@ -99,10 +102,10 @@ class UserNavbar extends React.Component {
             usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
           };
           api.apiSend('post','/not/getNoticeList',param,(rs)=>{
-            if(rs.reCd === '01' && rs.noticeList){
+            if(rs.reCd === '01' && rs.noticeCount){
               // console.log('친구 알람 클리어 성공');
               this.setState({
-                noticeList : rs.noticeList
+                noticeCount : rs.noticeCount
               });
             }else{
               console.log('친구 알람 클리어 실패');
@@ -167,7 +170,7 @@ class UserNavbar extends React.Component {
                         }}
                       >
                           <FrdReqList callbackFromParent={this.noticeClear}/>
-                            {this.state.noticeList.frdNotice > 0 ?
+                            {this.state.noticeCount.frdNotice > 0 ?
                               <span className="form-control-notice"
                                     // value={index} 
                                     style ={{
@@ -176,7 +179,7 @@ class UserNavbar extends React.Component {
                                       top:'0px',
                                     }}
                               >
-                                {this.state.noticeList.frdNotice}
+                                {this.state.noticeCount.frdNotice}
                               </span>
                             : ''
                             }
@@ -196,7 +199,7 @@ class UserNavbar extends React.Component {
                         }}
                     >
                       <MsgList/>
-                          {this.state.noticeList.msgNotice > 0 ?
+                          {this.state.noticeCount.msgNotice > 0 ?
                             <span className="form-control-notice"
                                   // value={index} 
                                   style ={{
@@ -205,7 +208,7 @@ class UserNavbar extends React.Component {
                                     top:'0px',
                                   }}
                             >
-                              {this.state.noticeList.msgNotice}
+                              {this.state.noticeCount.msgNotice}
                             </span>
                           : ''
                           }
@@ -228,9 +231,9 @@ class UserNavbar extends React.Component {
                             className="form-control-cursor"
                           //  onClick={e=>{this.imgView(index,e)}}
                           >
-                          <NotList/>
+                          <NotList actNotice={this.state.actNotice}/>
                           </a>
-                            {this.state.noticeList.pstNotice > 0 ?
+                            {this.state.noticeCount.actNotice > 0 ?
                               <span className="form-control-notice"
                                     // value={index} 
                                     style ={{
@@ -239,7 +242,7 @@ class UserNavbar extends React.Component {
                                       top:'0px',
                                     }}
                               >
-                                {this.state.noticeList.pstNotice}
+                                {this.state.noticeCount.actNotice}
                               </span>
                             : ''
                             }

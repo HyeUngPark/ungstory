@@ -54,8 +54,8 @@ class LoginProfile extends React.Component {
 
     loginCkCallback= (result) =>{
         if(result && result.reCd==="01"){
-            if(result.noticeList){
-                this.getNotice(result.noticeList);
+            if(result.noticeCount){
+                this.getNotice(result);
             }
         }else if(result && result.reCd ==='02'){
             // fail

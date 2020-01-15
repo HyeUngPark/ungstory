@@ -67,6 +67,7 @@ router.pstNotAdd = (frdList, usrName) =>{
             ,lstWrDt: date.getDate() // 최종 작성일
             ,subSchema: {
                 readYn : false,
+                delYn : false,
                 noticeCt : usrName, // 친구
                 usrName : frdList[i] // 친구들
             }
@@ -103,63 +104,15 @@ router.actNotAdd = (activeInfo) =>{
     }); 
 };
 
-router.getNotice = (usrName) =>{
+router.getNotice = (usrName, callback) =>{
     schema.aggregate([
         {$facet:{    
             frdNotice : [
                 {$match : {
                     wkCd : 'NOT'
                     ,wkDtCd : "FRD"
-                    ,"subSchema.usrName" :  params.usrName
+                    ,"subSchema.usrName" :  usrName
                     ,"subSchema.readYn" : false
-                }}
-                ,{ $project: { 
-                    _id: 1 
-                    ,"subSchema.readYn" : 1
-                    ,"subSchema.delYn" : 1
-                    ,"wkDtCd" : 1
-                    ,"subSchema.usrName" : 1
-                    ,"subSchema.noticeCt" : 1
-                }}
-                ,{ $group: { 
-                    _id: '$_id'
-                    ,'delYn' : {"$first" : "$subSchema.delYn"}
-                    ,'readYn' : {"$first" : "$subSchema.readYn"}
-                    ,'wkDtCd' : {"$first" : "$wkDtCd"}
-                    ,'usrName' : {"$first" : "$subSchema.usrName"}
-                    ,'noticeCt' : {"$first" : "$subSchema.noticeCt"}
-                }}
-            ]
-            ,frdYnNotice : [
-                {$match : {
-                    wkCd : 'NOT'
-                    ,wkDtCd : "FRDY"
-                    ,"subSchema.usrName" :  params.usrName
-                    ,"subSchema.delYn" : false
-                }}
-                ,{ $project: { 
-                    _id: 1 
-                    ,"subSchema.readYn" : 1
-                    ,"subSchema.delYn" : 1
-                    ,"wkDtCd" : 1
-                    ,"subSchema.usrName" : 1
-                    ,"subSchema.noticeCt" : 1
-                }}
-                ,{ $group: { 
-                    _id: '$_id'
-                    ,'delYn' : {"$first" : "$subSchema.delYn"}
-                    ,'readYn' : {"$first" : "$subSchema.readYn"}
-                    ,'wkDtCd' : {"$first" : "$wkDtCd"}
-                    ,'usrName' : {"$first" : "$subSchema.usrName"}
-                    ,'noticeCt' : {"$first" : "$subSchema.noticeCt"}
-                }}
-            ]
-            ,pstNotice : [
-                {$match : {
-                    wkCd : 'NOT'
-                    ,wkDtCd : "PST"
-                    ,"subSchema.usrName" :  params.usrName
-                    ,"subSchema.delYn" : false
                 }}
                 ,{ $project: { 
                     _id: 1 
@@ -182,7 +135,7 @@ router.getNotice = (usrName) =>{
                 {$match : {
                     wkCd : 'NOT'
                     ,wkDtCd : "MSG"
-                    ,"subSchema.usrName" :  params.usrName
+                    ,"subSchema.usrName" :  usrName
                     ,"subSchema.readYn" : false
                 }}
                 ,{ $project: { 
@@ -203,10 +156,10 @@ router.getNotice = (usrName) =>{
                 }}
             ]
             ,actNotice : [
-                    {$match : {
+                 {$match : {
                     wkCd : 'NOT'
-                    ,wkDtCd : {$in : ['COMM','LIKE']}
-                    ,"subSchema.usrName" :  params.usrName
+                    ,wkDtCd : {$in : ['COMM','LIKE',"PST", "FRDY"]}
+                    ,"subSchema.usrName" :  usrName
                     ,"subSchema.readYn" : false
                 }}
                 ,{ $project: { 
@@ -214,6 +167,7 @@ router.getNotice = (usrName) =>{
                     ,"subSchema.readYn" : 1
                     ,"subSchema.delYn" : 1
                     ,"wkDtCd" : 1
+                    ,'lstWrDt' : 1
                     ,"subSchema.usrName" : 1
                     ,"subSchema.noticeCt" : 1
                 }}
@@ -224,9 +178,13 @@ router.getNotice = (usrName) =>{
                     ,'wkDtCd' : {"$first" : "$wkDtCd"}
                     ,'usrName' : {"$first" : "$subSchema.usrName"}
                     ,'noticeCt' : {"$first" : "$subSchema.noticeCt"}
+                    ,'lstWrDt' : {"$first" : "$lstWrDt"}
+                }}
+                ,{$sort:{
+                    'lstWrDt' : -1
                 }}
             ]
-        }}    
+        }}
     ],function(err, result) {
         let resultList ={
             reCd : '01'
@@ -236,14 +194,20 @@ router.getNotice = (usrName) =>{
             // return res.status(500).send("알람 조회 실패 >> " + err)
         }
         if (result.length > 0) {
-            console.log('★★★ 알람 목록 조회 성공 ★★★ \n',result.length);
-            let noticeList = {};
-            result[0].frdNotice.length> 0 ? noticeList.frdNotice = result[0].frdNotice[0].count : noticeList.frdNotice =0;
-            result[0].pstNotice.length> 0 ? noticeList.pstNotice = result[0].pstNotice[0].count : noticeList.pstNotice =0;
-            result[0].msgNotice.length> 0 ? noticeList.msgNotice = result[0].msgNotice[0].count : noticeList.msgNotice =0;
-            resultList.noticeList = noticeList;
+            console.log('★★★ 알람 목록 조회 성공 ★★★ \n');
+            let noticeCount = {};
+            result[0].frdNotice.length> 0 ? noticeCount.frdNotice = result[0].frdNotice.length : noticeCount.frdNotice =0;
+            result[0].msgNotice.length> 0 ? noticeCount.msgNotice = result[0].msgNotice.length : noticeCount.msgNotice =0;
+            if(result[0].actNotice.length> 0 ){
+                noticeCount.actNotice = result[0].actNotice.length;
+                resultList.actNotice = result[0].actNotice;
+            }else{
+                noticeCount.actNotice =0;
+            }
+            resultList.noticeCount = noticeCount;
+
         }
-        return resultList;
+        callback(resultList);
     });
 }
 
@@ -289,42 +253,74 @@ router.post('/getNoticeList',function(req, res){
                     ,"subSchema.usrName" :  params.usrName
                     ,"subSchema.readYn" : false
                 }}
-                ,{ $group: { 
-                    _id: null, 
-                    count: { $sum: 1 } 
-                }}
                 ,{ $project: { 
-                    _id: 0 
-                }}
-                ]
-            ,pstNotice : [
-                {$match : {
-                    wkCd : 'NOT'
-                    ,wkDtCd : "PST"
-                    ,"subSchema.usrName" :  params.usrName 
-                    ,"subSchema.readYn" : false
+                    _id: 1 
+                    ,"subSchema.readYn" : 1
+                    ,"subSchema.delYn" : 1
+                    ,"wkDtCd" : 1
+                    ,"subSchema.usrName" : 1
+                    ,"subSchema.noticeCt" : 1
                 }}
                 ,{ $group: { 
-                    _id: null, 
-                    count: { $sum: 1 } 
-                }}
-                ,{ $project: { 
-                    _id: 0 
+                    _id: '$_id'
+                    ,'delYn' : {"$first" : "$subSchema.delYn"}
+                    ,'readYn' : {"$first" : "$subSchema.readYn"}
+                    ,'wkDtCd' : {"$first" : "$wkDtCd"}
+                    ,'usrName' : {"$first" : "$subSchema.usrName"}
+                    ,'noticeCt' : {"$first" : "$subSchema.noticeCt"}
                 }}
             ]
             ,msgNotice : [
                 {$match : {
                     wkCd : 'NOT'
                     ,wkDtCd : "MSG"
-                    ,"subSchema.usrName" :  params.usrName 
+                    ,"subSchema.usrName" :  params.usrName
                     ,"subSchema.readYn" : false
                 }}
+                ,{ $project: { 
+                    _id: 1 
+                    ,"subSchema.readYn" : 1
+                    ,"subSchema.delYn" : 1
+                    ,"wkDtCd" : 1
+                    ,"subSchema.usrName" : 1
+                    ,"subSchema.noticeCt" : 1
+                }}
                 ,{ $group: { 
-                    _id: null, 
-                    count: { $sum: 1 } 
+                    _id: '$_id'
+                    ,'delYn' : {"$first" : "$subSchema.delYn"}
+                    ,'readYn' : {"$first" : "$subSchema.readYn"}
+                    ,'wkDtCd' : {"$first" : "$wkDtCd"}
+                    ,'usrName' : {"$first" : "$subSchema.usrName"}
+                    ,'noticeCt' : {"$first" : "$subSchema.noticeCt"}
+                }}
+            ]
+            ,actNotice : [
+                 {$match : {
+                    wkCd : 'NOT'
+                    ,wkDtCd : {$in : ['COMM','LIKE',"PST", "FRDY"]}
+                    ,"subSchema.usrName" :  params.usrName
+                    ,"subSchema.readYn" : false
                 }}
                 ,{ $project: { 
-                    _id: 0 
+                    _id: 1 
+                    ,"subSchema.readYn" : 1
+                    ,"subSchema.delYn" : 1
+                    ,"wkDtCd" : 1
+                    ,'lstWrDt' : 1
+                    ,"subSchema.usrName" : 1
+                    ,"subSchema.noticeCt" : 1
+                }}
+                ,{ $group: { 
+                    _id: '$_id'
+                    ,'delYn' : {"$first" : "$subSchema.delYn"}
+                    ,'readYn' : {"$first" : "$subSchema.readYn"}
+                    ,'wkDtCd' : {"$first" : "$wkDtCd"}
+                    ,'usrName' : {"$first" : "$subSchema.usrName"}
+                    ,'noticeCt' : {"$first" : "$subSchema.noticeCt"}
+                    ,'lstWrDt' : {"$first" : "$lstWrDt"}
+                }}
+                ,{$sort:{
+                    'lstWrDt' : -1
                 }}
             ]
         }}
@@ -338,11 +334,16 @@ router.post('/getNoticeList',function(req, res){
         }
         if (result.length > 0) {
             console.log('★★★ 알람 목록 조회 성공 ★★★ \n',result.length);
-            let noticeList = {};
-            result[0].frdNotice.length> 0 ? noticeList.frdNotice = result[0].frdNotice[0].count : noticeList.frdNotice =0;
-            result[0].pstNotice.length> 0 ? noticeList.pstNotice = result[0].pstNotice[0].count : noticeList.pstNotice =0;
-            result[0].msgNotice.length> 0 ? noticeList.msgNotice = result[0].msgNotice[0].count : noticeList.msgNotice =0;
-            resultList.noticeList = noticeList;
+            let noticeCount = {};
+            result[0].frdNotice.length> 0 ? noticeCount.frdNotice = result[0].frdNotice.length : noticeCount.frdNotice =0;
+            result[0].msgNotice.length> 0 ? noticeCount.msgNotice = result[0].msgNotice.length : noticeCount.msgNotice =0;
+            if(result[0].actNotice.length> 0 ){
+                noticeCount.actNotice = result[0].actNotice.length;
+                resultList.actNotice = result[0].actNotice;
+            }else{
+                noticeCount.actNotice =0;
+            }
+            resultList.noticeCount = noticeCount;
         }else{
             resultList.reCd = '02';
         }

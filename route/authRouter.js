@@ -277,8 +277,10 @@ router.post('/loginCk',function(req, res){
                 
                 // 알람 목록 가져오기
                 
-                var resultList = notRouter.getNotice(params.usrName);
-                res.json(resultList);
+                console.log("★★★ 세션 체크 알람목록 가져오기 ★★★\n");
+                notRouter.getNotice(params.usrName, (result)=>{
+                    res.json(result);
+                });
 
             }else if(err && err.name === "TokenExpiredError"){
                 console.log('★★★ Token 유효기간 만료 ★★★\n');

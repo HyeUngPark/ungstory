@@ -660,12 +660,13 @@
 
     router.post('/postCmtRp',function(req, res){
         let params = req.body;
-        
+        var pstResult;
         schema.find({
             wkCd : 'PST',
             wkDtCd : 'PST',
             "subSchema.pstPk" : params.pstPk
         },function(err, result){
+            pstResult = result;
             if (err) {
                 console.log('error \n', err);
                 return res.status(500).send("select error >> " + err)
@@ -694,6 +695,14 @@
                     }
                     if (result.n) {
                         console.log("★★★ 답글 등록 성공 result ★★★ \n",result.n);
+                        if(pstResult[0].subSchema.usrName !== params.usrName){
+                            var cmtInfo ={
+                                wkDtCd : "COMM"
+                                , usrName  : pstResult[0].subSchema.usrName
+                                , noticeCt : params.usrName + "###" + params.pstPk
+                            }
+                            notRouter.actNotAdd(cmtInfo);
+                        }
                         res.json({
                             reCd : '01'
                         });
