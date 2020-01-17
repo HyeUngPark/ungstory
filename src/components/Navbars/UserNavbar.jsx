@@ -30,7 +30,6 @@ class UserNavbar extends React.Component {
         ,msgNotice : 0
         ,actNotice : 0
       }
-      ,actNotice : []
       ,searchText : ''
     };
   }
@@ -80,10 +79,8 @@ class UserNavbar extends React.Component {
   };
 
   getNotice = (result)=>{
-    console.log('알람 result \n',result);
     this.setState({
       noticeCount : result.noticeCount
-      ,actNotice : result.actNotice    
     });
   }
   tooltipToggle = (e,tooltip) =>{
@@ -231,7 +228,7 @@ class UserNavbar extends React.Component {
                             className="form-control-cursor"
                           //  onClick={e=>{this.imgView(index,e)}}
                           >
-                          <NotList actNotice={this.state.actNotice}/>
+                          <NotList />
                           </a>
                             {this.state.noticeCount.actNotice > 0 ?
                               <span className="form-control-notice"

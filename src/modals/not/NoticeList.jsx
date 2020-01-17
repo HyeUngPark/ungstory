@@ -137,40 +137,31 @@ class NoticeList extends React.Component {
               </Col>
             </Row>
             <br/>
-            {/* : 
-            <Row className="align-items-center" lg="12">
-              <Col lg="4">
-               <FrdInfo callbackFromParent={this.goPage} frdName={post.usrName}/> 
-              </Col>
-            </Row
-            > 
-          <br/>
+        {/* <Row className="align-items-center" lg="12"> */}
           {this.state.noticeList.length > 0 ? 
             this.state.noticeList.map((not, notIdx)=>{ 
               return(
-              */}
             <FormGroup check>
               <Card className="card-profile shadow">
                 <Row 
                   lg="12"
                   className = {` modal-center `}
-                  // className = {`justify-content-center modal-center 
-                  // ${not.notCountt>0 ? 'chat-unread' : 'chat-read'}
-                  // `}
+                  className = {`justify-content-center modal-center 
+                  ${!not.readYn ? 'chat-unread' : 'chat-read'}
+                  `}
                   >
                   <Col lg="1" className="form-padding-left-2">
                     <span className="text-center border-0 pt-8 pt-md-4 pb-0 pb-md-4">
                       <div className="avatar avatar-sm rounded-circle">
                         <a href="javascript:void(0)" 
-                          // onClick={e => popup.openImg(msg.usrPt)}
+                          onClick={e => popup.openImg(not.usrPt)}
                         >
                           <img
                             alt="..."
                             className="rounded-circle"
-                            // src={(msg.usrPt && msg.usrPt !=="") 
-                            // ? msg.usrPt
-                            // : 
-                            src={require("assets/img/theme/no-profile-130x130.png")}
+                            src={(not.usrPt && not.usrPt !=="") 
+                            ? not.usrPt
+                            : require("assets/img/theme/no-profile-130x130.png")}
                           />
                         </a>
                       </div>
@@ -180,83 +171,33 @@ class NoticeList extends React.Component {
                     lg="11"
                     className ="form-control-cursor"
                   >
-                        님이 메시지를 보냈습니다.
+                    {(not)=>{switch(not.wkDtCd){
+                      case 'FRDY':
+                        return '님이 메시지를 보냈습니다.'
+                      case "PST" :
+                        return '님이 새 포스팅을 작성했습니다.'
+                      case "COMM" :
+                        return '님이 회원님의 포스팅에 댓글을 남겼습니다.'
+                      case "LIKE" :
+                          return '님이 회원님의 포스팅을 좋아합니다.'
+                      default :
+                        break;
+                  }}}
+                        
                   </Col>
               </Row>
                 <hr className="chat-hr-none"/>
-                <Row 
-                  lg="12"
-                  className = {`justify-content-center modal-center `}
-                  // className = {`justify-content-center modal-center 
-                  // ${not.notCountt>0 ? 'chat-unread' : 'chat-read'}
-                  // `}
-                  >
-                  <Col lg="1">
-                    <span className="text-center border-0 pt-8 pt-md-4 pb-0 pb-md-4">
-                      <div className="avatar avatar-sm rounded-circle">
-                        <a href="javascript:void(0)" 
-                          // onClick={e => popup.openImg(msg.usrPt)}
-                          >
-                          <img
-                            alt="..."
-                            className="rounded-circle"
-                            src={require("assets/img/theme/no-profile-130x130.png")}
-                          />
-                        </a>
-                      </div>
-                    </span>
-                  </Col>
-                  <Col 
-                    lg="2"
-                    className ="form-control-cursor"
-                  >
-                        님이 회원님의 게시글에 좋아요/댓글 을 눌렀/남겼습니다.
-                  </Col>
-              </Row>
-                <hr className="chat-hr-none"/>
-                <Row 
-                  lg="12"
-                  className = {`justify-content-center modal-center 
-                  `}
-                  //  ${not.notCountt>0 ? 'chat-unread' : 'chat-read'}
-                  >
-                  <Col lg="1">
-                    <span className="text-center border-0 pt-8 pt-md-4 pb-0 pb-md-4">
-                      <div className="avatar avatar-sm rounded-circle">
-                        <a href="javascript:void(0)" 
-                          // onClick={e => popup.openImg(msg.usrPt)}
-                          >
-                          <img
-                            alt="..."
-                            className="rounded-circle"
-                            // src={(msg.usrPt && msg.usrPt !=="") 
-                            // ? msg.usrPt
-                            // : 
-                            src = {require("assets/img/theme/no-profile-130x130.png")}
-                          />
-                        </a>
-                      </div>
-                    </span>
-                  </Col>
-                  <Col 
-                    lg="2"
-                    className ="form-control-cursor"
-                  >
-                        님이 회원님의 게시글에 좋아요를 눌렀습니다.
-                  </Col>
-              </Row>
             </Card>
           </FormGroup>
-            {/* )})
-        : */}
-        <Card>
+          )})
+       : <Card className="card-profile shadow">
           <Row className="justify-content-center modal-center form-control-cursor"> 
             <Col lg="12">
               새로운 알림이 없습니다.
             </Col>
           </Row>
         </Card>
-        {/* } */}
+      }
         <br />
         <Row className="align-items-center justify-content-center"> 
           <Button 
@@ -271,7 +212,6 @@ class NoticeList extends React.Component {
       </form>
     </Modal>
   </div>
-      
     );
   }
 }

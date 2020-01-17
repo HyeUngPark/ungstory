@@ -195,19 +195,27 @@ router.getNotice = (usrName, callback) =>{
         }
         if (result.length > 0) {
             console.log('★★★ 알람 목록 조회 성공 ★★★ \n');
+            
             let noticeCount = {};
-            result[0].frdNotice.length> 0 ? noticeCount.frdNotice = result[0].frdNotice.length : noticeCount.frdNotice =0;
-            result[0].msgNotice.length> 0 ? noticeCount.msgNotice = result[0].msgNotice.length : noticeCount.msgNotice =0;
+            if(result[0].frdNotice.length> 0){
+                noticeCount.frdNotice = result[0].frdNotice.length;
+            }else{
+                noticeCount.frdNotice =0;
+            } 
+            if(result[0].msgNotice.length> 0){
+                noticeCount.msgNotice = result[0].msgNotice.length;
+            }else{
+                noticeCount.frdNotice =0;
+            } 
             if(result[0].actNotice.length> 0 ){
                 noticeCount.actNotice = result[0].actNotice.length;
-                resultList.actNotice = result[0].actNotice;
             }else{
                 noticeCount.actNotice =0;
             }
             resultList.noticeCount = noticeCount;
-
+            res.json(resultList);
+            callback(resultList);
         }
-        callback(resultList);
     });
 }
 
@@ -335,19 +343,27 @@ router.post('/getNoticeList',function(req, res){
         if (result.length > 0) {
             console.log('★★★ 알람 목록 조회 성공 ★★★ \n',result.length);
             let noticeCount = {};
-            result[0].frdNotice.length> 0 ? noticeCount.frdNotice = result[0].frdNotice.length : noticeCount.frdNotice =0;
-            result[0].msgNotice.length> 0 ? noticeCount.msgNotice = result[0].msgNotice.length : noticeCount.msgNotice =0;
+            if(result[0].frdNotice.length> 0){
+                noticeCount.frdNotice = result[0].frdNotice.length;
+            }else{
+                noticeCount.frdNotice =0;
+            } 
+            if(result[0].msgNotice.length> 0){
+                noticeCount.msgNotice = result[0].msgNotice.length;
+            }else{
+                noticeCount.frdNotice =0;
+            } 
             if(result[0].actNotice.length> 0 ){
                 noticeCount.actNotice = result[0].actNotice.length;
-                resultList.actNotice = result[0].actNotice;
             }else{
                 noticeCount.actNotice =0;
             }
             resultList.noticeCount = noticeCount;
+            res.json(resultList);
         }else{
             resultList.reCd = '02';
+            res.json(resultList);
         }
-        res.json(resultList);
     });
 });
 
@@ -378,4 +394,97 @@ router.post('/getNoticeList',function(req, res){
 
     });
 
+router.post('/getActNotice',function(req,res){
+    schema.aggregate([
+        {$match : {
+            wkCd : 'NOT'
+            ,wkDtCd : {$in : ['COMM','LIKE',"PST", "FRDY"]}
+            ,"subSchema.usrName" :  params.usrName
+            ,"subSchema.readYn" : false
+        }}
+        ,{ $project: { 
+            _id: 1 
+            ,"subSchema.readYn" : 1
+            ,"subSchema.delYn" : 1
+            ,"wkDtCd" : 1
+            ,'lstWrDt' : 1
+            ,"subSchema.usrName" : 1
+            ,"subSchema.noticeCt" : 1
+        }}
+        ,{ $group: { 
+            _id: '$_id'
+            ,'delYn' : {"$first" : "$subSchema.delYn"}
+            ,'readYn' : {"$first" : "$subSchema.readYn"}
+            ,'wkDtCd' : {"$first" : "$wkDtCd"}
+            ,'usrName' : {"$first" : "$subSchema.usrName"}
+            ,'noticeCt' : {"$first" : "$subSchema.noticeCt"}
+            ,'lstWrDt' : {"$first" : "$lstWrDt"}
+        }}
+        ,{$sort:{
+            'lstWrDt' : -1
+        }}
+    ],function(err, result) {
+        if (err) {
+            console.log('error \n', err);
+            // return res.status(500).send("알람 조회 실패 >> " + err)
+        }
+        if (result.length > 0) {
+            console.log('★★★ 알람 목록 조회 성공 ★★★ \n',result.length);
+            var noticeFriend =[];
+            var actNotList=[];
+            if(result[0].actNotice.length> 0 ){
+                for(var kk=0; kk<actNotList.length; kk++){
+                    let temp = actNotList.noticeCt.split('###');
+                    noticeFriend.indexOf(temp[1]) < 0 ? noticeFriend.push(temp[1]): ''
+                }
+            }
+
+            schema.aggregate([
+                {$match:{
+                    wkCd:'USR'
+                    ,wkDtCd:'USR'
+                    ,"subSchema.usrName" : {
+                        $in  : noticeFriend
+                    }
+                }}
+                ,{$project:{
+                    _id : 1
+                    ,"subSchema.usrPt" : 1
+                    ,"subSchema.usrName" : 1
+                }}
+                ,{$group:{
+                    _id : "$_id"
+                    ,"usrPt" : {$first : "$subSchema.usrPt"}
+                    ,"usrName" : {$first : "$subSchema.usrName"}
+                }}
+            ],function(pError, pResult){
+                if (pError) {
+                    console.log('알람 친구 프로필 조회 오류 \n', pError);
+                    return res.status(500).send("알람 친구 프로필 조회 오류 >> " + pError)
+                }
+                if (pResult.length > 0) {
+                    for(var i=0; i<pResult.length; i++){
+                        for(var j=0; j<actNotList.length; j++){
+                            var temp = actNotList[j];
+                            var tt = temp.split("###");
+                            if(tt[0] === pResult[i].usrName){
+                                temp.usrPt =  pResult[i].usrPt
+                            }
+                            actNotList[j] = temp;
+                        }
+                    }
+                }
+                res.json({
+                    reCd : '01'
+                    ,noticeList : actNotList
+                });
+            });
+        }else{
+            res.json({
+                reCd : '02'
+            });
+        }
+    });
+
+});
 module.exports = router;

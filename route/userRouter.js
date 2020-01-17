@@ -85,7 +85,7 @@
                     }
                     if (fResult.length > 0 && fResult[0].myFrd.length > 0) {
                         // 포스팅 알람 등록
-                        notRouter.pstNotAdd(fResult[0].myFrd, params.usrName);
+                        notRouter.pstNotAdd(fResult[0].myFrd, params.usrName+"###"+postSchema.pstPk);
                     }
                     res.json({
                         reCd: '01'
