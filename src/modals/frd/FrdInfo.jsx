@@ -19,7 +19,7 @@ import * as popup from "utils/popup";
 import { confirmAlert } from 'react-confirm-alert'; // Import
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 
-import PostDetailModal from '..//user/PostDetailModal';
+import PostDetailModal from '../user/PostDetailModal';
 
 export default class FrdInfo extends React.Component {
   constructor(props) {

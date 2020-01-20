@@ -15,7 +15,7 @@
     var random = require('../myUtils/randomUtils');
     var encrypt = require('../myUtils/encryptUtils');
 
-    router.get('/index',function(req,res){
+    router.get('/index',function(req, res){
         console.log('/user/index');
         res.redirect('../index.html');
     });

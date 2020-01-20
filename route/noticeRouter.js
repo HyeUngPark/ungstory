@@ -213,7 +213,6 @@ router.getNotice = (usrName, callback) =>{
                 noticeCount.actNotice =0;
             }
             resultList.noticeCount = noticeCount;
-            res.json(resultList);
             callback(resultList);
         }
     });
@@ -395,12 +394,13 @@ router.post('/getNoticeList',function(req, res){
     });
 
 router.post('/getActNotice',function(req,res){
+    var params = req.body;
     schema.aggregate([
         {$match : {
             wkCd : 'NOT'
             ,wkDtCd : {$in : ['COMM','LIKE',"PST", "FRDY"]}
             ,"subSchema.usrName" :  params.usrName
-            ,"subSchema.readYn" : false
+            ,"subSchema.delYn" : false
         }}
         ,{ $project: { 
             _id: 1 
@@ -421,7 +421,7 @@ router.post('/getActNotice',function(req,res){
             ,'lstWrDt' : {"$first" : "$lstWrDt"}
         }}
         ,{$sort:{
-            'lstWrDt' : -1
+            'fstWrDt' : -1
         }}
     ],function(err, result) {
         if (err) {
@@ -429,13 +429,14 @@ router.post('/getActNotice',function(req,res){
             // return res.status(500).send("알람 조회 실패 >> " + err)
         }
         if (result.length > 0) {
-            console.log('★★★ 알람 목록 조회 성공 ★★★ \n',result.length);
+            console.log('★★★ activeNotice 알람 목록 조회 성공 ★★★ ');
             var noticeFriend =[];
             var actNotList=[];
-            if(result[0].actNotice.length> 0 ){
+            if(result.length> 0 ){
+                actNotList = result;
                 for(var kk=0; kk<actNotList.length; kk++){
-                    let temp = actNotList.noticeCt.split('###');
-                    noticeFriend.indexOf(temp[1]) < 0 ? noticeFriend.push(temp[1]): ''
+                    let temp = actNotList[kk].noticeCt.split('###');
+                    noticeFriend.indexOf(temp[0]) < 0 ? noticeFriend.push(temp[0]): ''
                 }
             }
 
@@ -466,7 +467,7 @@ router.post('/getActNotice',function(req,res){
                     for(var i=0; i<pResult.length; i++){
                         for(var j=0; j<actNotList.length; j++){
                             var temp = actNotList[j];
-                            var tt = temp.split("###");
+                            var tt = temp.noticeCt.split("###");
                             if(tt[0] === pResult[i].usrName){
                                 temp.usrPt =  pResult[i].usrPt
                             }
@@ -485,6 +486,37 @@ router.post('/getActNotice',function(req,res){
             });
         }
     });
+
+});
+
+router.post('/notRead',function(req,res){
+    var params = req.body;
+
+    if(params.readCd === 'all'){ // 전체 읽기
+        notQuery = {$in : params.clearNot}
+    }else{ // 단일 읽기
+        notQuery = params.clearNot
+    }
+    schema.updateMany({
+        _id : notQuery
+    }
+    , { $set: {
+        lstWrDt : date.getDate()
+        ,'subSchema.readYn': true
+    }}
+    , function(uErr, uResult) {
+        if (uErr) {
+            console.log('알림 클릭 - 알람 클리어 실패 \n', uErr);
+            return res.status(500).send("알림 클릭 - 알람 클리어 실패" + uErr)
+        }
+        if (uResult.n) {
+            console.log('알림 클릭 - 알람 클리어 성공 \n', uErr);
+            res.json({
+                reCd : '01'
+            });
+        }
+    });
+
 
 });
 module.exports = router;

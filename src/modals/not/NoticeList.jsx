@@ -12,6 +12,9 @@ import * as api from "utils/api";
 import * as popup from "utils/popup";
 import { withRouter } from 'react-router-dom';
 
+import FrdInfo from '../frd/FrdInfo';
+import PostDetailModal from '../user/PostDetailModal';
+
 import 'react-confirm-alert/src/react-confirm-alert.css'; // Import css
 
 class NoticeList extends React.Component {
@@ -22,6 +25,7 @@ class NoticeList extends React.Component {
         ,noticeList : []
     };
     this.handleSubmit = this.handleSubmit.bind(this);
+    this.ntClick = React.createRef();
   }
   toggle = (e) => {
     if(!this.state.notModal){
@@ -69,6 +73,7 @@ class NoticeList extends React.Component {
   }
 
   noticeListCallback = (rs) =>{
+    console.log('noticeList CB \n',rs);
     if(rs.reCd ==='01'){
       // 메시지 리스트 조회 성공
       this.setState({
@@ -88,8 +93,35 @@ class NoticeList extends React.Component {
       let param={
         usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
       };
-      // api.apiSend('post','/msg/msgList',param,this.noticeListCallback);
+      api.apiSend('post','/not/getActNotice',param,this.noticeListCallback);
     }
+  }
+
+
+  notClearCallback = (rs) =>{
+    if(rs.reCd ==='01'){
+      // 알람 클리어 성공
+      // 알람 재조회
+      this.noticeList();
+    }else if(rs.reCd ==='02'){
+      // 알람 클리어 실패
+    }
+  }
+
+  notClick = (not) =>{
+    if(localStorage.getItem('usrInfo')){
+      if(not.wkDtCd !== 'FRDY'){
+        // 포스트 상세 팝업
+        this.ntClick.current.props.pstPk = not.noticeCt.split("###")[1];
+        this.ntClick.current.toggle();
+      }
+      // 읽기처리
+        let param={
+          usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
+          ,clearNot : not._id
+        };
+        api.apiSend('post','/not/notRead',param,this.notClearCallback);
+      }    
   }
 
   render() {
@@ -170,20 +202,29 @@ class NoticeList extends React.Component {
                   <Col 
                     lg="11"
                     className ="form-control-cursor"
+                    onClick = {e=>{
+                      this.notClick(not)
+                    }}
                   >
-                    {(not)=>{switch(not.wkDtCd){
-                      case 'FRDY':
-                        return '님이 메시지를 보냈습니다.'
-                      case "PST" :
-                        return '님이 새 포스팅을 작성했습니다.'
-                      case "COMM" :
-                        return '님이 회원님의 포스팅에 댓글을 남겼습니다.'
-                      case "LIKE" :
-                          return '님이 회원님의 포스팅을 좋아합니다.'
-                      default :
-                        break;
-                  }}}
-                        
+                    {/* 여기 */}
+                    {not.wkDtCd === 'FRDY'
+                     ? <FrdInfo frdName={not.noticeCt.split("###")[0].toString()}/> + ' 님이 친구를 수락했습니다.'
+                     : 
+                     not.wkDtCd ?
+                     <div>
+                      <PostDetailModal 
+                        ref={this.ntClick}
+                        pstPk={not.noticeCt.split("###")[1]}
+                        style={false}
+                      />
+                      {not.wkDtCd === 'PST' ?<span>{not.noticeCt.split("###")[0]} 님이 새 포스팅을 작성했습니다.</span>
+                      : not.wkDtCd === 'COMM' ? <span>{not.noticeCt.split("###")[0]} 님이 회원님의 포스팅에 댓글을 남겼습니다.</span> 
+                      : not.wkDtCd === 'LIKE' ? <span>{not.noticeCt.split("###")[0]} 님이 회원님의 포스팅을 좋아합니다.</span>
+                      : ''
+                      }
+                     </div>
+                     :''
+                    }
                   </Col>
               </Row>
                 <hr className="chat-hr-none"/>
