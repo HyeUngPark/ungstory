@@ -102,9 +102,14 @@ class NoticeList extends React.Component {
       });
     }else if(rs.reCd ==='03'){
       // 알람 없음
-
+      this.setState({
+        noticeList : []
+      });
     }else{
       // 알람 조회 실패
+      this.setState({
+        noticeList : []
+      });
 
     }
   }
