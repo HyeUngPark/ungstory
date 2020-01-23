@@ -489,7 +489,7 @@ router.post('/getActNotice',function(req,res){
 
 });
 
-router.post('/notRead',function(req,res){
+router.put('/notRead',function(req,res){
     var params = req.body;
 
     if(params.readCd === 'all'){ // 전체 읽기
@@ -511,12 +511,37 @@ router.post('/notRead',function(req,res){
         }
         if (uResult.n) {
             console.log('알림 클릭 - 알람 클리어 성공 \n', uErr);
-            res.json({
+            var resultList = {
                 reCd : '01'
-            });
+            }
+            params.readCd === 'all' ? resultList.readCd = 'all' : '';
+            res.json(resultList);
         }
     });
+});
+router.put('/notDel',function(req,res){
+    var params = req.body;
 
-
+    schema.updateMany({
+        _id : {$in:params.clearDel}
+    }
+    , { $set: {
+        lstWrDt : date.getDate()
+        ,'subSchema.readYn': true
+        ,'subSchema.delYn': true
+    }}
+    , function(uErr, uResult) {
+        if (uErr) {
+            console.log('알림 삭제 실패 \n', uErr);
+            return res.status(500).send("알람 삭제 실패" + uErr)
+        }
+        if (uResult.n) {
+            console.log('알림 삭제 성공 \n');
+            var resultList = {
+                reCd : '01'
+            }
+            res.json(resultList);
+        }
+    });
 });
 module.exports = router;

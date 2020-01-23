@@ -82,8 +82,8 @@ class PostDetailModal extends React.Component {
   cancel=()=>{
     this.setState({
       postInfo : {}
+      ,modal: false
     });
-    this.toggle();
   }
 
   postLikeCallback = (result) =>{

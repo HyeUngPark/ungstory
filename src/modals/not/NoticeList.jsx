@@ -26,6 +26,7 @@ class NoticeList extends React.Component {
     };
     this.handleSubmit = this.handleSubmit.bind(this);
     this.ntClick = React.createRef();
+    this.frdClick = React.createRef();
   }
   toggle = (e) => {
     if(!this.state.notModal){
@@ -41,49 +42,69 @@ class NoticeList extends React.Component {
   }
 
   cancel =()=>{
-
+    this.setState({
+      notModal: false
+    });
   }
 
-  goPages = (page,param)=>{
-    var nowPage = window.location.pathname;
-    if(nowPage !== '/user/msg-send' && page){
-      this.props.history.push({
-        pathname: page,
-        search: '',
-        state: {
-          frdName : param ? param : ''
+  notClear = (cd) =>{
+    if(cd === 'c'){
+      // 알람 읽기
+      
+      var unReadNot = [];
+      var noticeList = this.state.noticeList;
+      if(noticeList.length === 0 ){
+        alert('알람이 없습니다.');
+        return;
+      }
+      for(var i=0; i<noticeList.length; i++){
+        if(!noticeList[i].readYn){
+          unReadNot.push(noticeList[i]._id);
         }
-      });
-      this.setState({
-        msgMg : false
-      });
-      this.toggle();
-    }else if(nowPage === '/user/msg-send'){
-      this.toggle();
-    }
-  }
- 
-  notClear = (yn) =>{
-    if(yn){
-      // 1. 관리 아이콘, 새메시지 버튼 숨기기
-      // 2. 라디오버튼, 삭제하기 버튼 보여주기
-    }else{
-    
+      }
+      if(unReadNot.length>0){
+        let param={
+          usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
+          ,clearNot : unReadNot
+          ,readCd : 'all'
+        };
+        api.apiSend('put','/not/notRead',param,this.notClearCallback);
+      }else{
+        alert('클리어 할 알림이 없습니다.');
+      }
+    }else if(cd === 'd'){
+      // 알람 삭제
+      var delNot = [];
+      var noticeList = this.state.noticeList;
+      if(noticeList.length === 0 ){
+        alert('삭제할 알림이 없습니다.');
+        return;
+      }
+      for(var i=0; i<noticeList.length; i++){
+        delNot.push(noticeList[i]._id);
+      }
+      if(delNot.length>0){
+        let param={
+          usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
+          ,clearDel : delNot
+        };
+        api.apiSend('put','/not/notDel',param,this.notDelCallback);
+      }
     }
   }
 
   noticeListCallback = (rs) =>{
     console.log('noticeList CB \n',rs);
     if(rs.reCd ==='01'){
-      // 메시지 리스트 조회 성공
+      // 알람 리스트 조회 성공
       this.setState({
         noticeList : rs.noticeList
       });
     }else if(rs.reCd ==='03'){
-      // 메시지 없음
+      // 알람 없음
 
     }else{
-      // 메시지 리스트 조회 실패
+      // 알람 조회 실패
 
     }
   }
@@ -103,14 +124,30 @@ class NoticeList extends React.Component {
       // 알람 클리어 성공
       // 알람 재조회
       this.noticeList();
+      if(rs.readCd === 'all'){
+        alert('알람 클리어 성공');
+      }
     }else if(rs.reCd ==='02'){
       // 알람 클리어 실패
+    }
+  }
+  notDelCallback = (rs) =>{
+    if(rs.reCd ==='01'){
+      // 알람 삭제 성공
+      alert('알람 삭제 성공');
+      this.noticeList();
+    }else if(rs.reCd ==='02'){
+      // 알람 삭제 실패
+      alert('알람 삭제 실패');
     }
   }
 
   notClick = (not) =>{
     if(localStorage.getItem('usrInfo')){
-      if(not.wkDtCd !== 'FRDY'){
+      if(not.wkDtCd === 'FRDY'){
+        // 친구 상세 보기
+        this.frdClick.current.toggle();
+      }else{
         // 포스트 상세 팝업
         this.ntClick.current.props.pstPk = not.noticeCt.split("###")[1];
         this.ntClick.current.toggle();
@@ -120,7 +157,7 @@ class NoticeList extends React.Component {
           usrName : JSON.parse(localStorage.getItem('usrInfo')).usrName
           ,clearNot : not._id
         };
-        api.apiSend('post','/not/notRead',param,this.notClearCallback);
+        api.apiSend('put','/not/notRead',param,this.notClearCallback);
       }    
   }
 
@@ -152,17 +189,18 @@ class NoticeList extends React.Component {
             <ModalBody>
             <Row className="align-items-center" lg="12">
               <Col lg="6">
-                {/* <FrdInfo callbackFromParent={this.goPage} frdName={post.usrName}/> */}
               </Col>
               <Col lg="6" className="text-right">
                   <span>
                   <button type="button" 
                     className="btn btn-primary"
-                    // onClick = {e=>{this.goPages('/user/msg-send')}}
-                  >
+                    onClick = {e=>{this.notClear('c')}}
+                    >
                     알림 전체 읽기
                   </button>
-                  <Button color="danger" onClick={this.cancel}>
+                  <Button color="danger" 
+                    onClick = {e=>{this.notClear('d')}}
+                  >
                     알림 전체 삭제
                   </Button>
                   </span>
@@ -202,13 +240,21 @@ class NoticeList extends React.Component {
                   <Col 
                     lg="11"
                     className ="form-control-cursor"
-                    onClick = {e=>{
-                      this.notClick(not)
-                    }}
                   >
                     {/* 여기 */}
                     {not.wkDtCd === 'FRDY'
-                     ? <FrdInfo frdName={JSON.stringify(not.noticeCt)}/> + ' 님이 친구를 수락했습니다.'
+                     ? <div>
+                        <FrdInfo 
+                          ref={this.frdClick}
+                          frdName={this.state.noticeList[notIdx].noticeCt}
+                        /> <span
+                          onClick = {e=>{
+                            this.notClick(not)
+                          }}
+                        >
+                          님이 친구를 수락했습니다.
+                          </span>
+                       </div>
                      : 
                      not.wkDtCd ?
                      <div>
@@ -217,9 +263,27 @@ class NoticeList extends React.Component {
                         pstPk={not.noticeCt.split("###")[1]}
                         style={false}
                       />
-                      {not.wkDtCd === 'PST' ?<span>{not.noticeCt.split("###")[0]} 님이 새 포스팅을 작성했습니다.</span>
-                      : not.wkDtCd === 'COMM' ? <span>{not.noticeCt.split("###")[0]} 님이 회원님의 포스팅에 댓글을 남겼습니다.</span> 
-                      : not.wkDtCd === 'LIKE' ? <span>{not.noticeCt.split("###")[0]} 님이 회원님의 포스팅을 좋아합니다.</span>
+                      <FrdInfo 
+                        frdName = {not.noticeCt.split("###")[0]}
+                      /> 님이
+                      {not.wkDtCd === 'PST' ?
+                        <span
+                        onClick = {e=>{
+                          this.notClick(not)
+                        }}
+                        >&nbsp;새 포스팅을 작성했습니다.</span>
+                      : not.wkDtCd === 'COMM' ? 
+                      <span
+                        onClick = {e=>{
+                          this.notClick(not)
+                         }}
+                      >&nbsp;회원님의 포스팅에 댓글을 남겼습니다.</span> 
+                      : not.wkDtCd === 'LIKE' ?
+                      <span
+                          onClick = {e=>{
+                            this.notClick(not)
+                          }}
+                        >&nbsp; 회원님의 포스팅을 좋아합니다.</span>
                       : ''
                       }
                      </div>
