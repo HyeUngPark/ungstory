@@ -38,8 +38,8 @@ router.msgNotAdd = (msgInfo) =>{
 
 router.frdNotAdd = (frdInfo) =>{
     ntSchema.readYn=false;
-    ntSchema.noticeCt=frdInfo.frdReq;
-    ntSchema.usrName=frdInfo.frdRes;
+    ntSchema.noticeCt=frdInfo.frdRes;
+    ntSchema.usrName=frdInfo.frdReq;
     ntSchema.delYn=false;
 
     schema.create({
@@ -407,7 +407,7 @@ router.post('/getActNotice',function(req,res){
             ,"subSchema.readYn" : 1
             ,"subSchema.delYn" : 1
             ,"wkDtCd" : 1
-            ,'lstWrDt' : 1
+            ,'fstWrDt' : 1
             ,"subSchema.usrName" : 1
             ,"subSchema.noticeCt" : 1
         }}
@@ -418,7 +418,7 @@ router.post('/getActNotice',function(req,res){
             ,'wkDtCd' : {"$first" : "$wkDtCd"}
             ,'usrName' : {"$first" : "$subSchema.usrName"}
             ,'noticeCt' : {"$first" : "$subSchema.noticeCt"}
-            ,'lstWrDt' : {"$first" : "$lstWrDt"}
+            ,'fstWrDt' : {"$first" : "$fstWrDt"}
         }}
         ,{$sort:{
             'fstWrDt' : -1

@@ -110,7 +110,7 @@ export default class FrdInfo extends React.Component {
       usrName : localStorage.getItem('usrInfo') 
       ? JSON.parse(localStorage.getItem('usrInfo')).usrName
       : ''
-      ,frdName : this.props.frdName
+      ,frdName : this.props.frdName+""
     };
     api.apiSend('post','/frd/frdInfo',param,this.frdInfoCallback);
   }
@@ -209,7 +209,7 @@ export default class FrdInfo extends React.Component {
                 href="javascript:void(0)"
                 onClick={this.toggle}
             >
-            {this.props.frdName}
+              {this.props.frdName}
           </a>
           <Modal 
             isOpen={this.state.frdInfoModal} 

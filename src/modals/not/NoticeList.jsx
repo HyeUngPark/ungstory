@@ -208,7 +208,7 @@ class NoticeList extends React.Component {
                   >
                     {/* 여기 */}
                     {not.wkDtCd === 'FRDY'
-                     ? <FrdInfo frdName={not.noticeCt.split("###")[0].toString()}/> + ' 님이 친구를 수락했습니다.'
+                     ? <FrdInfo frdName={JSON.stringify(not.noticeCt)}/> + ' 님이 친구를 수락했습니다.'
                      : 
                      not.wkDtCd ?
                      <div>
