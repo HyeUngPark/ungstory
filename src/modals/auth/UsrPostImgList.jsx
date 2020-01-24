@@ -93,17 +93,21 @@ class UsrPostImgList extends React.Component {
             <ModalBody>
                 {( this.state.imgList &&
                   this.state.imgList.length >0 ) ? 
-                  this.state.imgList.map((imgs, idx)=>{
+                  this.state.imgList.map((imgs, imgIdx)=>{
                     return(
-                      <Row>
+                      <span>
+                        {imgIdx ===0 || (imgIdx !==0 && 
+                        imgs.date !== this.state.imgList[imgIdx-1].date) ? 
                         <Col lg="12">
+                        {imgIdx!==0?<br/>:''}
                         {imgs.date.substring(0,4) === this.props.thisYear 
                           ? `${imgs.date.substring(4,6)}월`
                           : `${imgs.date.substring(0,4)}년 ${imgs.date.substring(4,6)}월`
                         }
-                        </Col>
                           <hr className="my-4" />
-                        <Col lg="12">
+                        </Col>
+                        :''}
+                        <span>
                         {imgs.pstPts.map(
                           (img,imgIndex) => (<li className="form-tag form-tag-li" key={imgIndex}>
                               <PostDetailModal 
@@ -118,11 +122,12 @@ class UsrPostImgList extends React.Component {
                                 style={{
                                   width: "100px",
                                   height: "100px",
+                                  display : 'inline'
                                 }}
                               />
                         </li>))}
-                        </Col>
-                      </Row>
+                        </span>
+                      </span>
                       )})
                     :<Row>
                     <Col lg="12">
