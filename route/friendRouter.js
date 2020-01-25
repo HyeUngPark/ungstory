@@ -18,6 +18,7 @@ env.config();
 
 router.post('/friendSearch',function(req, res){
     var params = req.body;
+    var myResult;
     if(params.searchCd === 'MY'){
         // 1.내 친구 목록 조회
         schema.aggregate([
@@ -33,7 +34,7 @@ router.post('/friendSearch',function(req, res){
             ,{$group:{
                 _id : "$_id"
                 ,"myFrd" : {"$first":"$subSchema.usrFrds"}
-            }}
+            }} 
         ],function(fError, fResult){
             if (fError) {
                 console.log('error \n', fError);
@@ -85,30 +86,52 @@ router.post('/friendSearch',function(req, res){
         });
     }else if(params.usrName){
         schema.aggregate([
-            {$match : {
-                wkCd : 'USR'
-                ,wkDtCd : 'USR'
-                ,"subSchema.usrName" : params.usrName
-            }}
-            ,{$project:{
-                _id : 1
-            ,"subSchema.usrFrds" : 1
-            }}
-            ,{$group:{
-            _id : "$_id"
-            ,"myFrd" : {"$first":"$subSchema.usrFrds"}
+            {$facet:{
+                myFrd : [
+                  {$match : {
+                        wkCd : 'USR'
+                        ,wkDtCd : 'USR'
+                        ,"subSchema.usrName" : params.usrName
+                    }}
+                    ,{$project:{
+                        _id : 1
+                        ,"subSchema.usrFrds" : 1
+                    }}
+                    ,{$group:{
+                        _id : "$_id"
+                        ,"myFrd" : {"$first":"$subSchema.usrFrds"}
+                    }} 
+                ]
+                ,myReqList:[
+                    {$match : {
+                        wkCd : 'FRD'
+                        ,wkDtCd : 'FRD'
+                        ,"subSchema.frdReq" : params.usrName
+                        ,"subSchema.frdSt" : "S"
+                    }}
+                    ,{$project:{
+                        _id : 1
+                        ,"subSchema.frdRes" : 1
+                    }}
+                    ,{$group:{
+                        _id : "$_id"
+                        ,"usrName" : {"$first":"$subSchema.frdRes"}
+                    }} 
+                ]
             }}
         ],function(fError, fResult){
             if (fError) {
                 console.log('error \n', fError);
                 return res.status(500).send("내 친구 목록 조회 실패 >> " + fError)
             }
+            myResult = fResult;
+
             let matchQuery = ".*"+params.searchName+".*";
-            let myFrd = fResult[0].myFrd;
+            var myFrd = myResult[0].myFrd[0].myFrd; 
             let myName = [];
             myName.push(params.usrName);
 
-            if (fResult.length > 0) {
+            if (myResult.length > 0) {
                 schema.aggregate([
                     {$match : {
                         wkCd : 'USR'
@@ -124,12 +147,12 @@ router.post('/friendSearch',function(req, res){
                         ,withFrd : 1
                     }}
                     ,{$group:{
-                    _id : "$_id"
-                    ,"usrName" : {"$max":"$subSchema.usrName"}
-                    ,"usrPt" : {"$first":"$subSchema.usrPt"}
-                    ,"frdYn" : {"$sum" : "$frdYn"}
-                    ,"withFrd" : {"$sum" : "$withFrd"}
-                    ,"usrFrds" : {"$first":"$subSchema.usrFrds"}
+                        _id : "$_id"
+                        ,"usrName" : {"$max":"$subSchema.usrName"}
+                        ,"usrPt" : {"$first":"$subSchema.usrPt"}
+                        ,"frdYn" : {"$sum" : "$frdYn"}
+                        ,"withFrd" : {"$sum" : "$withFrd"}
+                        ,"usrFrds" : {"$first":"$subSchema.usrFrds"}
                     }}
                     ,{$addFields: {
                         withFrd : {
@@ -160,10 +183,28 @@ router.post('/friendSearch',function(req, res){
                         return res.status(500).send("친구 검색 실패 >> " + err)
                     }
                     if (result.length > 0) {
-                        res.json({
-                            reCd : '01'
-                            ,frdList : result 
-                        });
+                        if(myResult[0].myReqList.length>0){
+                            var returnResult = result;
+                            for(var i=0; i<result.length; i++){
+                                for(var j=0; j<myResult[0].myReqList.length; j++){
+                                    if(result[i].usrName === myResult[0].myReqList[j].usrName){
+                                        var temp = result[i];
+                                        temp.reqCd = true;
+                                        returnResult[i] = temp;
+                                    }
+                                }
+                            }
+                            res.json({
+                                reCd : '01'
+                                ,frdList : returnResult 
+                            });
+                        }else{
+                            res.json({
+                                reCd : '01'
+                                ,frdList : result 
+                            });
+                        }
+
                     }else{
                         res.json({
                             reCd : '02'

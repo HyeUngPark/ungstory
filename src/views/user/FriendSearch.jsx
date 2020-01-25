@@ -32,6 +32,7 @@ class FriendSearch extends React.Component {
   friendRequestCallback =(rs) =>{
     if(rs.reCd === '01'){
       alert('친구 요청 성공');
+      this.friendSearch();
     }else {
       alert('친구 요청 실패');
     }
@@ -222,7 +223,9 @@ class FriendSearch extends React.Component {
                             ?
                             '본인'
                             :
-                            !search.frdYn ?
+                            search.reqCd?
+                            '친구 신청중'
+                            : !search.frdYn ?
                             <input type="button" 
                               color="primary" 
                               className="btn btn-primary" 
