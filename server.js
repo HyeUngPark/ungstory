@@ -9,6 +9,9 @@ var port = process.env.PORT || 5000;
 var db = require('./mongo');
 var date = require('./myUtils/dateUtils');
 
+var request = require('request'); 
+var url = require('url'); 
+
 // mongoose local debugging setting
 app.use(function(req,res,next){
   if(req.headers && req.headers.host === 'localhost:5000'){
@@ -112,6 +115,9 @@ io.on('connection', (socket) => {
 
 var server = http.listen(port, function() {
   console.log("★★★ Server Started ★★★");
+  console.log("★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★");
+  
+  console.log("★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★");
 });
 
 app.use(function(req,res,next){
