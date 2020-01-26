@@ -74,7 +74,6 @@ export default class FrdInfo extends React.Component {
       alert(`${result.frdName}님과 성공적으로 친구를 끊었습니다.`);
       this.frdInfo();
     }else if(result.reCd ==='02'){
-      // console.log('내 친구 목록 조회 실패');
       alert('친구 끊기에 실패하였습니다.');
     }
   }
@@ -269,8 +268,18 @@ export default class FrdInfo extends React.Component {
                         프로필 변경
                       </Button>
                       :
+                      this.state.profileData.reqCd ?
+                      <Button
+                        className="float-right"
+                        color="danger"
+                        href="javascript:void(0)"
+                        size="sm"
+                      >
+                        친구 신청중..
+                      </Button>
+                      :
                       // 친구가 아닌경우
-                      (!this.state.profileData.frdYn) ? 
+                      (!this.state.profileData.frdYn) ?
                       <Button
                         className="float-right"
                         color="info"

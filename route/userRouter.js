@@ -1061,7 +1061,6 @@
                         ,usrName :aResult[0].usrInfo[0].usrName
                         ,usrMsg : aResult[0].usrInfo[0].usrMsg
                     };
-                    console.log('대화명 >> ',profileData.usrMsg);
                     res.json({
                         reCd : '01'
                         ,profileData : profileData

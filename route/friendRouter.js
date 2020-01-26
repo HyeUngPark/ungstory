@@ -538,20 +538,41 @@ router.put('/frdYn',function(req, res){
 
 router.post('/frdInfo',function(req, res){
     var params = req.body;
+    var myReqList;
     if(params.usrName){ // 회원
         schema.aggregate([
-            {$match : {
-                wkCd : 'USR'
-                ,wkDtCd : 'USR'
-                ,"subSchema.usrName" : params.usrName
-            }}
-            ,{$project:{
-                _id : 1
-               ,"subSchema.usrFrds" : 1
-            }}
-            ,{$group:{
-               _id : "$_id"
-               ,"myFrd" : {"$first":"$subSchema.usrFrds"}
+            {$facet:{
+                myFrds : [
+                    {$match : {
+                        wkCd : 'USR'
+                        ,wkDtCd : 'USR'
+                        ,"subSchema.usrName" : params.usrName
+                    }}
+                    ,{$project:{
+                        _id : 1
+                       ,"subSchema.usrFrds" : 1
+                    }}
+                    ,{$group:{
+                       _id : "$_id"
+                       ,"myFrd" : {"$first":"$subSchema.usrFrds"}
+                    }}
+                ]
+                ,myReqList : [
+                    {$match : {
+                        wkCd : 'FRD'
+                        ,wkDtCd : 'FRD'
+                        ,"subSchema.frdReq" : params.usrName
+                        ,"subSchema.frdSt" : "S"
+                    }}
+                    ,{$project:{
+                        _id : 0
+                        ,"subSchema.frdRes" : 1
+                    }}
+                    ,{$group:{
+                       _id : "$_id"
+                        ,"reqFrds" : {"$push":"$subSchema.frdRes"}
+                    }}
+                ]
             }}
         ],function(fError, fResult){
             if (fError) {
@@ -559,9 +580,11 @@ router.post('/frdInfo',function(req, res){
                 return res.status(500).send("내 친구 목록 조회 실패 >> " + fError)
             }
             let myFrd = [];
+            
             if (fResult.length > 0) {
                 console.log('내 친구 목록 조회 성공');
-                myFrd = fResult[0].myFrd;
+                myFrd = fResult[0].myFrds[0].myFrd;
+                myReqList = fResult[0].myReqList[0].reqFrds;
             }
             let myName = [];
             myName.push(params.usrName);
@@ -647,6 +670,10 @@ router.post('/frdInfo',function(req, res){
                         ,pstPts : iResult[0].pstPts.length
                         ,usrMsg : iResult[0].usrMsg
                     };
+                    if(myReqList.length>0 && myReqList.indexOf(profileData.usrName)>-1){
+                        profileData.reqCd = true;
+                    }
+
                     console.log('친구 정보 조회 성공 \n');
                     res.json({
                         reCd : '01'
