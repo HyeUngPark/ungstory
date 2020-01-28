@@ -94,7 +94,7 @@ class NoticeList extends React.Component {
   }
 
   noticeListCallback = (rs) =>{
-    console.log('noticeList CB \n',rs);
+    // console.log('noticeList CB \n',rs);
     if(rs.reCd ==='01'){
       // 알람 리스트 조회 성공
       this.setState({

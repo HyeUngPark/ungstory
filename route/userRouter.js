@@ -314,7 +314,7 @@
                                 }
                             }
                         }
-                        console.log('★★★★★',cmtUsrList.length,'명 프로필 사진 조회 시작 ★★★★★');
+                        // console.log('★★★★★',cmtUsrList.length,'명 프로필 사진 조회 시작 ★★★★★');
                         schema.aggregate([
                             {$match:{
                                 wkCd : 'USR',
@@ -475,7 +475,7 @@
                         }
                     }
                 }
-                console.log('★★★★★',cmtUsrList.length,'명 프로필 사진 조회 시작 ★★★★★');
+                // console.log('★★★★★',cmtUsrList.length,'명 프로필 사진 조회 시작 ★★★★★');
                 schema.aggregate([
                     {$match:{
                         wkCd : 'USR',
@@ -1714,7 +1714,7 @@ router.post('/getPostInfo', function(req, res){
                     cmtUsrList.push(pstInfo.pstCmt[j].usrName) : '';
                  }
              }
-             console.log('★★★★★',cmtUsrList.length,'명 프로필 사진 조회 시작 ★★★★★');
+            //  console.log('★★★★★',cmtUsrList.length,'명 프로필 사진 조회 시작 ★★★★★');
              schema.aggregate([
                 {$facet:{
                     cmtUsrPt :[

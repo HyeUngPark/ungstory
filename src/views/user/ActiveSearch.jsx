@@ -55,21 +55,21 @@ class ActiveSearch extends React.Component {
   }
   activeSearchCallback = (rs) => {
     if(rs.reCd === '01'){
-      console.log('조회 성공');
+      // console.log('조회 성공');
       this.setState({
         cmtList : rs.activeResult.cmtList
         ,likeList : rs.activeResult.likeList
         ,firstCd : true
       });
     }else if(rs.reCd === '03'){
-      console.log('조회 결과 없음');
+      // console.log('조회 결과 없음');
       this.setState({
         cmtList : []
         ,likeList : []
         ,firstCd : true
       });
     }else{
-      console.log('조회 실패');
+      // console.log('조회 실패');
       this.setState({
         cmtList : []
         ,likeList : []

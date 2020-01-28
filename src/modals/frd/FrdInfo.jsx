@@ -90,14 +90,14 @@ export default class FrdInfo extends React.Component {
 
   frdInfoCallback = (result) =>{
     if(result.reCd === '01'){
-      console.log('친구 정보 조회 성공');
+      // console.log('친구 정보 조회 성공');
       this.setState({
         profileData : result.profileData
         ,firstCd : true
         ,frdPtList : []
       });
     }else{
-      console.log('친구 정보 조회 실패');
+      // console.log('친구 정보 조회 실패');
       this.setState({
         firstCd : true
         ,frdPtList : []
