@@ -186,7 +186,7 @@ class Register extends React.Component {
 
   joinCallback = (result) =>{
     if(result.reCd==="01"){
-      alert('회원가입 성공');
+      alert('회원가입에 성공했습니다. 이메일 인증을 해주세요');
       this.props.history.push('/');
     }else{
       alert('회원가입 실패');
