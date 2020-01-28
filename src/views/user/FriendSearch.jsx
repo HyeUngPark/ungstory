@@ -48,20 +48,26 @@ class FriendSearch extends React.Component {
 
   friendAction = (searchIdx) =>{
     let searchList = this.state.searchList;
-    confirmAlert({
-      title: '친구신청 확인',
-      message: '정말 '+searchList[searchIdx].usrName+'님에게 친구 신청 하시겠습니까?',
-      buttons: [
-        {
-          label: '신청',
-          onClick: () => {this.friendRequest(searchList[searchIdx]);}
-        },
-        {
-          label: '취소',
-          onClick: () => {}
-        }
-      ],
-    });
+    if(localStorage.getItem('usrInfo') && 
+    JSON.parse(localStorage.getItem('usrInfo')).usrName){
+      confirmAlert({
+        title: '친구신청 확인',
+        message: '정말 '+searchList[searchIdx].usrName+'님에게 친구 신청 하시겠습니까?',
+        buttons: [
+          {
+            label: '신청',
+            onClick: () => {this.friendRequest(searchList[searchIdx]);}
+          },
+          {
+            label: '취소',
+            onClick: () => {}
+          }
+        ],
+        });
+    }else{
+      alert('비회원은 친구신청이 불가능합니다.');
+      return;
+    }
   }
 
   valChange =(e, cd)=>{

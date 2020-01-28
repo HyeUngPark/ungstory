@@ -25,20 +25,6 @@ var routes =[
   //   layout: "/user"
   // },
   {
-    path: "/login",
-    name: "Login",
-    icon: "ni ni-key-25 text-info",
-    component: Login,
-    layout: "/auth"
-  },
-  {
-    path: "/register",
-    name: "Register",
-    icon: "ni ni-circle-08 text-pink",
-    component: Register,
-    layout: "/auth"
-  },
-  {
     path: "/friend-Search",
     name: "Friend Search",
     icon: "ni ni-single-02",
@@ -83,10 +69,26 @@ var routes =[
       component: MsgSend,
       layout: "/user"
     });
-  }
-
+  }else{
 /* 
   비회원 전용 메뉴
 */
+  routes.push(
+  {
+    path: "/login",
+    name: "Login",
+    icon: "ni ni-key-25 text-info",
+    component: Login,
+    layout: "/auth"
+  });
+  routes.push(
+  {
+    path: "/register",
+    name: "Register",
+    icon: "ni ni-circle-08 text-pink",
+    component: Register,
+    layout: "/auth"
+  });
+}
 
 export default routes;
