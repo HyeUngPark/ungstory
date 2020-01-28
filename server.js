@@ -8,10 +8,25 @@ var path = require('path');
 var port = process.env.PORT || 5000;
 var db = require('./mongo');
 var date = require('./myUtils/dateUtils');
+// var cron = require('./cron');
+var cron = require('node-cron');
+var request = require('request');
 
-var request = require('request'); 
-var url = require('url'); 
+// var cronUrl = 'http\:\/\/localhost:5000/';
+var cronUrl = 'https\:\/\/ungstory.herokuapp.com\/';
 
+// cron setting
+var task = cron.schedule('*/3 * * * *', () => { 
+    request(cronUrl, function (error, response, body) {
+        if (response && response.statusCode == 200) { 
+            console.log('/' + ' connected successfully'); 
+            return; 
+        } console.error('/' + ' fail to connect'); 
+    }); 
+}, 
+{ scheduled: false }); 
+task.start(); 
+console.log('task start\n',new Date());
 // mongoose local debugging setting
 app.use(function(req,res,next){
   if(req.headers && req.headers.host === 'localhost:5000'){
@@ -19,6 +34,17 @@ app.use(function(req,res,next){
   }
   next();
 });
+
+// cron setting
+// app.use(function(req,res,next){
+//   if(req.headers && req.headers.host){
+//     let url = 'http\:\/\/';
+//     url+= req.headers.host ? req.headers.host : req.headers
+//     console.log('★★★ cron url ★★★\n',url);
+//     cron.setCron(url+'/');
+//   }
+//   next();
+// });
 
 /* 
 router module
@@ -115,9 +141,6 @@ io.on('connection', (socket) => {
 
 var server = http.listen(port, function() {
   console.log("★★★ Server Started ★★★");
-  console.log("★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★");
-  
-  console.log("★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★★");
 });
 
 app.use(function(req,res,next){

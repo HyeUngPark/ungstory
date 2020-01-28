@@ -59,6 +59,7 @@
     "moment": "^2.24.0",
     "moment-timezone": "^0.5.26",
     "mongoose": "^5.6.0",
+    "node-cron": "^2.0.3",
     "node-sass": "4.11.0",
     "nodemailer": "^6.2.1",
     "nodemon": "^1.19.1",
@@ -82,6 +83,7 @@
     "redux": "^4.0.4",
     "redux-actions": "^2.6.5",
     "req-flash": "0.0.3",
+    "request": "^2.88.0",
     "serve-static": "^1.14.1",
     "socket.io": "^2.3.0",
     "socket.io-client": "^2.3.0"
