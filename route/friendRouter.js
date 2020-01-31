@@ -583,7 +583,7 @@ router.post('/frdInfo',function(req, res){
             
             if (fResult.length > 0) {
                 console.log('내 친구 목록 조회 성공');
-                myFrd = fResult[0].myFrds[0].myFrd;
+                myFrd = fResult[0].myFrds.length>0? fResult[0].myFrds[0].myFrd : [];
                 myReqList = fResult[0].myReqList.length>0 ? fResult[0].myReqList[0].reqFrds : []; 
             }
             let myName = [];
