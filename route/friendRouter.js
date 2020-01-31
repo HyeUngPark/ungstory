@@ -588,45 +588,34 @@ router.post('/frdInfo',function(req, res){
             }
             let myName = [];
             myName.push(params.usrName);
-            var frdYnQuery= {
-            frdCount : {
-                $size: "$usrFrds"
-            },   
-            frdYn : {
-                $cond:
-                    [{$gt:[
-                        {$size:{
-                            $setIntersection:["$usrFrds",myName]}
-                        }
-                        ,0]}
-                        ,true
-                        ,false
-                    ]
+            var frdYnQuery= {};
+            if(myFrd.length>0){
+                frdYnQuery.withFrdCount=  {$size:{
+                    $setIntersection:["$usrFrds",myFrd]
+                }};
+                frdYnQuery.withFrd = {
+                    $setIntersection:["$usrFrds",myFrd]
+                };
+                frdYnQuery.frdYn = {
+                    $cond:
+                        [{$gt:[
+                            {$size:{
+                                $setIntersection:["$usrFrds",myName]}
+                            }
+                            ,0]}
+                            ,true
+                            ,false
+                        ]
+                };
+                frdYnQuery.frdCount = {
+                    $size: "$usrFrds"
+                };
+            }else{
+                frdYnQuery.withFrdCount=  0;
+                frdYnQuery.withFrd =[];
+                frdYnQuery.withFrd =false;
+                frdYnQuery.frdCount = 0;
             }
-        }
-        if(myFrd.length>0){
-            frdYnQuery.withFrdCount=  {$size:{
-                $setIntersection:["$usrFrds",myFrd]
-            }};
-            frdYnQuery.withFrd = {
-                $setIntersection:["$usrFrds",myFrd]
-            };
-            frdYnQuery.frdYn = {
-                $cond:
-                    [{$gt:[
-                        {$size:{
-                            $setIntersection:["$usrFrds",myName]}
-                        }
-                        ,0]}
-                        ,true
-                        ,false
-                    ]
-            };
-        }else{
-            frdYnQuery.withFrdCount=  0;
-            frdYnQuery.withFrd =[];
-            frdYnQuery.withFrd =false;
-        }
             schema.aggregate([
                 {$match : {
                     "subSchema.usrName" : params.frdName
