@@ -588,6 +588,45 @@ router.post('/frdInfo',function(req, res){
             }
             let myName = [];
             myName.push(params.usrName);
+            var frdYnQuery= {
+            frdCount : {
+                $size: "$usrFrds"
+            },   
+            frdYn : {
+                $cond:
+                    [{$gt:[
+                        {$size:{
+                            $setIntersection:["$usrFrds",myName]}
+                        }
+                        ,0]}
+                        ,true
+                        ,false
+                    ]
+            }
+        }
+        if(myFrd.length>0){
+            frdYnQuery.withFrdCount=  {$size:{
+                $setIntersection:["$usrFrds",myFrd]
+            }};
+            frdYnQuery.withFrd = {
+                $setIntersection:["$usrFrds",myFrd]
+            };
+            frdYnQuery.frdYn = {
+                $cond:
+                    [{$gt:[
+                        {$size:{
+                            $setIntersection:["$usrFrds",myName]}
+                        }
+                        ,0]}
+                        ,true
+                        ,false
+                    ]
+            };
+        }else{
+            frdYnQuery.withFrdCount=  0;
+            frdYnQuery.withFrd =[];
+            frdYnQuery.withFrd =false;
+        }
             schema.aggregate([
                 {$match : {
                     "subSchema.usrName" : params.frdName
@@ -627,30 +666,9 @@ router.post('/frdInfo',function(req, res){
                    ,"pstPts" : {'$push' : "$subSchema.pstPts"}
                    ,"usrMsg" : {'$max' : "$subSchema.usrMsg"}
                 }}    
-                ,{$addFields: {
-                    frdCount : {
-                        $size: "$usrFrds"
-                    },    
-                    withFrdCount : {
-                        $size:{
-                            $setIntersection:["$usrFrds",myFrd]
-                        }
-                    },
-                    withFrd : {
-                        $setIntersection:["$usrFrds",myFrd]
-                    },
-                    frdYn : {
-                        $cond:
-                            [{$gt:[
-                                {$size:{
-                                    $setIntersection:["$usrFrds",myName]}
-                                }
-                                ,0]}
-                                ,true
-                                ,false
-                            ]
-                    }
-                }}
+                ,{$addFields: 
+                    frdYnQuery
+                }
                 ,{$sort:{
                    fstWrDt : -1     
                 }} 
