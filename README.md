@@ -1,10 +1,14 @@
 # 웅스토리
 
 ## 소개
-
+```
 React.js와 Node.js, MongoDB 학습을 위해 개발한 SNS 웹사이트 입니다.
 
+프로젝트 기간 : 2019.06.17 ~ 2020.02.03
+프로젝트 인원 : 1인
+```
 ![메인화면](https://user-images.githubusercontent.com/45528487/73654219-777b5480-46ce-11ea-8811-ce48e1ae5520.PNG)
+
 
 ## 결과물
 
