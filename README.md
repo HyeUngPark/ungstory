@@ -68,8 +68,6 @@ React.js와 Node.js, MongoDB 학습을 위해 개발한 SNS 웹사이트 입니�
 │   ├── postCmtSchema.js
 │   ├── postSchema.js
 │   └── userSchema.js
-└── src
-    ├── assets
 ├── .gitignore
 ├── hlog.bat
 ├── LICENSE
